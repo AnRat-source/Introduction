@@ -35,7 +35,15 @@
       padding:22px;border-radius:var(--radius);box-shadow:var(--shadow);
     }
     .brand{display:flex;gap:14px;align-items:center}
-    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6985d1);display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 6px 18px rgba(128, 68, 239, 0.12)}
+    .logo{
+      width:36px;height:36px;border-radius:100px;background: linear-gradient(135deg, #be65e7, #7d99e7, #be65e7); background-size: 200% 200%;display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0px 0px 30px rgb(232, 118, 255);
+      animation: flowGradient 2s linear infinite;
+    }
+    @keyframes flowGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
     h1{margin:0;font-size:20px}
     p.lead{margin:0;color:var(--muted);font-size:13px}
 
@@ -52,6 +60,16 @@
 
     .card .head{display:flex;align-items:start;gap:14px;}
     .icon{width:62px;height:62px;border-radius:12px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-size:20px}
+    .icon.pfp{
+      -webkit-mask-image: linear-gradient(to top, transparent 5%, black 20%);
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-size: cover;
+
+      /* For non-webkit browsers */
+      mask-image: linear-gradient(to top, transparent 5%, black 20%);
+      mask-repeat: no-repeat;
+      mask-size: cover;
+    }
     .title{font-size:18px;margin:0}
     .sub{color:var(--muted);font-size:13px;margin-top:4px}
 
@@ -280,7 +298,7 @@
     <header>
       <div class="brand">
         <div class="logo">
-          <div class="icon">
+          <div class="icon pfp" style="background: #00000000;">
             <img src="Images/PFP.png" alt="icon">
           </div>
         </div>
