@@ -21,13 +21,13 @@
     body{
       margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
       color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-      padding:32px;
+      padding:15px;
       display:flex; align-items:flex-start; justify-content:center;
       background: radial-gradient(1200px 600px at 10% 10%, rgba(255,68,68,0.06), transparent 6%),
                   radial-gradient(900px 500px at 90% 90%, rgba(80,80,255,0.03), transparent 6%),
                   var(--bg);
     }
-    .wrap{width:100%; max-width:var(--maxw); overflow: visible;}
+    .wrap{width:100%; max-width:var(--maxw); overflow: visible; z-index: 100;}
 
     header{
       display:flex;align-items:center;justify-content:space-between;margin-bottom:28px; 
@@ -46,16 +46,37 @@
       background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
       border:1px solid rgba(255,255,255,0.04);
       padding:22px;border-radius:var(--radius);box-shadow:var(--shadow);
-      display:flex;flex-direction:column;gap:14px;min-height:300px;position:relative;overflow:hidden
+      display:flex;flex-direction:column;gap:14px;min-height:300px;position:relative;overflow:hidden;
+      z-index: -5;
     }
 
-    .card .head{display:flex;align-items:start;gap:14px}
+    .card .head{display:flex;align-items:start;gap:14px;}
     .icon{width:62px;height:62px;border-radius:12px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-size:20px}
     .title{font-size:18px;margin:0}
     .sub{color:var(--muted);font-size:13px;margin-top:4px}
 
     .desc{color:#dbe7f3;font-size:14px;line-height:1.45}
-    .topdesc{color:#dbe7f3;font-size:16px;line-height:1.45; width: 80%;}
+    .topdesc{color:#dbe7f3;font-size:16px;line-height:1.45; width: 40vw;
+      overflow: hidden;
+      max-height: 150px; /* initial height */
+      transition: max-height 25s ease;
+    }
+
+    .topdesc.expanded {
+      max-height: 1000px; /* large enough to fit the full text */
+    }
+
+    @media (min-width: 600px) {
+      .topdesc {
+        max-height: 250px; /* medium screens */
+      }
+    }
+
+    @media (min-width: 1000px) {
+      .topdesc {
+        max-height: 140px; /* large screens */
+      }
+    }
 
     .tags{display:flex;flex-wrap:wrap;gap:8px}
     .tag{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(0, 0, 0, 0.3);border:1px solid rgba(255,255,255,0.5);color:var(--muted);text-decoration:none;}
@@ -65,13 +86,14 @@
     .socials{display:flex;gap:8px}
     .social{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.02);text-decoration:none;color:inherit}
 
-    footer.note{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+    .footer{z-index: 100;}
+    footer.note{margin-top:10px;color:var(--muted);font-size:13px;text-align:center}
 
     /* subtle animated accent */
     .accent-spark{position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:linear-gradient(180deg, rgba(239,68,68,0.06), transparent);filter:blur(40px);transform:rotate(10deg);pointer-events:none}
 
     /* small project grid for anchors */
-    .projects{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .projects{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px; z-index: 100;}
     @media (max-width:840px){.projects{grid-template-columns:repeat(2,1fr)}}
     .proj{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);font-size:13px}
 
@@ -283,18 +305,37 @@
             <div class="sub">Hyperfixations • Minor Autism</div>
           </div>
           <div style="min-width:80px;text-align:right">
-            <div class="muted">Indie / Contract</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:6px">Available for hire</div>
+            <div class="muted">Secret text</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px">Mizukis big ass head</div>
           </div>
         </div>
 
         <p class="topdesc">
-            Hi im AnRat, but you can call me Seph. <br>
+          Hi, I'm AnRat, but you can call me Seph. <br><br>
+          I am a Game Developer and Graphics Designer but most of the time I'm just your average weeb. 
+          I like making websites and little side projects to just make QOL improvements to everything I do. 
+          And I have an exponentially growing mental health problem :3 <br>
+
+          <!-- Read More container -->
+          <span id="read-more-preview">
+            <button id="read-more-btn" style="
+              background:none;
+              border:none;
+              color:rgb(204, 204, 204);
+              cursor:pointer;
+              font-weight:600;
+            ">Read More</button>
+          </span>
+
+          <!-- Original text hidden at first -->
+          <span id="read-more-break" style="display:none">
             <br>
-            I am a Game Developer and Graphics Designer but most of the time im just your average weeb. 
-            I like making websites and little side projects to just make QOL improvements to everything i do. 
-            And i have an exponentially growing mental health problem :3 <br>
-            <br>
+            I have a serious addiction to Hatsune Miku and Project Sekai in general. I love shooter games and story games, not just that I also make them. I dont really like action packed animes, I perfer comedy and romcom animes. I can speak English, Japanese and like a couple words of Tagalog.
+            <br> <br>
+            I lowkey have Genetic Dementia, ADHD, and Borderline Personality Disorder but we chilling nonetheless.
+          </span>
+
+          <span id="read-more-text"></span>
         </p>
 
         <div class="tags">
@@ -344,7 +385,8 @@
         </div>
       </article>
 
-      <article class="card" id="graphics-card">
+      <div style="z-index: 200;">
+        <article class="card" id="graphics-card">
         <div class="graphics-card-bg"></div>
         <div class="accent-spark" aria-hidden></div>
         <div class="head">
@@ -377,47 +419,154 @@
             <a class="social" href="#" title="Dribbble">D</a>
             <a class="social" href="#" title="Instagram">I</a>
           </div> -->
-          <div class="socials">
-            <a class="social" href="https://www.youtube.com/@An_Rat" title="YouTube">
-            <i class="fab fa-youtube"></i>
-            </a>
-
-            <a class="social" href="https://www.roblox.com/users/882754373/profile" title="Roblox">
-            <i class="fa-solid fa-cube"></i>
-            </a>
-
-            <a class="social" href="https://discord.gg/UDsjHHn55r" title="Discord">
-            <i class="fab fa-discord"></i>
-            </a>
-          </div>
+          
         </div>
 
       </article>
     </main>
 
-    <section style="margin-top:30px;">
-      <!--<h3 style="margin:0 0 10px 0">Selected projects</h3>
-      <div class="projects" id="graphics-portfolio">
-        <div class="proj">Brand identity for local cafe — logo, signage, menu design</div>
-        <div class="proj">Mobile UI kit — 40+ components</div>
-        <div class="proj">Illustration series — character concepts</div>
+    <div class="note" style="margin-top:18px;display:flex;gap:12px;align-items:center">
+        <div style="flex:1;color:var(--muted)" id="SplashText">.</div>
+        <div style="white-space:nowrap">
+          <div class="socials">
+            <a class="social" href="https://www.youtube.com/@An_Rat" title="YouTube">
+              <i class="fab fa-youtube"></i>
+            </a>
+
+            <a class="social" href="https://www.roblox.com/users/882754373/profile" title="Roblox">
+              <i class="fa-solid fa-cube"></i>
+            </a>
+
+            <a class="social" href="https://discord.gg/UDsjHHn55r" title="Discord">
+              <i class="fab fa-discord"></i>
+            </a>
+
+            <a class="social" href="mailto:seph@anrat.site" title="Email me">
+              <i class="fa-solid fa-envelope"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    
+      <h3 style="margin:30px 0 10px 0;">Top 3 Songs</h3>
+      <div class="projects" id="game-portfolio" style="margin-top:0px">
+        <!-- Music Player Card Template -->
+        <div class="music-card" style="
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            font-family: sans-serif;
+            margin-top:16px;
+        ">
+          <div style="display:flex; align-items:center; gap:12px; width:100%;">
+            <img src="Images/AdoPear.jpg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-weight:600; font-size:16px;">Take me to the beach</div>
+              <div style="font-size:14px; color:rgba(255,255,255,0.7);">Imagine Dragons ft. Ado</div>
+            </div>
+            <button class="play-btn" style="
+                width:40px; height:40px; border:none; border-radius:50%;
+                background: var(--accent);
+                color:#fff;
+                font-size:16px;
+                cursor:pointer;
+            ">▶</button>
+          </div>
+          <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
+            <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
+          </div>
+          <audio class="music-player" src="Music/FavSong1.mp3"></audio>
+        </div>
+        <!-- Music Player Card Template -->
+        <div class="music-card" style="
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            font-family: sans-serif;
+            margin-top:16px;
+        ">
+          <div style="display:flex; align-items:center; gap:12px; width:100%;">
+            <img src="Images/Miku.jpg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-weight:600; font-size:16px;">Miku</div>
+              <div style="font-size:14px; color:rgba(255,255,255,0.7);">Anamanaguchi</div>
+            </div>
+            <button class="play-btn" style="
+                width:40px; height:40px; border:none; border-radius:50%;
+                background: var(--accent);
+                color:#fff;
+                font-size:16px;
+                cursor:pointer;
+            ">▶</button>
+          </div>
+          <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
+            <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
+          </div>
+          <audio class="music-player" src="Music/FavSong2.mp3"></audio>
+        </div>
+        <!-- Music Player Card Template -->
+        <div class="music-card" style="
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            font-family: sans-serif;
+            margin-top:16px;
+        ">
+          <div style="display:flex; align-items:center; gap:12px; width:100%;">
+            <img src="Images/Gura.jpeg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-weight:600; font-size:16px;">Reflect</div>
+              <div style="font-size:14px; color:rgba(255,255,255,0.7);">Gawr Gura</div>
+            </div>
+            <button class="play-btn" style="
+                width:40px; height:40px; border:none; border-radius:50%;
+                background: var(--accent);
+                color:#fff;
+                font-size:16px;
+                cursor:pointer;
+            ">▶</button>
+          </div>
+          <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
+            <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
+          </div>
+          <audio class="music-player" src="Music/FavSong3.mp3"></audio>
+        </div>
       </div>
 
-      <div class="projects" id="game-portfolio" style="margin-top:12px">
+      <!--<div class="projects" id="game-portfolio" style="margin-top:12px">
         <div class="proj">2D platformer prototype — tight controls, polish</div>
         <div class="proj">Tool: enemy spawning system for optimization</div>
         <div class="proj">Level: puzzle-driven vertical progression</div>
       </div>-->
-
-      <div class="note" style="margin-top:18px;display:flex;gap:12px;align-items:center">
-        <div style="flex:1;color:var(--muted)" id="SplashText">.</div>
-        <div style="white-space:nowrap">
-          <a class="cta" href="mailto:seph@anrat.site">Email me</a>
-        </div>
+      <br>
+      <footer class="note">Rest is under construction</footer>
+      <footer class="note">© <span id="year"></span> AnRat · Built with ♥ · IDC Studios</footer>
+      <br>
       </div>
-    </section>
-
-    <footer class="note">© <span id="year"></span> AnRat · Built with ♥ · IDC Studios</footer>
   </div>
 
   <script>
@@ -483,6 +632,96 @@
       mizuki.classList.add("loaded");
     }, 200);
   });
+
+  document.querySelectorAll('.music-card').forEach(card => {
+    const audio = card.querySelector('.music-player');
+    const playBtn = card.querySelector('.play-btn');
+    const progress = card.querySelector('.progress');
+    const progressContainer = card.querySelector('.progress-container');
+
+    // Start paused
+    audio.pause();
+    audio.volume = 0.1; // <-- set default volume to 40%
+    playBtn.textContent = '▶';
+
+    playBtn.addEventListener('click', () => {
+      // Pause all other players
+      document.querySelectorAll('.music-player').forEach(otherAudio => {
+        if(otherAudio !== audio) otherAudio.pause();
+      });
+      document.querySelectorAll('.play-btn').forEach(btn => {
+        if(btn !== playBtn) btn.textContent = '▶';
+      });
+
+      if(audio.paused){
+        audio.play();
+        playBtn.textContent = '⏸';
+      } else {
+        audio.pause();
+        playBtn.textContent = '▶';
+      }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      const percent = (audio.currentTime / audio.duration) * 100;
+      progress.style.width = percent + '%';
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+      const width = progressContainer.clientWidth;
+      const clickX = e.offsetX;
+      audio.currentTime = (clickX / width) * audio.duration;
+    });
+  });
+
+  // Define your list of strings
+  const messages = [
+    "Meow!",
+    "Roblox is love Roblox is life!",
+    "AnRat was here.",
+    "JACK ITS A REVENENANT",
+    "I know what you goon to"
+  ];
+
+  // Function to pick a random message
+  function setRandomMessage() {
+    const randomIndex = Math.floor(Math.random() * messages.length);
+    document.getElementById("SplashText").textContent = messages[randomIndex];
+  }
+
+  // Call it once when the page loads
+  setRandomMessage();
+
+  const btn = document.getElementById('read-more-btn');
+const readMoreText = document.getElementById('read-more-text');
+const readMoreBreak = document.getElementById('read-more-break');
+
+const fullText = readMoreBreak.innerHTML;
+
+btn.addEventListener('click', () => {
+  btn.style.display = 'none'; // hide button
+  readMoreText.style.display = 'inline';
+  document.querySelector('.topdesc').classList.add('expanded');
+
+  let i = 0;
+  function type() {
+    if(i < fullText.length){
+      if(fullText[i] === "<"){ 
+        // It's a tag, find the end
+        const endTag = fullText.indexOf(">", i);
+        readMoreText.innerHTML += fullText.slice(i, endTag + 1);
+        i = endTag + 1;
+      } else {
+        // Normal character
+        readMoreText.innerHTML += fullText[i];
+        i++;
+      }
+      setTimeout(type, 7); // typing speed
+    }
+  }
+  type();
+});
+
 
   </script>
 </body>
