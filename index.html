@@ -303,7 +303,7 @@
           </div>
           <div style="flex:1">
             <h2 class="title">About Me</h2>
-            <div class="sub">Hyperfixations • Minor Autism</div>
+            <div class="sub"><span id="age"></span> • She/Her • Minor Autism</div>
           </div>
           <div style="min-width:80px;text-align:right">
             <div class="muted">Secret text</div>
@@ -343,8 +343,8 @@
           <a class="tag" href="https://potatocorner.com/">Potato Corner</a>
           <a class="tag" href="https://store.anrat.site/portfolio/">Skills</a>
           <a class="tag" href="#">Crazy</a>
-          <a class="tag" href="#">Optimization</a>
-          <a class="tag" href="#">Shaders</a>
+          <a class="tag" href="#">Gamer</a>
+          <a class="tag" href="#">E-Girl</a>
         </div>
 
         <div class="actions">
@@ -574,6 +574,20 @@
     // small niceties
     document.getElementById('year').textContent = new Date().getFullYear();
 
+    const birthDate = new Date("2010-01-13");
+    const today = new Date();
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+
+    // Adjust if the birthday hasn't occurred yet this year
+    const hasHadBirthdayThisYear =
+      today.getMonth() > birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+    if (!hasHadBirthdayThisYear) years--;
+
+    document.getElementById("age").textContent = years;
+
     // smooth anchor scrolling
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', e => {
@@ -681,7 +695,21 @@
     "Roblox is love Roblox is life!",
     "AnRat was here.",
     "JACK ITS A REVENENANT",
-    "I know what you goon to"
+    "I know what you goon to",
+    "FUCK Broken Studios",
+    "### # #### #### ####",
+    "Potato corner 🤤",
+    "Give me Potato Corner or give me Death",
+    "Akiyama Mizuki Desu!",
+    "秋山瑞稀です！",
+    "アクワーです！",
+    "Aqua Desu!",
+    "Gomen...",
+    "ごめん。。。",
+    "世界でいちばんおひめさま",
+    "Hi Addy :3",
+    "Hah Lesbians",
+    "*notices buldge*"
   ];
 
   // Function to pick a random message
