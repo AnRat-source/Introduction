@@ -40,9 +40,9 @@
       animation: flowGradient 2s linear infinite;
     }
     @keyframes flowGradient {
-      0% { background-position: 0% 50%; }
+      30% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      70% { background-position: 0% 50%; }
     }
     h1{margin:0;font-size:20px}
     p.lead{margin:0;color:var(--muted);font-size:13px}
@@ -74,9 +74,9 @@
     .sub{color:var(--muted);font-size:13px;margin-top:4px}
 
     .desc{color:#dbe7f3;font-size:14px;line-height:1.45}
-    .topdesc{color:#dbe7f3;font-size:16px;line-height:1.45; width: 40vw;
+    .topdesc{color:#dbe7f3;font-size:16px;line-height:1.45; width: 100%;
       overflow: hidden;
-      max-height: 150px; /* initial height */
+      max-height: 500px; /* initial height */
       transition: max-height 25s ease;
     }
 
@@ -84,15 +84,19 @@
       max-height: 1000px; /* large enough to fit the full text */
     }
 
-    @media (min-width: 600px) {
+    @media (min-width: 800px) {
       .topdesc {
-        max-height: 250px; /* medium screens */
+        max-height: 140px; /* large screens */
+        width: 44vw;
       }
     }
 
+    .songs {
+        display: none;
+    }
     @media (min-width: 1000px) {
-      .topdesc {
-        max-height: 140px; /* large screens */
+      .songs {
+        display: block;
       }
     }
 
@@ -139,7 +143,7 @@
         overflow: visible;
         inset: 0;
         background: url("Images/Mizuki.png") center no-repeat;
-        z-index: 0;
+        z-index: -100;
         width: 110%;
         height: 110%;
         background-size: contain;
@@ -159,6 +163,12 @@
         content: "";
         position: absolute;
         inset: 0;
+    }
+
+    @media (min-width: 800px) {
+      .mizuki-bg {
+        z-index: 0;
+      }
     }
 
     /* Background image or GIF */
@@ -324,8 +334,8 @@
             <div class="sub"><span id="age"></span> • She/Her • Minor Autism</div>
           </div>
           <div style="min-width:80px;text-align:right">
-            <div class="muted">Secret text</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:6px">Mizukis big ass head</div>
+            <div class="muted">Seph</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px">Nifty is my spirit animal</div>
           </div>
         </div>
 
@@ -467,112 +477,114 @@
         </div>
       </div>
     
-      <h3 style="margin:30px 0 10px 0;">Top 3 Songs</h3>
-      <div class="projects" id="game-portfolio" style="margin-top:0px">
-        <!-- Music Player Card Template -->
-        <div class="music-card" style="
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            padding: 16px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            color: #fff;
-            font-family: sans-serif;
-            margin-top:16px;
-        ">
-          <div style="display:flex; align-items:center; gap:12px; width:100%;">
-            <img src="Images/AdoPear.jpg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-              <div style="font-weight:600; font-size:16px;">Take me to the beach</div>
-              <div style="font-size:14px; color:rgba(255,255,255,0.7);">Imagine Dragons ft. Ado</div>
+      <div class="songs">
+        <h3 style="margin:30px 0 10px 0;">Top 3 Songs</h3>
+        <div class="projects" id="game-portfolio" style="margin-top:0px">
+          <!-- Music Player Card Template -->
+          <div class="music-card" style="
+              display:flex;
+              flex-direction:column;
+              align-items:center;
+              background: rgba(0, 0, 0, 0.2);
+              border-radius: 16px;
+              padding: 16px;
+              width: 100%;
+              max-width: 30vw;
+              box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+              backdrop-filter: blur(10px);
+              color: #fff;
+              font-family: sans-serif;
+              margin-top:16px;
+          ">
+            <div style="display:flex; align-items:center; gap:12px; width:100%;">
+              <img src="Images/AdoPear.jpg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-weight:600; font-size:16px;">Take me to the beach</div>
+                <div style="font-size:14px; color:rgba(255,255,255,0.7);">Imagine Dragons ft. Ado</div>
+              </div>
+              <button class="play-btn" style="
+                  width:40px; height:40px; border:none; border-radius:50%;
+                  background: var(--accent);
+                  color:#fff;
+                  font-size:16px;
+                  cursor:pointer;
+              ">▶</button>
             </div>
-            <button class="play-btn" style="
-                width:40px; height:40px; border:none; border-radius:50%;
-                background: var(--accent);
-                color:#fff;
-                font-size:16px;
-                cursor:pointer;
-            ">▶</button>
-          </div>
-          <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
-            <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
-          </div>
-          <audio class="music-player" src="Music/FavSong1.mp3"></audio>
-        </div>
-        <!-- Music Player Card Template -->
-        <div class="music-card" style="
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            padding: 16px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            color: #fff;
-            font-family: sans-serif;
-            margin-top:16px;
-        ">
-          <div style="display:flex; align-items:center; gap:12px; width:100%;">
-            <img src="Images/Miku.jpg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-              <div style="font-weight:600; font-size:16px;">Miku</div>
-              <div style="font-size:14px; color:rgba(255,255,255,0.7);">Anamanaguchi</div>
+            <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
+              <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
             </div>
-            <button class="play-btn" style="
-                width:40px; height:40px; border:none; border-radius:50%;
-                background: var(--accent);
-                color:#fff;
-                font-size:16px;
-                cursor:pointer;
-            ">▶</button>
+            <audio class="music-player" src="Music/FavSong1.mp3"></audio>
           </div>
-          <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
-            <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
-          </div>
-          <audio class="music-player" src="Music/FavSong2.mp3"></audio>
-        </div>
-        <!-- Music Player Card Template -->
-        <div class="music-card" style="
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            padding: 16px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            color: #fff;
-            font-family: sans-serif;
-            margin-top:16px;
-        ">
-          <div style="display:flex; align-items:center; gap:12px; width:100%;">
-            <img src="Images/Gura.jpeg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-              <div style="font-weight:600; font-size:16px;">Reflect</div>
-              <div style="font-size:14px; color:rgba(255,255,255,0.7);">Gawr Gura</div>
+          <!-- Music Player Card Template -->
+          <div class="music-card" style="
+              display:flex;
+              flex-direction:column;
+              align-items:center;
+              background: rgba(0, 0, 0, 0.2);
+              border-radius: 16px;
+              padding: 16px;
+              width: 100%;
+              max-width: 30vw;
+              box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+              backdrop-filter: blur(10px);
+              color: #fff;
+              font-family: sans-serif;
+              margin-top:16px;
+          ">
+            <div style="display:flex; align-items:center; gap:12px; width:100%;">
+              <img src="Images/Miku.jpg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-weight:600; font-size:16px;">Miku</div>
+                <div style="font-size:14px; color:rgba(255,255,255,0.7);">Anamanaguchi</div>
+              </div>
+              <button class="play-btn" style="
+                  width:40px; height:40px; border:none; border-radius:50%;
+                  background: var(--accent);
+                  color:#fff;
+                  font-size:16px;
+                  cursor:pointer;
+              ">▶</button>
             </div>
-            <button class="play-btn" style="
-                width:40px; height:40px; border:none; border-radius:50%;
-                background: var(--accent);
-                color:#fff;
-                font-size:16px;
-                cursor:pointer;
-            ">▶</button>
+            <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
+              <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
+            </div>
+            <audio class="music-player" src="Music/FavSong2.mp3"></audio>
           </div>
-          <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
-            <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
+          <!-- Music Player Card Template -->
+          <div class="music-card" style="
+              display:flex;
+              flex-direction:column;
+              align-items:center;
+              background: rgba(0, 0, 0, 0.2);
+              border-radius: 16px;
+              padding: 16px;
+              width: 100%;
+              max-width: 30vw;
+              box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+              backdrop-filter: blur(10px);
+              color: #fff;
+              font-family: sans-serif;
+              margin-top:16px;
+          ">
+            <div style="display:flex; align-items:center; gap:12px; width:100%;">
+              <img src="Images/Gura.jpeg" alt="Album Art" style="width:64px; height:64px; border-radius:12px; object-fit:cover;">
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-weight:600; font-size:16px;">Reflect</div>
+                <div style="font-size:14px; color:rgba(255,255,255,0.7);">Gawr Gura</div>
+              </div>
+              <button class="play-btn" style="
+                  width:40px; height:40px; border:none; border-radius:50%;
+                  background: var(--accent);
+                  color:#fff;
+                  font-size:16px;
+                  cursor:pointer;
+              ">▶</button>
+            </div>
+            <div style="width:100%; height:4px; background: rgba(255,255,255,0.2); border-radius:2px; margin-top:12px; cursor:pointer;" class="progress-container">
+              <div class="progress" style="width:0%; height:100%; background: var(--accent); border-radius:2px;"></div>
+            </div>
+            <audio class="music-player" src="Music/FavSong3.mp3"></audio>
           </div>
-          <audio class="music-player" src="Music/FavSong3.mp3"></audio>
         </div>
       </div>
 
@@ -726,8 +738,28 @@
     "ごめん。。。",
     "世界でいちばんおひめさま",
     "Hi Addy :3",
-    "Hah Lesbians",
-    "*notices buldge*"
+    "Lesbians",
+    "*notices buldge*",
+    "Error 404: Mental breakdown in affect.",
+    "My name is Alexander Hamilton",
+    "HE WROTE THE OTHER 51", 
+    "Do a barrel roll",
+    "Beep Boop",
+    "Splash Text!",
+    "Open the sparkling apple juice karen!",
+    "Press F to pay respects",
+    "Powered by chaos",
+    "I speak fluent spaghetti",
+    "HANK DONT ABBRIEVIATE CYBERPUNK HANK",
+    "1, 2, 3, 4, 5, 8, 9",
+    "I goon to femboys but noone will know.",
+    "The world turned upside down...",
+    "On the morning of septemb-",
+    "Im a Catgirl btw",
+    "More insecurities than a cyclops",
+    "Metal Health -inf",
+    "Is it veiny?",
+    ""
   ];
 
   // Function to pick a random message
