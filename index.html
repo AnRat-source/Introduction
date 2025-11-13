@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Seph — Graphics Designer & Game Developer</title>
+  <meta name="description" content="Portfolio cards for a Graphics Designer and Game Developer. Standalone single-file HTML + CSS." />
+  <style>
+    :root{
+      --bg:#0b0b0d; --card:#0f1113; --muted:#9aa3ad; --accent:#b044ef; --glass: rgba(255,255,255,0.04);
+      --radius:18px; --maxw:1100px;
+      --shadow: 0 10px 30px rgba(2,6,23,0.6);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      padding:32px;
+      display:flex; align-items:center; justify-content:center;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(255,68,68,0.06), transparent 6%),
+                  radial-gradient(900px 500px at 90% 90%, rgba(80,80,255,0.03), transparent 6%),
+                  var(--bg);
+    }
+    .wrap{width:100%; max-width:var(--maxw);}
+
+    header{
+      display:flex;align-items:center;justify-content:space-between;margin-bottom:28px; 
+      background:linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.3)); border:1px solid rgba(255,255,255,0.04);
+      padding:22px;border-radius:var(--radius);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;gap:14px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6985d1);display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 6px 18px rgba(128, 68, 239, 0.12)}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+    @media (max-width:840px){.grid{grid-template-columns:1fr}}
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);
+      padding:22px;border-radius:var(--radius);box-shadow:var(--shadow);
+      display:flex;flex-direction:column;gap:14px;min-height:300px;position:relative;overflow:hidden
+    }
+
+    .card .head{display:flex;align-items:start;gap:14px}
+    .icon{width:62px;height:62px;border-radius:12px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-size:20px}
+    .title{font-size:18px;margin:0}
+    .sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+    .desc{color:#dbe7f3;font-size:14px;line-height:1.45}
+
+    .tags{display:flex;flex-wrap:wrap;gap:8px}
+    .tag{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(0, 0, 0, 0.3);border:1px solid rgba(255,255,255,0.5);color:var(--muted);text-decoration:none;}
+
+    .actions{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+    .cta{background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.5);text-decoration:none;color:inherit;font-weight:600}
+    .socials{display:flex;gap:8px}
+    .social{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.02);text-decoration:none;color:inherit}
+
+    footer.note{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* subtle animated accent */
+    .accent-spark{position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:linear-gradient(180deg, rgba(239,68,68,0.06), transparent);filter:blur(40px);transform:rotate(10deg);pointer-events:none}
+
+    /* small project grid for anchors */
+    .projects{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media (max-width:840px){.projects{grid-template-columns:repeat(2,1fr)}}
+    .proj{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);font-size:13px}
+
+    /* utility */
+    .muted{color:var(--muted)}
+
+    .icon img {
+      width: 60px;      /* adjust as needed */
+      height: 60px;
+      border-radius: 10%; /* makes it round if you want */
+      object-fit: cover;  /* crops instead of stretching */
+    }
+
+    /* Background image or GIF */
+    .am-card-bg {
+        position: absolute;
+        inset: 0;
+        background: url("/Images/AboutMeBackground.jpg") bottom/cover no-repeat;
+        z-index: -1;
+    }
+
+    /* Fade at the bottom */
+    .am-card-bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, transparent 0%, rgb(4, 4, 4));
+    }
+
+    .game-card-bg {
+        position: absolute;
+        inset: 0;
+        background: url("/Images/Game.webp") bottom/cover no-repeat;
+        z-index: -1;
+    }
+
+    /* Fade at the bottom */
+    .game-card-bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, transparent 0%, rgb(4, 4, 4));
+    }
+
+    .graphics-card-bg {
+        position: absolute;
+        inset: 0;
+        background: url("/Images/Graphics.jpg") bottom/cover no-repeat;
+        z-index: -1;
+    }
+
+    /* Fade at the bottom */
+    .graphics-card-bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, transparent 0%, rgb(4, 4, 4));
+    }
+
+    .background {
+      position: fixed;
+      overflow: hidden;
+      z-index: -100;
+      background: url("/Images/FullBackground.gif") top/cover no-repeat;
+      width: 105vw;
+      height: 105vh;
+      filter: blur(15px);
+      animation: blurCycle 20s ease-in-out infinite, cameraShake 5s ease-in-out infinite;
+    }
+    .background::after{
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    @keyframes blurCycle {
+      0% {
+        filter: blur(15px);
+      }
+      50% {
+        filter: blur(5px);
+      }
+      100% {
+        filter: blur(15px);
+      }
+    }
+    @keyframes cameraShake {
+      0% { transform: translate(0px, 0px) rotate(0deg); }
+      15% { transform: translate(5px, -5px) rotate(-0.1deg); }
+      50% { transform: translate(-5px, 5px) rotate(0.1deg); }
+      80% { transform: translate(-5px, -5px) rotate(-0.1deg); }
+      100% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+  <div class="background"></div>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">AN</div>
+        <div>
+          <h1>AnRat — Graphics Designer & Game Developer</h1>
+          <p class="lead">I like anime, games, and anything that moves.</p>
+        </div>
+      </div>
+      <nav>
+        <a href="#contact" class="cta">Contact</a>
+      </nav>
+    </header>
+
+    <article class="card" id="intrests-card">
+        <div class="am-card-bg"></div>
+        <div class="head">
+          <div class="icon" aria-hidden>
+            <img src="Images/AboutMePfp.png" alt="icon">
+            </div>
+          <div style="flex:1">
+            <h2 class="title">About Me</h2>
+            <div class="sub">Hyperfixations • Minor Autism</div>
+          </div>
+          <div style="min-width:80px;text-align:right">
+            <div class="muted">Indie / Contract</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px">Available for hire</div>
+          </div>
+        </div>
+
+        <p class="topdesc">
+            Hi im AnRat, but you can call me Seph <br>
+            <br>
+            I am a Game Developer and Graphics Designer but most of the time im just your average weeb. 
+            I like making websites and little side projects to just make QOL improvements to everything i do. 
+            And i have an exponentially growing mental health problem :3 <br>
+            <br>
+        </p>
+
+        <div class="tags">
+          <a class="tag" href="https://potatocorner.com/">Potato Corner</a>
+          <a class="tag" href="https://store.anrat.site/portfolio/">Skills</a>
+          <a class="tag" href="#">Crazy</a>
+          <a class="tag" href="#">Optimization</a>
+          <a class="tag" href="#">Shaders</a>
+        </div>
+
+        <div class="actions">
+          <a class="cta" href="https://store.anrat.site/portfolio">See Projects →</a>
+          <div class="socials">
+            <a class="social" href="https://www.youtube.com/@An_Rat" title="YouTube">
+            <i class="fab fa-youtube"></i>
+            </a>
+
+            <a class="social" href="https://www.roblox.com/users/882754373/profile" title="Roblox">
+            <i class="fa-solid fa-cube"></i>
+            </a>
+
+            <a class="social" href="https://discord.gg/UDsjHHn55r" title="Discord">
+            <i class="fab fa-discord"></i>
+            </a>
+          </div>
+        </div>
+    </article>
+
+    <main class="grid" style="margin-top:30px;">
+      <article class="card" id="game-card">
+        <div class="game-card-bg"></div>
+        <div class="head">
+          <div class="icon" aria-hidden>🎮</div>
+          <div style="flex:1">
+            <h2 class="title">Game Developer</h2>
+            <div class="sub">Gameplay • Tools • Prototyping • Simulations</div>
+          </div>
+          <div style="min-width:80px;text-align:right">
+            <div class="muted">Indie / Contract</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px">Available for hire</div>
+          </div>
+        </div>
+
+        <p class="desc">Ive been doing game design for 7+ years.</p>
+
+        <div class="tags">
+          <a class="tag" href="#">Unity / Godot / Roblox</a>
+          <a class="tag" href="https://www.lua.org/">Lua • C#</a>
+          <a class="tag" href="https://store.anrat.site/portfolio">Level Design</a>
+          <a class="tag" href="https://store.anrat.site/portfolio">Optimization</a>
+          <a class="tag" href="https://store.anrat.site/portfolio">Shaders</a>
+        </div>
+
+        <div class="actions">
+          <a class="cta" href="https://store.anrat.site/portfolio">See Projects →</a>
+          <a class="cta" href="https://store.anrat.site/">See Asset Store →</a>
+        </div>
+      </article>
+
+      <article class="card" id="graphics-card">
+        <div class="graphics-card-bg"></div>
+        <div class="accent-spark" aria-hidden></div>
+        <div class="head">
+          <div class="icon" aria-hidden>🎨</div>
+          <div style="flex:1">
+            <h2 class="title">Graphics Designer</h2>
+            <div class="sub">Branding • Illustration • UI Assets • Aesthetics</div>
+          </div>
+          <div style="min-width:80px;text-align:right">
+            <div class="muted">Freelance</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px">Rates on request</div>
+          </div>
+        </div>
+
+        <p class="desc">I do graphics, much.</p>
+
+        <div class="tags">
+          <a class="tag" href="#">Logo Design</a>
+          <a class="tag" href="#">Illustration</a>
+          <a class="tag" href="#">Photo Editing</a>
+          <a class="tag" href="#">Shaders</a>
+        </div>
+
+        <div class="actions">
+          <a class="cta" href="https://store.anrat.site/portfolio">View Portfolio →</a>
+          <!-- <div class="socials">
+            <a class="social" href="#" title="Behance">B</a>
+            <a class="social" href="#" title="Dribbble">D</a>
+            <a class="social" href="#" title="Instagram">I</a>
+          </div> -->
+        </div>
+
+      </article>
+    </main>
+
+    <section style="margin-top:30px;">
+      <!--<h3 style="margin:0 0 10px 0">Selected projects</h3>
+      <div class="projects" id="graphics-portfolio">
+        <div class="proj">Brand identity for local cafe — logo, signage, menu design</div>
+        <div class="proj">Mobile UI kit — 40+ components</div>
+        <div class="proj">Illustration series — character concepts</div>
+      </div>
+
+      <div class="projects" id="game-portfolio" style="margin-top:12px">
+        <div class="proj">2D platformer prototype — tight controls, polish</div>
+        <div class="proj">Tool: enemy spawning system for optimization</div>
+        <div class="proj">Level: puzzle-driven vertical progression</div>
+      </div>-->
+
+      <div class="note" style="margin-top:18px;display:flex;gap:12px;align-items:center">
+        <div style="flex:1;color:var(--muted)" id="SplashText">.</div>
+        <div style="white-space:nowrap">
+          <a class="cta" href="mailto:seph@anrat.site">Email me</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="note">© <span id="year"></span> AnRat · Built with ♥ · IDC Studios</footer>
+  </div>
+
+  <script>
+    // small niceties
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // smooth anchor scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const href = a.getAttribute('href');
+        if (href.length>1) {
+          e.preventDefault();
+          document.querySelector(href).scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      })
+    });
+  </script>
+</body>
+</html>
