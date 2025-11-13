@@ -50,6 +50,7 @@
     .sub{color:var(--muted);font-size:13px;margin-top:4px}
 
     .desc{color:#dbe7f3;font-size:14px;line-height:1.45}
+    .topdesc{color:#dbe7f3;font-size:16px;line-height:1.45; width: 80%;}
 
     .tags{display:flex;flex-wrap:wrap;gap:8px}
     .tag{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(0, 0, 0, 0.3);border:1px solid rgba(255,255,255,0.5);color:var(--muted);text-decoration:none;}
@@ -72,11 +73,38 @@
     /* utility */
     .muted{color:var(--muted)}
 
+    #game-card {
+      z-index: 1;
+    }
+    #graphics-card {
+      z-index: 1;
+    }
+
     .icon img {
       width: 60px;      /* adjust as needed */
       height: 60px;
       border-radius: 10%; /* makes it round if you want */
       object-fit: cover;  /* crops instead of stretching */
+    }
+
+    /* Background image or GIF */
+    .mizuki-bg {
+        position: fixed;
+        top: 200px;
+        overflow: visible;
+        inset: 0;
+        background: url("Images/Mizuki.png") center no-repeat;
+        z-index: 0;
+        animation: MizukiShake 5s ease-in-out infinite;
+        width: 110%;
+        height: 110%;
+    }
+
+    /* Fade at the bottom */
+    .mizuki-bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
     }
 
     /* Background image or GIF */
@@ -133,7 +161,7 @@
       width: 105vw;
       height: 105vh;
       filter: blur(15px);
-      animation: blurCycle 20s ease-in-out infinite, cameraShake 5s ease-in-out infinite;
+      animation: blurCycle 20s ease-in-out infinite, cameraShake 10s ease-in-out infinite;
     }
     .background::after{
       content: "";
@@ -159,6 +187,14 @@
       100% { transform: translate(0px, 0px) rotate(0deg); }
     }
 
+    @keyframes MizukiShake {
+      0% { transform: translate(390px, 0px) rotate(1deg); }
+      15% { transform: translate(391px, -1px) rotate(-1deg); }
+      50% { transform: translate(389px, 1px) rotate(1deg); }
+      80% { transform: translate(389px, -1px) rotate(-1deg); }
+      100% { transform: translate(390px, 0px) rotate(1deg); }
+    }
+
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
@@ -167,7 +203,11 @@
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo">AN</div>
+        <div class="logo">
+          <div class="icon">
+            <img src="Images/PFP.png" alt="icon">
+          </div>
+        </div>
         <div>
           <h1>AnRat — Graphics Designer & Game Developer</h1>
           <p class="lead">I like anime, games, and anything that moves.</p>
@@ -180,10 +220,11 @@
 
     <article class="card" id="intrests-card">
         <div class="am-card-bg"></div>
+        <div class="mizuki-bg"></div>
         <div class="head">
           <div class="icon" aria-hidden>
             <img src="Images/AboutMePfp.png" alt="icon">
-            </div>
+          </div>
           <div style="flex:1">
             <h2 class="title">About Me</h2>
             <div class="sub">Hyperfixations • Minor Autism</div>
@@ -233,7 +274,9 @@
       <article class="card" id="game-card">
         <div class="game-card-bg"></div>
         <div class="head">
-          <div class="icon" aria-hidden>🎮</div>
+          <div class="icon" aria-hidden>
+            <img src="Images/GamePFP.jpg" alt="icon">
+          </div>
           <div style="flex:1">
             <h2 class="title">Game Developer</h2>
             <div class="sub">Gameplay • Tools • Prototyping • Simulations</div>
@@ -264,7 +307,9 @@
         <div class="graphics-card-bg"></div>
         <div class="accent-spark" aria-hidden></div>
         <div class="head">
-          <div class="icon" aria-hidden>🎨</div>
+          <div class="icon" aria-hidden>
+            <img src="Images/GraphicsPFP.jpg" alt="icon">
+          </div>
           <div style="flex:1">
             <h2 class="title">Graphics Designer</h2>
             <div class="sub">Branding • Illustration • UI Assets • Aesthetics</div>
