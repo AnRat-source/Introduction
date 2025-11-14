@@ -45,6 +45,7 @@
       70% { background-position: 0% 50%; }
     }
     h1{margin:0;font-size:20px}
+    h3{text-align: center;}
     p.lead{margin:0;color:var(--muted);font-size:13px}
 
     .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
@@ -76,7 +77,7 @@
     .desc{color:#dbe7f3;font-size:14px;line-height:1.45;text-shadow: var(--bg) 0 0 5px;}
     .topdesc{color:#dbe7f3;font-size:16px;line-height:1.45; width: 100%;
       overflow: hidden;
-      max-height: 500px; /* initial height */
+      max-height: 700px; /* initial height */
       transition: max-height 1s ease;
     }
 
@@ -101,10 +102,10 @@
     }
 
     .tags{display:flex;flex-wrap:wrap;gap:8px}
-    .tag{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(0, 0, 0, 0.3);border:1px solid rgba(255,255,255,0.5);color:var(--muted);text-decoration:none;}
+    .tag{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(0, 0, 0, 0.3);border:1px solid rgba(255,255,255,0.5);color:var(--muted);text-decoration:none;backdrop-filter: blur(5px);}
 
     .actions{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
-    .cta{background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.5);text-decoration:none;color:inherit;font-weight:600}
+    .cta{background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.5);text-decoration:none;color:inherit;font-weight:600;backdrop-filter: blur(5px);}
     .socials{display:flex;gap:8px}
     .social{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.02);text-decoration:none;color:inherit;backdrop-filter: blur(5px);}
 
@@ -177,6 +178,7 @@
         inset: 0;
         background: url("Images/AboutMeBackground.jpg") bottom/cover no-repeat;
         z-index: -1;
+        pointer-events: none;
     }
 
     /* Fade at the bottom */
@@ -192,6 +194,7 @@
         inset: 0;
         background: url("Images/Game.webp") bottom/cover no-repeat;
         z-index: -1;
+        pointer-events: none;
     }
 
     /* Fade at the bottom */
@@ -205,8 +208,9 @@
     .graphics-card-bg {
         position: absolute;
         inset: 0;
-        background: url("Images/Graphics.jpg") bottom/cover no-repeat;
+        background: url("Images/Graphics.jpg") center/cover no-repeat;
         z-index: -1;
+        pointer-events: none;
     }
 
     /* Fade at the bottom */
@@ -297,8 +301,15 @@
       margin-bottom: 16px;
     }
 
+
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    ::selection {
+            background-color: rgb(192, 114, 255); /* Or use hex: #800080 */
+            box-shadow: #b044ef 0 0 20px;
+            color: rgb(190, 216, 255); /* Optional: Change text color for better contrast */
     }
 
   </style>
@@ -389,7 +400,8 @@
     </article>
 
     <main class="grid" style="margin-top:30px;">
-      <article class="card" id="game-card">
+      <div>
+        <article class="card" id="game-card">
         <div class="game-card-bg"></div>
         <div class="head">
           <div class="icon" aria-hidden>
@@ -442,63 +454,65 @@
           <a class="cta" href="https://store.anrat.site/">See Asset Store →</a>
         </div>
       </article>
+      </div>
 
       <div style="z-index: 200;">
         <article class="card" id="graphics-card">
-        <div class="graphics-card-bg"></div>
-        <div class="accent-spark" aria-hidden></div>
-        <div class="head">
-          <div class="icon" aria-hidden>
-            <img src="Images/GraphicsPFP.jpg" alt="icon">
+          <div class="graphics-card-bg"></div>
+          <div class="accent-spark" aria-hidden></div>
+          <div class="head">
+            <div class="icon" aria-hidden>
+              <img src="Images/GraphicsPFP.jpg" alt="icon">
+            </div>
+            <div style="flex:1">
+              <h2 class="title">Graphics Designer</h2>
+              <div class="sub">3D Modeling • Illustration • UI Assets • Aesthetics</div>
+            </div>
+            <div style="min-width:80px;text-align:right">
+              <div class="muted">Freelance</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">Rates on request</div>
+            </div>
           </div>
-          <div style="flex:1">
-            <h2 class="title">Graphics Designer</h2>
-            <div class="sub">Branding • Illustration • UI Assets • Aesthetics</div>
+
+          <p class="desc">
+            I do some- graphics. <br>
+            <!-- Read More container -->
+            <span id="read-more-preview">
+              <button class="read-more-btn" style="
+                background:none;
+                border:none;
+                color:var(--muted);
+                cursor:pointer;
+                font-weight:600;
+              ">Read More</button>
+            </span>
+
+            <!-- Original text hidden at first -->
+            <span class="read-more-break" style="display:none">
+              <br>
+              I do UI Design and 3D scenes mostly, but recently ive been working on web design and making shaders. I only started graphics design last year but its a good skill to learn ig.
+            </span>
+
+            <span class="read-more-text"></span>
+          </p>
+
+          <div class="tags">
+            <a class="tag" href="#">Illustration</a>
+            <a class="tag" href="#">Photo Editing</a>
+            <a class="tag" href="#">UI</a>
+            <a class="tag" href="#">Shaders</a>
+            <a class="tag" href="#">3D Modeling</a>
           </div>
-          <div style="min-width:80px;text-align:right">
-            <div class="muted">Freelance</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:6px">Rates on request</div>
+
+          <div class="actions">
+            <a class="cta" href="https://store.anrat.site/portfolio">View Portfolio →</a>
+            <!-- <div class="socials">
+              <a class="social" href="#" title="Behance">B</a>
+              <a class="social" href="#" title="Dribbble">D</a>
+              <a class="social" href="#" title="Instagram">I</a>
+            </div> -->
+            
           </div>
-        </div>
-
-        <p class="desc">
-          I do some- graphics. <br>
-          <!-- Read More container -->
-          <span id="read-more-preview">
-            <button class="read-more-btn" style="
-              background:none;
-              border:none;
-              color:var(--muted);
-              cursor:pointer;
-              font-weight:600;
-            ">Read More</button>
-          </span>
-
-          <!-- Original text hidden at first -->
-          <span class="read-more-break" style="display:none">
-            <br>
-            I do UI Design mostly, but recently ive been working on web design and making shaders. I only started graphics design last year but its a good skill to learn ig.
-          </span>
-
-          <span class="read-more-text"></span>
-        </p>
-
-        <div class="tags">
-          <a class="tag" href="#">Logo Design</a>
-          <a class="tag" href="#">Illustration</a>
-          <a class="tag" href="#">Photo Editing</a>
-          <a class="tag" href="#">Shaders</a>
-        </div>
-
-        <div class="actions">
-          <a class="cta" href="https://store.anrat.site/portfolio">View Portfolio →</a>
-          <!-- <div class="socials">
-            <a class="social" href="#" title="Behance">B</a>
-            <a class="social" href="#" title="Dribbble">D</a>
-            <a class="social" href="#" title="Instagram">I</a>
-          </div> -->
-          
-        </div>
 
       </article>
     </main>
@@ -636,6 +650,229 @@
           </div>
         </div>
       </div>
+      <h3 style="margin:30px 0 10px 0;">Hobbies and Hyperfixations</h3>
+
+      <main class="grid" style="margin-top:30px;">
+        <div>
+          <article class="card" id="game-card">
+          <div class="graphics-card-bg" style="background-image: url('Images/Nightcord.jpg'); "></div>
+          <div class="head">
+            <div class="icon" aria-hidden>
+              <img src="Images/MIZUKI.jpg" alt="icon">
+            </div>
+            <div style="flex:1">
+              <h2 class="title">Project Sekai</h2>
+              <div class="sub">Hatsune Miku • Akiyama Mizuki</div>
+            </div>
+            <div style="min-width:80px;text-align:right">
+              <div class="muted">Priority: 5</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">Current Hyperfixation</div>
+            </div>
+          </div>
+
+          <p class="desc">
+            Akiyama Mizuki Desu! Litterally... <br>
+
+            <span id="read-more-preview">
+              <button class="read-more-btn" style="
+                background:none;
+                border:none;
+                color:var(--muted);
+                cursor:pointer;
+                font-weight:600;
+              ">Read More</button>
+            </span>
+
+            <!-- Original text hidden at first -->
+            <span class="read-more-break" style="display:none">
+              <br>
+              I have a wall dedicated to Hatsune Miku ALONE 4 plushies, 5 keychains, 2 jackets and a bag. Miku is love Miku is life and I GET TO SEE HER LIVE AT HER CONCERT. life is great. <br>
+              <br>
+              I am Mizuki, maybe too much... even her problems i share... i dont want to share them. <br>
+              <br>
+              I will never be enough.
+            </span>
+
+            <span class="read-more-text"></span>
+          </p>
+
+          <div class="tags">
+            <a class="tag" href="#">PJSK</a>
+            <a class="tag" href="#">ごめん。。。</a>
+            <a class="tag" href="#">待って瑞稀</a>
+            <a class="tag" href="#">Mizu7</a>
+          </div>
+          <div class="actions">
+            <a class="cta" href="#WIPthisDoesntDoAnything">Miku Shrine →</a>
+          </div>
+        </article>
+        </div>
+
+        <div>
+          <article class="card" id="game-card">
+          <div class="game-card-bg" style="background-image: url('Images/RatCave.png'); backdrop-filter: blur(5px);"></div>
+          <div class="head">
+            <div class="icon" aria-hidden>
+              <img src="Images/PFP.png" alt="icon">
+            </div>
+            <div style="flex:1">
+              <h2 class="title">Roblox</h2>
+              <div class="sub">Gaming • Games • Game Dev</div>
+            </div>
+            <div style="min-width:80px;text-align:right">
+              <div class="muted">Priority: 5</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">Roblox any day, everyday</div>
+            </div>
+          </div>
+
+          <p class="desc">
+            Cant stop wont stop. <br>
+
+            <span id="read-more-preview">
+              <button class="read-more-btn" style="
+                background:none;
+                border:none;
+                color:var(--muted);
+                cursor:pointer;
+                font-weight:600;
+              ">Read More</button>
+            </span>
+
+            <!-- Original text hidden at first -->
+            <span class="read-more-break" style="display:none">
+              <br>
+              I think ive spent half of my life on this game and i dont intend to stop, this is my escape, my paradise, where i find temporary happines.
+            </span>
+
+            <span class="read-more-text"></span>
+          </p>
+
+          <div class="tags">
+            <a class="tag" href="https://www.roblox.com/home">Roblox</a>
+            <a class="tag" href="https://www.roblox.com/games/735030788/Royalloween">Royale High</a>
+            <a class="tag" href="https://www.roblox.com/games/185655149/Welcome-to-Bloxburg">Bloxburg</a>
+            <a class="tag" href="https://www.roblox.com/games/2916899287/Blackhawk-Rescue-Mission-5">BRM5</a>
+            <a class="tag" href="https://create.roblox.com/">Studio</a>
+          </div>
+
+          <div class="actions">
+            <a class="cta" href="https://www.roblox.com/communities/13663879/IDC-Games#!/">Join Group →</a>
+          </div>
+        </article>
+        </div>
+        <div>
+          <article class="card" id="game-card">
+          <div class="game-card-bg" style="background-image: url('Images/Shikanoko.gif');"></div>
+          <div class="head">
+            <div class="icon" aria-hidden>
+              <img src="Images/Shikanoko.jpeg" alt="icon">
+            </div>
+            <div style="flex:1">
+              <h2 class="title">Cosplay</h2>
+              <div class="sub">Fashion • Edits • Trends</div>
+            </div>
+            <div style="min-width:80px;text-align:right">
+              <div class="muted">Priority: 3</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">Am i pretty?</div>
+            </div>
+          </div>
+
+          <p class="desc">
+            Cosplaying for 2 years now but still too scared to go to a con 💔 <br>
+
+            <span id="read-more-preview">
+              <button class="read-more-btn" style="
+                background:none;
+                border:none;
+                color:var(--muted);
+                cursor:pointer;
+                font-weight:600;
+              ">Read More</button>
+            </span>
+
+            <!-- Original text hidden at first -->
+            <span class="read-more-break" style="display:none">
+              <br>
+              I love cosplaying just as much as the next guy, but GOD i have severe social anxiety so most of the time i just stay in my room. 🥀 <br>
+              Hopefully *someone* will pull me from might hole, bocchi the rock style :3
+            </span>
+
+            <span class="read-more-text"></span>
+          </p>
+
+          <div class="tags">
+            <a class="tag" href="#">Anime</a>
+            <a class="tag" href="#">E-Girl</a>
+            <a class="tag" href="#">Gooner bait</a>
+          </div>
+
+          <div class="actions">
+            I might post cosplays on discord ;) 
+            <div style="white-space:nowrap">
+            <div class="socials">
+              <a class="social" href="https://www.youtube.com/@An_Rat" title="YouTube">
+                <i class="fab fa-youtube"></i>
+              </a>
+              <a class="social" href="https://discord.gg/UDsjHHn55r" title="Discord">
+                <i class="fab fa-discord"></i>
+              </a>
+            </div>
+          </div>
+          </div>
+        </article>
+        </div>
+        <div>
+          <article class="card" id="game-card">
+          <div class="game-card-bg" style="background-image: url('Images/MikuGun.gif');"></div>
+          <div class="head">
+            <div class="icon" aria-hidden>
+              <img src="Images/MizukiGun.webp" alt="icon">
+            </div>
+            <div style="flex:1">
+              <h2 class="title">Guns</h2>
+              <div class="sub">Weapons • Tactics • EyeCandy</div>
+            </div>
+            <div style="min-width:80px;text-align:right">
+              <div class="muted">Priority: 1</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">Old hobby of mine</div>
+            </div>
+          </div>
+
+          <p class="desc">
+            Its been months since I last went shooting <br>
+
+            <span id="read-more-preview">
+              <button class="read-more-btn" style="
+                background:none;
+                border:none;
+                color:var(--muted);
+                cursor:pointer;
+                font-weight:600;
+              ">Read More</button>
+            </span>
+
+            <!-- Original text hidden at first -->
+            <span class="read-more-break" style="display:none">
+              <br>
+              This used to be my entire Personality but looks like life moves on. Still nice to have a fucking armory in the background of my camera tho :3
+            </span>
+
+            <span class="read-more-text"></span>
+          </p>
+
+          <div class="tags">
+            <a class="tag" href="#">Armed</a>
+            <a class="tag" href="#">E-Girl</a>
+            <a class="tag" href="#">Gooner bait</a>
+          </div>
+
+          <div class="actions">
+            For legal reasons i dont *own* these guns
+          
+          </div>
+        </article>
+        </div>
+      </main>
 
       <!--<div class="projects" id="game-portfolio" style="margin-top:12px">
         <div class="proj">2D platformer prototype — tight controls, polish</div>
