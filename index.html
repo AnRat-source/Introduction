@@ -32,7 +32,7 @@
     header{
       display:flex;align-items:center;justify-content:space-between;margin-bottom:28px; 
       background:linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.3)); border:1px solid rgba(255,255,255,0.04);
-      padding:22px;border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:22px;border-radius:var(--radius);box-shadow:var(--shadow); backdrop-filter: blur(5px);
     }
     .brand{display:flex;gap:14px;align-items:center}
     .logo{
@@ -73,11 +73,11 @@
     .title{font-size:18px;margin:0}
     .sub{color:var(--muted);font-size:13px;margin-top:4px}
 
-    .desc{color:#dbe7f3;font-size:14px;line-height:1.45}
+    .desc{color:#dbe7f3;font-size:14px;line-height:1.45;text-shadow: var(--bg) 0 0 5px;}
     .topdesc{color:#dbe7f3;font-size:16px;line-height:1.45; width: 100%;
       overflow: hidden;
       max-height: 500px; /* initial height */
-      transition: max-height 25s ease;
+      transition: max-height 1s ease;
     }
 
     .topdesc.expanded {
@@ -106,7 +106,7 @@
     .actions{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
     .cta{background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.5);text-decoration:none;color:inherit;font-weight:600}
     .socials{display:flex;gap:8px}
-    .social{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.02);text-decoration:none;color:inherit}
+    .social{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.02);text-decoration:none;color:inherit;backdrop-filter: blur(5px);}
 
     .footer{z-index: 100;}
     footer.note{margin-top:10px;color:var(--muted);font-size:13px;text-align:center}
@@ -272,6 +272,13 @@
       color: var(--muted);
       z-index: 9999;
       transition: opacity 0.6s ease, visibility 0.6s ease;
+
+      background: url("Images/FullBackground.gif") bottom/cover no-repeat;
+      top: -20px;
+      width: 105vw;
+      height: 105vh;
+      filter: blur(15px);
+      animation: blurCycle 20s ease-in-out infinite, cameraShake 10s ease-in-out infinite;
     }
 
     #loader.fade-out {
@@ -339,7 +346,7 @@
           </div>
         </div>
 
-        <p class="topdesc">
+        <p class="desc topdesc">
           Hi, I'm AnRat, but you can call me Seph. <br><br>
           I am a Game Developer and Graphics Designer but most of the time I'm just your average weeb. 
           I like making websites and little side projects to just make QOL improvements to everything I do. 
@@ -347,24 +354,24 @@
 
           <!-- Read More container -->
           <span id="read-more-preview">
-            <button id="read-more-btn" style="
+            <button class="read-more-btn" style="
               background:none;
               border:none;
-              color:rgb(204, 204, 204);
+              color:var(--muted);
               cursor:pointer;
               font-weight:600;
             ">Read More</button>
           </span>
 
           <!-- Original text hidden at first -->
-          <span id="read-more-break" style="display:none">
+          <span class="read-more-break" style="display:none">
             <br>
             I have a serious addiction to Hatsune Miku and Project Sekai in general. I love shooter games and story games, not just that I also make them. I dont really like action packed animes, I perfer comedy and romcom animes. I can speak English, Japanese and like a couple words of Tagalog.
             <br> <br>
             I lowkey have Genetic Dementia, ADHD, and Borderline Personality Disorder but we chilling nonetheless.
           </span>
 
-          <span id="read-more-text"></span>
+          <span class="read-more-text"></span>
         </p>
 
         <div class="tags">
@@ -398,7 +405,29 @@
           </div>
         </div>
 
-        <p class="desc">Ive been doing game design for 7+ years.</p>
+        <p class="desc">
+          Ive been doing game design for <span id="GameDevAge"></span>+ years. <br>
+
+          <span id="read-more-preview">
+            <button class="read-more-btn" style="
+              background:none;
+              border:none;
+              color:var(--muted);
+              cursor:pointer;
+              font-weight:600;
+            ">Read More</button>
+          </span>
+
+          <!-- Original text hidden at first -->
+          <span class="read-more-break" style="display:none">
+            <br>
+            Ive made several "Succesful" games if your idea of success is thousands of active players. I mainly make systems and simulations that eventually turn into games. <br>
+            Ive worked around the industry for 5+ years and have honestly seen it all, geniuses, scammers, and toxic work environments, you name it ive dealt with it. <br>
+            Ive been lead dev for 2 years in a studio i no longer associate with. Ive been to several conferences about game design and have hosted a few myself.
+          </span>
+
+          <span class="read-more-text"></span>
+        </p>
 
         <div class="tags">
           <a class="tag" href="#">Unity / Godot / Roblox</a>
@@ -432,7 +461,27 @@
           </div>
         </div>
 
-        <p class="desc">I do graphics, much.</p>
+        <p class="desc">
+          I do some- graphics. <br>
+          <!-- Read More container -->
+          <span id="read-more-preview">
+            <button class="read-more-btn" style="
+              background:none;
+              border:none;
+              color:var(--muted);
+              cursor:pointer;
+              font-weight:600;
+            ">Read More</button>
+          </span>
+
+          <!-- Original text hidden at first -->
+          <span class="read-more-break" style="display:none">
+            <br>
+            I do UI Design mostly, but recently ive been working on web design and making shaders. I only started graphics design last year but its a good skill to learn ig.
+          </span>
+
+          <span class="read-more-text"></span>
+        </p>
 
         <div class="tags">
           <a class="tag" href="#">Logo Design</a>
@@ -617,6 +666,7 @@
     if (!hasHadBirthdayThisYear) years--;
 
     document.getElementById("age").textContent = years;
+    document.getElementById("GameDevAge").textContent = years-8;
 
     // smooth anchor scrolling
     document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -774,35 +824,38 @@
   // Call it once when the page loads
   setRandomMessage();
 
-  const btn = document.getElementById('read-more-btn');
-const readMoreText = document.getElementById('read-more-text');
-const readMoreBreak = document.getElementById('read-more-break');
+  document.querySelectorAll('.read-more-btn').forEach(btn => {
+    console.log(btn.innerHTML)
+    btn.addEventListener('click', () => {
+      btn.style.display = 'none'; // hide button
 
-const fullText = readMoreBreak.innerHTML;
+      const container = btn.closest('.desc'); // get the parent paragraph
+      const readMoreText = container.querySelector('.read-more-text');
+      const readMoreBreak = container.querySelector('.read-more-break');
 
-btn.addEventListener('click', () => {
-  btn.style.display = 'none'; // hide button
-  readMoreText.style.display = 'inline';
-  document.querySelector('.topdesc').classList.add('expanded');
+      readMoreText.style.display = 'inline'; // show typing area
+      container.classList.add("expanded")
+      const fullText = readMoreBreak.innerHTML;
 
-  let i = 0;
-  function type() {
-    if(i < fullText.length){
-      if(fullText[i] === "<"){ 
-        // It's a tag, find the end
-        const endTag = fullText.indexOf(">", i);
-        readMoreText.innerHTML += fullText.slice(i, endTag + 1);
-        i = endTag + 1;
-      } else {
-        // Normal character
-        readMoreText.innerHTML += fullText[i];
-        i++;
+      let i = 0;
+      function type() {
+        if (i < fullText.length) {
+          if (fullText[i] === "<") { 
+            const endTag = fullText.indexOf(">", i);
+            readMoreText.innerHTML = fullText.slice(0, i) + "|";
+            i = endTag + 1;
+          } else {
+            readMoreText.innerHTML = fullText.slice(0, i) + "|";
+            i++;
+          }
+          setTimeout(type, 7);
+        } else {
+          readMoreText.innerHTML = fullText.slice(0, i);
+        }
       }
-      setTimeout(type, 7); // typing speed
-    }
-  }
-  type();
-});
+      type();
+    });
+  });
 
 
   </script>
