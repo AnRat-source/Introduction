@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AnRat - Gamer and Designer</title>
-  <link rel="icon" type="image/x-icon" href="Images/PFP.png">
+  <link rel="icon" type="image/x-icon" href="Images/PFP.ico">
   <meta property="og:title" content="AnRat — Graphics Designer & Game Developer">
   <meta property="og:description" content="Hi im AnRat, but you can call me Seph">
   <meta property="og:image" content="Images/PFP.png">
@@ -237,6 +237,47 @@
       position: absolute;
       inset: 0;
     }
+
+    #vaultInput {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 10px;
+        width: 100%;
+        box-sizing: border-box; /* Ensures padding doesn't increase width */
+        color: white;
+        font-size: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        outline: none; /* Removes default browser outline on focus */
+    }
+
+    #vaultInput::placeholder {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    #vaultInput:focus {
+        background: rgba(255, 255, 255, 0.3); /* Slightly less transparent on focus */
+    }
+
+    #vaultButton {
+        background: rgba(255, 255, 255, 0.3);
+        border: none;
+        padding: 15px 20px;
+        margin-top: 20px;
+        border-radius: 10px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: background 0.3s ease;
+    }
+
+    #vaultButton:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
     @keyframes blurCycle {
       0% {
         filter: blur(15px);
@@ -878,6 +919,29 @@
         <div class="proj">Level: puzzle-driven vertical progression</div>
       </div>-->
       <br>
+
+      <div class="card vault-card" style="backdrop-filter: blur(10px); background-color: #00000063;">
+          <div class="head">
+            <div class="icon" aria-hidden>
+              <img src="Images/Terminal.png" id="terminalicon" alt="icon">
+            </div>
+            <div style="flex:1">
+              <h2 class="title" id="terminaltitle">Terminal</h2>
+              <div class="sub" id="terminalclass">Special • Education</div>
+            </div>
+            <div style="min-width:80px;text-align:right">
+              <div class="muted" id="terminalpriority">Priority: ???</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px" id="terminaltag">What is this?</div>
+            </div>
+          </div>
+
+        <p class="desc" id="terminaldesc" style="display:none;">
+        </p>
+        <input type="password" id="vaultInput" placeholder="Awaiting Input...">
+        <button onclick="openVault()" id="vaultButton">Run</button>
+        <p id="vaultError" style="color:red; display:none;"></p>
+    </div>
+    <br>
       <footer class="note">Rest is under construction</footer>
       <footer class="note">© <span id="year"></span> AnRat · Built with ♥ · IDC Studios</footer>
       <br>
@@ -885,6 +949,7 @@
   </div>
 
   <script>
+
     // small niceties
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -1092,6 +1157,64 @@
     });
   });
 
+  const errorEl = document.getElementById("vaultError");
+    const terminaltitle = document.getElementById("terminaltitle");
+    const terminalclass = document.getElementById("terminalclass");
+    const terminalpriority = document.getElementById("terminalpriority");
+    const terminaltag = document.getElementById("terminaltag");
+    const terminaldesc = document.getElementById("terminaldesc");
+    const terminalicon = document.getElementById("terminalicon");
+
+    async function openVault() {
+      const phrase = document.getElementById("vaultInput").value.trim();
+
+      errorEl.textContent = "";
+      terminaldesc.style.display = "none";
+      errorEl.style.display = "none";
+      console.log("asd")
+      // Only allow safe filenames (letters + numbers)
+      if (!/^[a-zA-Z0-9_-]+$/.test(phrase)) {
+          errorEl.textContent = "Invalid phrase.";
+          errorEl.style.display = "block";
+          return;
+      }
+
+      try {
+          const response = await fetch(`secrets/${phrase}.txt`);
+
+          if (!response.ok) {
+              throw new Error("Not found");
+          }
+
+          const text = await response.text();
+          parseSecret(text);
+
+      } catch (err) {
+        console.log(err)
+          errorEl.textContent = "No secret found.";
+          errorEl.style.display = "block";
+      }
+  }
+
+  function parseSecret(content) {
+      const lines = content.split("\n");
+
+      const title = lines[0]?.replace("Title:", "").trim() || "Unknown";
+      const subclass = lines[1]?.replace("Class:", "").trim() || "Unknown";
+      const priority = lines[2]?.replace("Priority:", "").trim() || "Unknown";
+      const tag = lines[3]?.replace("Tag:", "").trim() || "Unknown";
+      const icon = lines[4]?.replace("Icon:", "").trim() || "Unknown";
+      const paragraph = lines.slice(6).join("\n").trim();
+
+      terminaltitle.textContent = title;
+      terminalclass.textContent = subclass
+      terminalpriority.textContent = priority
+      terminaltag.textContent = tag
+      terminaldesc.innerHTML = paragraph
+      terminalicon.src = icon
+
+      terminaldesc.style.display = "block";
+  }
 
   </script>
 </body>
