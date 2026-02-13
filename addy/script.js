@@ -279,6 +279,20 @@ if (window.location.hash == "#phase3") {
     changeMusic("./Sounds/MenuTheme.mp3", 0.1)
     Phase3()
 }
+if (window.location.hash == "#end") {
+    Intro.style.display = "none"
+    Memories.style.width = "100vw"
+    Memories.style.height = "100vh"
+    Memories.style.opacity = 1
+    Memories.style.filter = "blur(0px)"
+    MemoriesText.style.opacity = 0
+    MemoriesText.style.filter = "blur(150px)"
+    TextCursor.style.opacity = 0
+    TextCursor.style.filter = "blur(150px)"
+    Phase3Text.style.opacity = 1
+    Phase3Text.style.filter = "blur(0px)"
+    changeMusic("./Sounds/MenuTheme.mp3", 0.1)
+}
 
 let Started = false
 
