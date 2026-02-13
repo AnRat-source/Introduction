@@ -130,7 +130,7 @@ function showChoice() {
 
 const Memories = document.getElementById("Memories")
 const MemoriesText = document.getElementById("GuideText")
-const TextCursor = document.getElementById("cursor")
+const TextCursor = document.getElementById("TextCursor")
 function TypeMemories(Text) {
     console.log(Text)
     const speed = 30;
