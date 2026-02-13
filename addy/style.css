@@ -153,6 +153,7 @@ h1 {
   background-color: white;
   margin-left: 6px;
   animation: blink 1s steps(1) infinite;
+  transition: opacity 2s ease-out, filter 2s ease-out;
   box-shadow:
         0 0 0px #000000,      /* hard edge */
         0 0 10px #000000,      /* sharp glow */

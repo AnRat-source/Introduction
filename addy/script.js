@@ -130,7 +130,7 @@ function showChoice() {
 
 const Memories = document.getElementById("Memories")
 const MemoriesText = document.getElementById("GuideText")
-
+const TextCursor = document.getElementById("cursor")
 function TypeMemories(Text) {
     console.log(Text)
     const speed = 30;
@@ -178,6 +178,8 @@ function Phase3() {
                     setTimeout(() => {
                         MemoriesText.style.opacity = 0
                         MemoriesText.style.filter = "blur(150px)"
+                        TextCursor.style.opacity = 0
+                        TextCursor.style.filter = "blur(150px)"
                         Phase3Text.style.opacity = 1
                         Phase3Text.style.filter = "blur(0px)"
                     }, 5100)
