@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Memory Card</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="../Images/PFP.ico">
+</head>
+<body>
+    <div id="Phase2">
+        <img id="Phase2Img" src="Images/Start.png">
+    </div>
+
+    <div id="Memories">
+        <div class="lisback"></div>
+        <div class="lismiddle"></div>
+    </div>
+
+    <div id="ILY">
+        <h1>Happy Valentines Day!</h1>
+        <h2>"I Love You!"</h2>
+        <h5>- Seph</h5>
+    </div>
+
+    <h1 id="GuideText"></h1><span class="cursor"></span>
+
+    <div id="Intro">
+        <div id="start-screen">
+            <h1>Memory Card</h1>
+            <button onclick="startGame()">New Game</button>
+        </div>
+
+        <div id="game" class="hidden">
+            <div class="dialogue-box">
+                <p id="text"></p>
+                <button onclick="nextLine()">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
