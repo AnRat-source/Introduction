@@ -53,9 +53,21 @@ function changeMusic(track, volume) {
     }, 1000)
 }
 
+
 document.addEventListener("click", () => {
     startMusic();
 }, { once: true });
+
+const typingSound = document.getElementById('typing-sound');
+
+function KeystrokeSound() {
+    const soundInstance = typingSound.cloneNode();
+    soundInstance.volume = 0.01
+    soundInstance.play();
+  
+  // Optional: Remove the clone from memory after it finishes
+    soundInstance.onended = () => soundInstance.remove();
+}
 
 const lines = [
     "February 14th.",
@@ -85,15 +97,21 @@ function nextLine() {
     }
 }
 
-function typeText(text) {
+function typeText(text, elementToType) {
     let i = 0;
     const speed = 40;
-    const element = document.getElementById("text");
+    let element = document.getElementById("text");
+    if (elementToType) {
+        element = elementToType
+    }
     element.innerHTML = "";
 
     function type() {
         if (i < text.length) {
             element.innerHTML += text.charAt(i);
+
+            KeystrokeSound()
+
             i++;
             setTimeout(type, speed);
         }
@@ -106,10 +124,13 @@ function showChoice() {
     const box = document.querySelector(".dialogue-box");
 
     box.innerHTML = `
-        <p>Will you be my Valentine?</p>
+        <p id="Question"></p>
         <button id="yesBtn" onclick="yesEnding()">YES</button>
         <button id="noBtn" onclick="window.location.href='https://mattiasgustavsson.com/wasm/doom-crt/'">NO</button>
     `;
+
+    const Question = document.getElementById("Question")
+    typeText("Will you be my Valentine?", Question)
 
     // 1. Select the element you want to track
     const elementToHover = document.getElementById('noBtn');
@@ -150,6 +171,9 @@ function TypeMemories(Text) {
     function type() {
         if (j < Text.length) {
             MemoriesText.innerHTML += Text.charAt(j);
+
+            KeystrokeSound()
+
             j++;
             setTimeout(type, speed);
         }
