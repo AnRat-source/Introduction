@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Main Menu</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: rgb(0, 0, 0);
+}
+/* Background Layer */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    background: url("/Background/BG.jpg") no-repeat center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    z-index: -2;
+}
+
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 177vh;
+    height: 100vh;
+    background-image: url("/Background/BG.jpg") no-repeat center center;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;     
+    z-index: -1;
+}
+
+.background-image:nth-child(1) { animation-delay: 0s; }
+.background-image:nth-child(2) { animation-delay: 1.3s; }
+.background-image:nth-child(3) { animation-delay: 2.7s; }
+.background-image:nth-child(4) { animation-delay: 3.5s; }
+.background-image:nth-child(5) { animation-delay: 4.7s; }
+.background-image:nth-child(6) { animation-delay: 5.2s; }
+.moving {
+    animation: rotate-shake 10s infinite linear;
+}
+.blink.moving {
+    animation: 
+        rotate-shake 10s infinite linear, 
+        blink 4.5s infinite;
+}
+.mirrored {
+    transform: scaleX(-1);
+}
+.moving:nth-child(1) { animation-delay: 0s; }
+.moving:nth-child(2) { animation-delay: 1.3s; }
+.moving:nth-child(3) { animation-delay: 2.7s; }
+.moving:nth-child(4) { animation-delay: 3.5s; }
+.moving:nth-child(5) { animation-delay: 4.7s; }
+.moving:nth-child(6) { animation-delay: 5.2s; }
+.moving:nth-child(7) { animation-delay: 6.2s; }
+.moving:nth-child(8) { animation-delay: 7.3s; }
+.moving:nth-child(9) { animation-delay: 8.7s; }
+.moving:nth-child(10) { animation-delay: 9.5s; }
+.moving:nth-child(11) { animation-delay: 10.7s; }
+.moving:nth-child(12) { animation-delay: 11.2s; }
+
+.shake-on-hover:hover {
+  animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.shake {
+    animation: shake 20s both infinite;
+}
+
+.background-title {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 177vh;
+    height: 100vh;
+    background-image: url("/Background/BG.jpg") no-repeat center center;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;     
+    z-index: -1;
+}
+
+.EyesClosed {
+     animation: 
+        Reverseblink 20s infinite;
+}
+
+@keyframes rotate-shake {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(1deg); }
+  50% { transform: rotate(0); }
+  75% { transform: rotate(-1deg); }
+  100% { transform: rotate(0); }
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-5px, 0, 0); }
+  20%, 80% { transform: translate3d(5px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+  40%, 60% { transform: translate3d(5px, 0, 0); }
+}
+
+@keyframes blink {
+  /* open most of the time */
+  0%, 97%, 100% { opacity: 1; }
+
+  /* blink (0.2s ≈ ~5% of 4s) */
+  98%, 99% { opacity: 0; }
+}
+
+@keyframes Reverseblink {
+  /* open most of the time */
+  0%, 95%, 100% { opacity: 0; }
+
+  /* blink (0.2s ≈ ~5% of 4s) */
+  96%, 99% { opacity: 1; }
+}
+
+/* Optional dark overlay for readability */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    z-index: -1;
+}
+
+/* Center menu */
+.menu-container {
+    position: absolute;
+    right: 10vw;              /* ← Margin from right side */
+    top: 60%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    align-items: center;
+}
+
+.options-highlight {
+    position: fixed;
+    right: 300px;              /* ← Margin from right side */
+    top: 50%;
+    transform: translateY(-50%);
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    align-items: center;
+}
+
+@media screen and (max-width: 830px) {
+    .options-highlight {
+        display: none; /* This completely removes the element and its space from the layout */
+    }
+}
+
+.title {
+    font-size: 48px;
+    color: white;
+    margin-bottom: 40px;
+    text-shadow: 0 0 15px black;
+}
+
+.menu-button {
+    width: 260px;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.menu-button:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+.bg {
+    background-color: rgba(0, 0, 0, 0);
+    filter: blur(15px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+}
+
+</style>
+</head>
+<body>
+
+<div class="bg">
+    <div class="background"></div>
+    <div class="background EyesClosed" style="background-image: url('/Background/EyesClosed.jpg');"></div>
+    <div class="eyes">
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes1.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes2.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes3.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes4.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes5.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes6.png');"></div>
+    </div>
+    <div class="eyes mirrored">
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes1.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes2.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes3.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes4.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes5.png');"></div>
+        <div class="background-image moving blink" style="background-image: url('/Background/Eyes6.png');"></div>
+    </div>
+</div>
+
+<div class="overlay">
+    <div class="background-image shake-on-hover shake" style="background-image: url('/Background/MainCharacter.png'); transform: scale(10.2s);"></div>
+    <div class="background-title" style="background-image: url('/Background/Title.png');"></div>
+</div>
+
+<div class="menu-container">
+    <img src="MenuButtons/Highlight.png" class="options-highlight">
+    <img src="MenuButtons/Play.png" class="menu-button moving shake-on-hover" onclick="startGame()">
+    <img src="MenuButtons/Load.png" class="menu-button moving shake-on-hover" onclick="loadGame()">
+    <img src="MenuButtons/Settings.png" class="menu-button moving shake-on-hover" onclick="openSettings()">
+    <img src="MenuButtons/Credits.png" class="menu-button moving shake-on-hover" onclick="showCredits()">
+</div>
+
+<script>
+
+    function startGame() {
+        alert("I didnt code anything else...");
+    }
+
+    function loadGame() {
+        alert("You never made a save file tf are u loading");
+    }
+
+    function openSettings() {
+        alert("Random Bullshit GO!");
+    }
+
+    function showCredits() {
+        alert("Hiiii jovey - seph");
+    }
+</script>
+
+</body>
+</html>
