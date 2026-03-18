@@ -254,10 +254,10 @@
       const icon = lines[4]?.replace("Icon:", "").trim() || "Unknown";
       const paragraph = lines.slice(6).join("\n").trim();
 
-      terminaltitle.textContent = title;
-      terminalclass.textContent = subclass
-      terminalpriority.textContent = priority
-      terminaltag.textContent = tag
+      terminaltitle.innerHTML = title;
+      terminalclass.innerHTML = subclass
+      terminalpriority.innerHTML = priority
+      terminaltag.innerHTML = tag
       terminaldesc.innerHTML = paragraph
       terminalicon.src = icon
 
