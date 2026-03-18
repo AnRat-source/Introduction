@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hello Animation</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+  }
+
+  #text {
+    font-size: 4rem;
+    position: absolute;
+    transition: all 0.2s ease;
+  }
+
+  .showtop {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+
+  .show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .hide {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+</style>
+</head>
+<body>
+
+<div id="text"></div>
+
+<script>
+const words = [
+  "Hello",
+  "Bonjour",
+  "Hola",
+  "こんにちは",
+  "안녕하세요",
+  "Ciao",
+  "Hallo",
+  "Привет",
+  "مرحبا"
+];
+
+const textEl = document.getElementById("text");
+let index = 0;
+
+function showNextWord() {
+  textEl.classList.remove("show");
+  textEl.classList.add("hide");
+
+  setTimeout(() => {
+    textEl.textContent = words[index];
+
+
+    textEl.classList.remove("hide");
+    textEl.classList.add("showtop");
+
+    index = (index + 1) % words.length;
+
+    setTimeout(() => {
+        textEl.classList.remove("showtop");
+        textEl.classList.add("show");
+    }, 200);
+  }, 200);
+}
+
+// initial display
+textEl.textContent = words[0];
+textEl.classList.add("show");
+
+setInterval(showNextWord, 1000);
+</script>
+
+</body>
+</html>
