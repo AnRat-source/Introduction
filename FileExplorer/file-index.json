@@ -60,11 +60,6 @@
     ]
   },
   {
-    "type": "directory",
-    "name": "Tools",
-    "children": []
-  },
-  {
     "type": "file",
     "name": "Portfolio.href",
     "path": "FileExplorer/Portfolio.href"
