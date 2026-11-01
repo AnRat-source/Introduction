@@ -1,0 +1,34 @@
+[
+  {
+    "type": "directory",
+    "name": "Fun",
+    "children": [
+      {
+        "type": "file",
+        "name": "MusicPlayer.html",
+        "path": "FileExplorer/Fun/MusicPlayer.html"
+      }
+    ]
+  },
+  {
+    "type": "directory",
+    "name": "Games",
+    "children": [
+      {
+        "type": "file",
+        "name": "Doom.iframe",
+        "path": "FileExplorer/Games/Doom.iframe"
+      }
+    ]
+  },
+  {
+    "type": "directory",
+    "name": "Tools",
+    "children": []
+  },
+  {
+    "type": "file",
+    "name": "Portfolio.href",
+    "path": "FileExplorer/Portfolio.href"
+  }
+]

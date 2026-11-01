@@ -1,4 +1,228 @@
 // small niceties
+  function addWindowChrome(windowElement, title) {
+    const chrome = document.createElement('div');
+    chrome.className = 'window-chrome';
+    chrome.innerHTML = `<span>${title.toLowerCase().replace(/\s+/g, '-')}.window</span><span class="window-controls"><i aria-hidden="true">−</i><i aria-hidden="true">□</i><button class="window-close" type="button" aria-label="Close ${title}">×</button></span>`;
+    windowElement.prepend(chrome);
+  }
+
+  document.querySelectorAll('.card').forEach((card, number) => {
+    const title = card.querySelector('.title')?.textContent.trim() || `window-${number + 1}`;
+    addWindowChrome(card, title);
+  });
+  document.querySelectorAll('.music-card').forEach(card => {
+    addWindowChrome(card, 'Music Player');
+  });
+
+  // Keep a stable return point for the terminal. When the explorer is open the
+  // terminal is placed at the document root, so its fixed coordinates are
+  // always relative to the viewport rather than the page's content wrapper.
+  const terminalWindow = document.getElementById('terminalWindow');
+  const commandLine = document.querySelector('.command-line');
+  const terminalHome = document.createComment('terminal-window-home');
+  terminalWindow.before(terminalHome);
+
+  function dockTerminalForExplorer(isOpen) {
+    if (isOpen) {
+      if (terminalWindow.parentElement !== document.body) document.body.append(terminalWindow);
+      return;
+    }
+
+    if (terminalWindow.previousSibling !== terminalHome) terminalHome.after(terminalWindow);
+  }
+
+  function animateExplorerConsole() {
+    [terminalWindow, commandLine].forEach(element => {
+      element.classList.remove('console-dock-enter');
+      void element.offsetWidth;
+      element.classList.add('console-dock-enter');
+    });
+  }
+
+  const siteHeader = document.querySelector('header');
+  const headerSpacer = document.createElement('div');
+  headerSpacer.className = 'header-spacer';
+  headerSpacer.setAttribute('aria-hidden', 'true');
+  siteHeader.before(headerSpacer);
+  let headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
+
+  function syncFloatingHeader() {
+    const floating = siteHeader.classList.contains('is-floating');
+    if (!floating) headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
+    const shouldFloat = window.scrollY > headerStart - 12;
+
+    if (shouldFloat && !floating) {
+      headerSpacer.style.height = `${siteHeader.offsetHeight + 22}px`;
+      siteHeader.classList.add('is-floating');
+    } else if (!shouldFloat && floating) {
+      siteHeader.classList.remove('is-floating');
+      headerSpacer.style.height = '0';
+      headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
+    }
+
+    if (siteHeader.classList.contains('is-floating')) {
+      const wrapRect = siteHeader.parentElement.getBoundingClientRect();
+      siteHeader.style.setProperty('--floating-header-left', `${wrapRect.left}px`);
+      siteHeader.style.setProperty('--floating-header-width', `${wrapRect.width}px`);
+    }
+  }
+
+  window.addEventListener('scroll', syncFloatingHeader, { passive: true });
+  window.addEventListener('resize', syncFloatingHeader);
+  syncFloatingHeader();
+
+  const fileExplorer = document.getElementById('fileExplorer');
+  const fileExplorerToggle = document.getElementById('fileExplorerToggle');
+  const fileExplorerClose = document.getElementById('fileExplorerClose');
+  const fileExplorerScrim = document.getElementById('fileExplorerScrim');
+  const fileExplorerStatus = document.getElementById('fileExplorerStatus');
+  const fileExplorerTree = document.getElementById('fileExplorerTree');
+  let explorerTreeId = 0;
+
+  function positionFileExplorer() {
+    const headerRect = siteHeader.getBoundingClientRect();
+    const defaultTop = 14;
+    const explorerLeft = 14;
+    const explorerRight = explorerLeft + Math.min(320, window.innerWidth - 28);
+    const overlapsExplorer =
+      headerRect.left < explorerRight &&
+      headerRect.right > explorerLeft &&
+      headerRect.top < window.innerHeight - 14 &&
+      headerRect.bottom > defaultTop;
+    const explorerTop = overlapsExplorer
+      ? Math.max(defaultTop, Math.min(headerRect.bottom + 8, window.innerHeight - 96))
+      : defaultTop;
+    fileExplorer.style.setProperty('--explorer-top', `${explorerTop}px`);
+  }
+
+  function setFileExplorerOpen(isOpen) {
+    if (isOpen) positionFileExplorer();
+    dockTerminalForExplorer(isOpen);
+    document.body.classList.toggle('explorer-open', isOpen);
+    fileExplorer.classList.toggle('is-open', isOpen);
+    fileExplorer.setAttribute('aria-hidden', String(!isOpen));
+    fileExplorerToggle.setAttribute('aria-expanded', String(isOpen));
+    fileExplorerScrim.hidden = !isOpen;
+    if (isOpen) requestAnimationFrame(animateExplorerConsole);
+    else [terminalWindow, commandLine].forEach(element => element.classList.remove('console-dock-enter'));
+  }
+
+  fileExplorerToggle.addEventListener('click', () => setFileExplorerOpen(!fileExplorer.classList.contains('is-open')));
+  fileExplorerClose.addEventListener('click', () => setFileExplorerOpen(false));
+  fileExplorerScrim.addEventListener('click', () => setFileExplorerOpen(false));
+  window.addEventListener('scroll', () => {
+    if (fileExplorer.classList.contains('is-open')) positionFileExplorer();
+  }, { passive: true });
+  window.addEventListener('resize', () => {
+    if (fileExplorer.classList.contains('is-open')) positionFileExplorer();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && fileExplorer.classList.contains('is-open')) setFileExplorerOpen(false);
+  });
+
+  function getExplorerFileIcon(name) {
+    const extension = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
+    const icons = {
+      html: ['tree-html', 'fa-file-code'],
+      href: ['tree-href', 'fa-link'],
+      iframe: ['tree-iframe', 'fa-window-maximize'],
+      js: ['tree-js', 'fa-file-code'],
+      css: ['tree-css', 'fa-file-code'],
+      json: ['tree-json', 'fa-file-code'],
+      png: ['tree-image', 'fa-file-image'],
+      jpg: ['tree-image', 'fa-file-image'],
+      jpeg: ['tree-image', 'fa-file-image'],
+      webp: ['tree-image', 'fa-file-image'],
+      mp3: ['tree-audio', 'fa-file-audio'],
+      wav: ['tree-audio', 'fa-file-audio']
+    };
+    return icons[extension] || ['tree-generic', 'fa-file-lines'];
+  }
+
+  function makeExplorerTree(entries, depth = 0) {
+    const fragment = document.createDocumentFragment();
+    entries.forEach(entry => {
+      if (entry.type === 'directory') {
+        const folderId = `explorer-folder-${explorerTreeId++}`;
+        const isOpen = depth === 0;
+        const folder = document.createElement('button');
+        folder.className = 'tree-folder';
+        folder.type = 'button';
+        folder.setAttribute('aria-expanded', String(isOpen));
+        folder.setAttribute('aria-controls', folderId);
+        folder.innerHTML = `<i class="fa-solid fa-chevron-${isOpen ? 'down' : 'right'} tree-chevron" aria-hidden="true"></i><i class="fa-solid fa-folder tree-folder-icon" aria-hidden="true"></i><span></span>`;
+        folder.querySelector('span').textContent = entry.name;
+
+        const children = document.createElement('div');
+        children.className = 'tree-children';
+        children.id = folderId;
+        children.hidden = !isOpen;
+        children.append(makeExplorerTree(entry.children || [], depth + 1));
+        fragment.append(folder, children);
+        return;
+      }
+
+      const [typeClass, iconClass] = getExplorerFileIcon(entry.name);
+      const isHref = entry.name.toLowerCase().endsWith('.href');
+      const file = document.createElement(isHref ? 'button' : 'a');
+      file.className = `tree-file ${typeClass}`;
+      if (isHref) {
+        file.type = 'button';
+        file.dataset.hrefFile = entry.path;
+      } else {
+        file.href = entry.path;
+        file.target = '_blank';
+        file.rel = 'noopener noreferrer';
+      }
+      file.innerHTML = `<i class="fa-solid ${iconClass}" aria-hidden="true"></i><span></span>`;
+      file.querySelector('span').textContent = entry.name;
+      fragment.append(file);
+    });
+    return fragment;
+  }
+
+  async function refreshFileExplorer() {
+    try {
+      const response = await fetch('FileExplorer/file-index.json', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Index not found');
+      const entries = await response.json();
+      if (!Array.isArray(entries)) throw new Error('Invalid index');
+      explorerTreeId = 0;
+      fileExplorerTree.replaceChildren(makeExplorerTree(entries));
+      fileExplorerStatus.textContent = 'Select a file to open it.';
+    } catch {
+      fileExplorerStatus.textContent = 'File index could not be loaded.';
+    }
+  }
+
+  fileExplorerTree.addEventListener('click', async event => {
+    const folder = event.target.closest('.tree-folder');
+    if (folder) {
+      const childTree = document.getElementById(folder.getAttribute('aria-controls'));
+      const isOpen = folder.getAttribute('aria-expanded') === 'true';
+      folder.setAttribute('aria-expanded', String(!isOpen));
+      childTree.hidden = isOpen;
+      folder.querySelector('.tree-chevron').className = `fa-solid fa-chevron-${isOpen ? 'right' : 'down'} tree-chevron`;
+      return;
+    }
+
+    const hrefFile = event.target.closest('[data-href-file]');
+    if (!hrefFile) return;
+    fileExplorerStatus.textContent = `Opening ${hrefFile.querySelector('span').textContent}…`;
+    try {
+      const response = await fetch(hrefFile.dataset.hrefFile);
+      const storedText = await response.text();
+      const linkMatch = storedText.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
+      if (!response.ok || !linkMatch) throw new Error('No valid URL');
+      const storedLink = /^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`;
+      window.location.assign(storedLink);
+    } catch {
+      fileExplorerStatus.textContent = `${hrefFile.querySelector('span').textContent} does not contain a valid URL yet.`;
+    }
+  });
+
+  refreshFileExplorer();
+
     document.getElementById('year').textContent = new Date().getFullYear();
 
     const birthDate = new Date("2010-01-13");
@@ -14,7 +238,13 @@
     if (!hasHadBirthdayThisYear) years--;
 
     document.getElementById("age").textContent = years;
-    document.getElementById("GameDevAge").textContent = years-8;
+    const gameDevYears = years - 8;
+    document.getElementById("GameDevAge").textContent = gameDevYears;
+    document.getElementById("GameDevYearsLabel").textContent = gameDevYears === 1 ? 'year' : 'years';
+    const graphicsDesignStartYear = 2024;
+    const graphicsDesignYears = Math.max(0, today.getFullYear() - graphicsDesignStartYear);
+    document.getElementById("GraphicsDesignAge").textContent = graphicsDesignYears;
+    document.getElementById("GraphicsDesignYearsLabel").textContent = graphicsDesignYears === 1 ? 'year' : 'years';
 
     // smooth anchor scrolling
     document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -62,6 +292,99 @@
     }));
   }
 
+  function enableMizukiScrollSpring(mizuki) {
+    let frame = null;
+    let restTimer = null;
+    let lastScrollPosition = window.scrollY;
+    let offsetY = 0;
+    let positionX = window.innerWidth * 1.2;
+    let positionY = 0;
+    let velocityX = 0;
+    let velocityY = 0;
+    let lastFrameTime = performance.now();
+    let returningToRest = false;
+    let entering = true;
+    const minimumVerticalOffset = -80;
+
+    const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
+    const getTarget = now => {
+      const baseX = window.innerWidth * 0.15;
+      const isIdle = !entering && Math.abs(offsetY) < 0.01;
+      const idleBob = isIdle ? Math.sin(now / 1050) * 5 : 0;
+      return {
+        x: baseX,
+        y: Math.max(offsetY, minimumVerticalOffset) + idleBob,
+        isIdle
+      };
+    };
+
+    const stepSpring = now => {
+      const seconds = Math.min((now - lastFrameTime) / 1000, 0.04);
+      lastFrameTime = now;
+      const target = getTarget(now);
+      // The initial entrance and return are gentle; active scrolling responds fast.
+      const stiffness = entering || returningToRest ? 3 : 95;
+      const damping = entering || returningToRest ? 3.5 : 15;
+
+      velocityX += (target.x - positionX) * stiffness * seconds;
+      velocityY += (target.y - positionY) * stiffness * seconds;
+      velocityX *= Math.exp(-damping * seconds);
+      velocityY *= Math.exp(-damping * seconds);
+      positionX += velocityX * seconds;
+      positionY += velocityY * seconds;
+      mizuki.style.translate = `${positionX.toFixed(2)}px ${positionY.toFixed(2)}px`;
+
+      const atRest = Math.abs(target.x - positionX) < 0.15 && Math.abs(target.y - positionY) < 0.15 && Math.abs(velocityX) < 0.15 && Math.abs(velocityY) < 0.15;
+      if (atRest && !target.isIdle) {
+        const justFinishedEntering = entering;
+        positionX = target.x;
+        positionY = target.y;
+        velocityX = 0;
+        velocityY = 0;
+        mizuki.style.translate = `${target.x}px ${target.y}px`;
+        entering = false;
+        if (justFinishedEntering) {
+          frame = requestAnimationFrame(stepSpring);
+          return;
+        }
+        frame = null;
+        return;
+      }
+
+      frame = requestAnimationFrame(stepSpring);
+    };
+
+    const wakeSpring = () => {
+      if (!frame) {
+        lastFrameTime = performance.now();
+        frame = requestAnimationFrame(stepSpring);
+      }
+    };
+
+    window.addEventListener('scroll', () => {
+      const scrollPosition = window.scrollY;
+      const distance = scrollPosition - lastScrollPosition;
+      lastScrollPosition = scrollPosition;
+      if (!distance) return;
+
+      // Scrolling down is capped at an 80px upward offset; scrolling up can
+      // carry her downward as far as needed.
+      offsetY = Math.max(offsetY - distance * 0.17, minimumVerticalOffset);
+      entering = false;
+      returningToRest = false;
+      wakeSpring();
+
+      clearTimeout(restTimer);
+      restTimer = setTimeout(() => {
+        offsetY = 0;
+        returningToRest = true;
+        wakeSpring();
+      }, 300);
+    }, { passive: true });
+    window.addEventListener('resize', wakeSpring);
+    wakeSpring();
+  }
+
   // Main preloader
   document.addEventListener("DOMContentLoaded", async () => {
     await waitForAllImages();
@@ -73,6 +396,7 @@
       console.log("Adding loaded class...");
       const mizuki = document.getElementById("mizuki");
       mizuki.classList.add("loaded");
+      enableMizukiScrollSpring(mizuki);
     }, 200);
   });
 
@@ -172,6 +496,228 @@
   // Call it once when the page loads
   setRandomMessage();
 
+  // Browser-local command console. Custom responses remain on this device.
+  const commandForm = document.getElementById('commandForm');
+  const commandInput = document.getElementById('commandInput');
+  const commandOutput = document.getElementById('commandOutput');
+  const terminalHistory = document.getElementById('terminalHistory');
+  const commandStorageKey = 'anrat-custom-commands';
+  let customCommands = {};
+  let musicPiPWindow = null;
+
+  try {
+    const savedCommands = JSON.parse(localStorage.getItem(commandStorageKey) || '{}');
+    if (savedCommands && typeof savedCommands === 'object' && !Array.isArray(savedCommands)) {
+      customCommands = Object.fromEntries(
+        Object.entries(savedCommands).filter(([name, response]) =>
+          /^[a-z0-9_-]+$/i.test(name) && typeof response === 'string'
+        )
+      );
+    }
+  } catch {
+    customCommands = {};
+  }
+
+  function showCommandOutput(message, state = '') {
+    commandOutput.textContent = message;
+    commandOutput.dataset.state = state;
+  }
+
+  function saveCustomCommands() {
+    localStorage.setItem(commandStorageKey, JSON.stringify(customCommands));
+  }
+
+  function clearTerminalSession() {
+    terminalHistory.replaceChildren();
+    const emptyState = document.createElement('p');
+    emptyState.className = 'terminal-empty';
+    emptyState.textContent = 'Run a command to begin this session.';
+    terminalHistory.append(emptyState);
+    terminalWindow.hidden = false;
+  }
+
+  document.addEventListener('click', event => {
+    const closeButton = event.target.closest('.window-close');
+    if (!closeButton) return;
+
+    const windowCard = closeButton.closest('.card, .music-card');
+    if (!windowCard) return;
+
+    if (windowCard === terminalWindow) {
+      clearTerminalSession();
+      return;
+    }
+
+    windowCard.hidden = true;
+  });
+
+  function appendSafeRecordMarkup(target, markup, linkClass = 'terminal-record-link') {
+    const template = document.createElement('template');
+    template.innerHTML = markup;
+
+    const copyNode = (node, parent) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent.replace(/\s+/g, ' ');
+        if (text) parent.append(document.createTextNode(text));
+        return;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+      const tag = node.tagName.toLowerCase();
+      if (tag === 'br') {
+        parent.append(document.createElement('br'));
+        return;
+      }
+      if (tag === 'a') {
+        const href = node.getAttribute('href') || '';
+        const safeHref = /^(https?:|mailto:|\/)/i.test(href) ? href : '';
+        const link = safeHref ? document.createElement('a') : document.createElement('span');
+        if (safeHref) {
+          link.href = safeHref;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.className = linkClass;
+        }
+        node.childNodes.forEach(child => copyNode(child, link));
+        parent.append(link);
+        return;
+      }
+
+      const allowedTags = new Set(['b', 'strong', 'em', 'i', 'span', 'p']);
+      const element = allowedTags.has(tag) ? document.createElement(tag) : document.createElement('span');
+      node.childNodes.forEach(child => copyNode(child, element));
+      parent.append(element);
+    };
+
+    template.content.childNodes.forEach(node => copyNode(node, target));
+  }
+
+  function appendTerminalEntry(command, message, state = '', record = null) {
+    const commandTop = commandForm.getBoundingClientRect().top;
+    terminalWindow.hidden = false;
+    terminalHistory.querySelector('.terminal-empty')?.remove();
+    const entry = document.createElement('div');
+    entry.className = 'terminal-entry';
+    entry.dataset.state = state;
+
+    const commandLine = document.createElement('div');
+    commandLine.className = 'terminal-command';
+    commandLine.textContent = `$ ${command}`;
+
+    const resultLine = document.createElement('div');
+    resultLine.className = 'terminal-result';
+    resultLine.textContent = message;
+
+    entry.append(commandLine, resultLine);
+    if (record) {
+      const meta = document.createElement('div');
+      meta.className = 'terminal-record-meta';
+      if (record.priority) meta.append(document.createTextNode(record.priority));
+      if (record.priority && record.tag) meta.append(document.createTextNode(' — '));
+      if (record.tag) appendSafeRecordMarkup(meta, record.tag, 'terminal-record-inline-link');
+
+      const body = document.createElement('div');
+      body.className = 'terminal-record-body';
+      appendSafeRecordMarkup(body, record.paragraph);
+
+      entry.append(meta, body);
+    }
+    terminalHistory.append(entry);
+    terminalHistory.scrollTop = terminalHistory.scrollHeight;
+
+    requestAnimationFrame(() => {
+      const offset = commandForm.getBoundingClientRect().top - commandTop;
+      if (offset) window.scrollBy({ top: offset, behavior: 'auto' });
+    });
+  }
+
+  async function openMusicPlayer() {
+    if (!('documentPictureInPicture' in window)) {
+      return { ok: false, message: 'Document Picture-in-Picture is not supported by this browser.' };
+    }
+
+    if (musicPiPWindow && !musicPiPWindow.closed) {
+      musicPiPWindow.focus();
+      return { ok: true, message: 'Music player is already open in Document PiP.' };
+    }
+
+    try {
+      musicPiPWindow = await window.documentPictureInPicture.requestWindow({ width: 720, height: 480 });
+      musicPiPWindow.document.title = 'Shuffle Station';
+      musicPiPWindow.document.body.style.cssText = 'margin:0;background:#080b10;overflow:hidden;';
+
+      const player = musicPiPWindow.document.createElement('iframe');
+      player.src = 'FileExplorer/Fun/MusicPlayer.html?embedded=1&autoplay=1';
+      player.title = 'Shuffle Station music player';
+      player.allow = 'autoplay; fullscreen';
+      player.style.cssText = 'display:block;width:100vw;height:100vh;border:0;background:#080b10;';
+      musicPiPWindow.document.body.append(player);
+
+      musicPiPWindow.addEventListener('pagehide', () => {
+        musicPiPWindow = null;
+      }, { once: true });
+
+      return { ok: true, message: 'Opened Shuffle Station in Document PiP.' };
+    } catch {
+      musicPiPWindow = null;
+      return { ok: false, message: 'Could not open the music player in Document PiP.' };
+    }
+  }
+
+  commandForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const command = commandInput.value.trim();
+    if (!command) return;
+
+    const addCommand = command.match(/^add\s+([a-z0-9_-]+)\s*::\s*(.+)$/i);
+    const removeCommand = command.match(/^(?:remove|delete)\s+([a-z0-9_-]+)$/i);
+    const normalizedCommand = command.toLowerCase();
+
+    let message;
+    let state = '';
+    let record = null;
+
+    if (normalizedCommand === 'music') {
+      const result = await openMusicPlayer();
+      message = result.message;
+      state = result.ok ? 'success' : 'error';
+    } else if (addCommand) {
+      const [, name, response] = addCommand;
+      customCommands[name.toLowerCase()] = response.trim();
+      saveCustomCommands();
+      message = `Saved command: ${name.toLowerCase()}`;
+      state = 'success';
+    } else if (removeCommand) {
+      const name = removeCommand[1].toLowerCase();
+      if (Object.hasOwn(customCommands, name)) {
+        delete customCommands[name];
+        saveCustomCommands();
+        message = `Removed command: ${name}`;
+        state = 'success';
+      } else {
+        message = `No custom command named "${name}".`;
+        state = 'error';
+      }
+    } else if (normalizedCommand === 'help') {
+      message = 'music   |   add name :: response   |   name   |   list   |   remove name   |   vault phrase';
+    } else if (normalizedCommand === 'list') {
+      const names = Object.keys(customCommands);
+      message = names.length ? `Custom commands: ${names.join(', ')}` : 'No custom commands yet.';
+    } else if (Object.hasOwn(customCommands, normalizedCommand)) {
+      message = customCommands[normalizedCommand];
+      state = 'success';
+    } else {
+      const result = await openVault(command);
+      message = result.message;
+      state = result.ok ? 'success' : 'error';
+      record = result.record || null;
+    }
+
+    showCommandOutput(message, state);
+    appendTerminalEntry(command, message, state, record);
+    commandInput.value = '';
+  });
+
   document.querySelectorAll('.read-more-btn').forEach(btn => {
     console.log(btn.innerHTML)
     btn.addEventListener('click', () => {
@@ -205,26 +751,10 @@
     });
   });
 
-  const errorEl = document.getElementById("vaultError");
-    const terminaltitle = document.getElementById("terminaltitle");
-    const terminalclass = document.getElementById("terminalclass");
-    const terminalpriority = document.getElementById("terminalpriority");
-    const terminaltag = document.getElementById("terminaltag");
-    const terminaldesc = document.getElementById("terminaldesc");
-    const terminalicon = document.getElementById("terminalicon");
-
-    async function openVault() {
-      const phrase = document.getElementById("vaultInput").value.trim();
-
-      errorEl.textContent = "";
-      terminaldesc.style.display = "none";
-      errorEl.style.display = "none";
-      console.log("asd")
+    async function openVault(phrase) {
       // Only allow safe filenames (letters + numbers)
       if (!/^[a-zA-Z0-9_-]+$/.test(phrase)) {
-          errorEl.textContent = "Invalid phrase.";
-          errorEl.style.display = "block";
-          return;
+          return { ok: false, message: 'Invalid command.' };
       }
 
       try {
@@ -235,12 +765,11 @@
           }
 
           const text = await response.text();
-          parseSecret(text);
+          const record = parseSecret(text);
+          return { ok: true, message: `Opened terminal record: ${record.title}`, record };
 
       } catch (err) {
-        console.log(err)
-          errorEl.textContent = "No secret found.";
-          errorEl.style.display = "block";
+          return { ok: false, message: `Command not found: ${phrase}. Type help for options.` };
       }
   }
 
@@ -254,14 +783,7 @@
       const icon = lines[4]?.replace("Icon:", "").trim() || "Unknown";
       const paragraph = lines.slice(6).join("\n").trim();
 
-      terminaltitle.innerHTML = title;
-      terminalclass.innerHTML = subclass
-      terminalpriority.innerHTML = priority
-      terminaltag.innerHTML = tag
-      terminaldesc.innerHTML = paragraph
-      terminalicon.src = icon
-
-      terminaldesc.style.display = "block";
+      return { title, subclass, priority, tag, icon, paragraph };
   }
 
 const SelfNames = [

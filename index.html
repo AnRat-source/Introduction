@@ -20,9 +20,23 @@
   </div>
 
   <div class="background"></div>
+  <div class="mizuki-bg" id="mizuki" aria-hidden="true"></div>
+  <aside class="explorer-sidebar" id="fileExplorer" aria-label="File Explorer" aria-hidden="true">
+    <div class="explorer-titlebar">
+      <span><i class="fa-solid fa-folder-tree" aria-hidden="true"></i> EXPLORER</span>
+      <button class="explorer-close" id="fileExplorerClose" type="button" aria-label="Close File Explorer">×</button>
+    </div>
+    <div class="explorer-workspace">INTRODUCTION /</div>
+    <nav class="explorer-tree" id="fileExplorerTree" aria-label="Introduction files"></nav>
+    <p class="explorer-status" id="fileExplorerStatus">Select a file to open it.</p>
+  </aside>
+  <div class="explorer-scrim" id="fileExplorerScrim" hidden></div>
   <div class="wrap">
     <header>
       <div class="brand">
+        <button class="file-explorer-toggle" id="fileExplorerToggle" type="button" aria-label="Open File Explorer" aria-expanded="false" title="Open File Explorer">
+          <i class="fa-solid fa-folder-tree" aria-hidden="true"></i>
+        </button>
         <div class="logo">
           <div class="icon pfp" style="background: #00000000;">
             <img src="Images/PFP.png" alt="icon">
@@ -40,14 +54,13 @@
 
     <article class="card" id="intrests-card">
         <div class="am-card-bg"></div>
-        <div class="mizuki-bg" id="mizuki"></div>
         <div class="head">
           <div class="icon" aria-hidden>
             <img src="Images/AboutMePfp.png" alt="icon">
           </div>
           <div style="flex:1">
             <h2 class="title">About Me</h2>
-            <div class="sub"><span id="age"></span> • She/Her • Minor Autism</div>
+            <div class="sub profile-status"><span id="age"></span>  - She/Her - Minor Autism</div>
           </div>
           <div style="min-width:80px;text-align:right">
             <div class="muted"><b>Aqua</b></div>
@@ -83,40 +96,33 @@
           <span class="read-more-text"></span>
         </p>
 
-        <div class="tags">
-          <a class="tag" href="https://potatocorner.com/">Potato Corner</a>
-          <a class="tag" href="https://store.anrat.link/portfolio/">Skills</a>
-          <a class="tag" href="#">Crazy</a>
-          <a class="tag" href="#">Gamer</a>
-          <a class="tag" href="#">E-Girl</a>
-        </div>
-
         <div class="actions">
           <a class="cta" href="https://store.anrat.link/portfolio">See Projects →</a>
           
         </div>
     </article>
 
-    <main class="grid" style="margin-top:30px;">
+    <main class="grid work-grid" style="margin-top:30px;">
       <div>
-        <article class="card" id="game-card">
+        <article class="card role-window game-window" id="game-card">
         <div class="game-card-bg"></div>
         <div class="head">
-          <div class="icon" aria-hidden>
-            <img src="Images/GamePFP.jpg" alt="icon">
-          </div>
           <div style="flex:1">
             <h2 class="title">Game Developer</h2>
-            <div class="sub">Gameplay • Tools • Prototyping • Simulations</div>
+            <div class="role-facts" aria-label="Game development details">
+              <div class="years-stat"><span>Years active</span><b><span class="stat-number" id="GameDevAge"></span><span class="stat-unit" id="GameDevYearsLabel">years</span></b></div>
+              <div><span>Current</span><b>Freelance</b></div>
+              <div><span>Prior teams</span><b>Byfrost · Broken Studios</b></div>
+            </div>
           </div>
           <div style="min-width:80px;text-align:right">
-            <div class="muted">Indie / Contract</div>
+            <div class="muted">Freelance</div>
             <div style="font-size:12px;color:var(--muted);margin-top:6px">Available for hire</div>
           </div>
         </div>
 
         <p class="desc">
-          Ive been doing game design for <span id="GameDevAge"></span>+ years. <br>
+          I mostly make the stuff behind a game—systems, tools, and simulations. I like turning a weird idea into something people can actually mess around with. <br>
 
           <span id="read-more-preview">
             <button class="read-more-btn" style="
@@ -131,21 +137,13 @@
           <!-- Original text hidden at first -->
           <span class="read-more-break" style="display:none">
             <br>
-            Ive made several "Succesful" games if your idea of success is thousands of active players. I mainly make systems and simulations that eventually turn into games. <br>
-            Ive worked around the industry for 5+ years and have honestly seen it all, geniuses, scammers, and toxic work environments, you name it ive dealt with it. <br>
-            Ive been lead dev for 2 years in a studio i no longer associate with. Ive been to several conferences about game design and have hosted a few myself.
+            A few of my games have reached thousands of active players, which is still kind of wild to me. Most projects start as a random system idea, then turn into a full game once the loop feels good. <br>
+            I have been around game dev for 5+ years and have seen the good, the bad, and the very confusing. I care a lot about people being able to talk honestly and get things done. <br>
+            I was a lead developer for two years at a studio I do not work with anymore. I have also been to a few game-design conferences and hosted some myself.
           </span>
 
           <span class="read-more-text"></span>
         </p>
-
-        <div class="tags">
-          <a class="tag" href="#">Unity / Godot / Roblox</a>
-          <a class="tag" href="https://www.lua.org/">Lua • C#</a>
-          <a class="tag" href="https://store.anrat.link/portfolio">Level Design</a>
-          <a class="tag" href="https://store.anrat.link/portfolio">Optimization</a>
-          <a class="tag" href="https://store.anrat.link/portfolio">Shaders</a>
-        </div>
 
         <div class="actions">
           <a class="cta" href="https://store.anrat.link/portfolio">See Projects →</a>
@@ -155,25 +153,26 @@
       </div>
 
       <div style="z-index: 200;">
-        <article class="card" id="graphics-card">
+        <article class="card role-window graphics-window" id="graphics-card">
           <div class="graphics-card-bg"></div>
           <div class="accent-spark" aria-hidden></div>
           <div class="head">
-            <div class="icon" aria-hidden>
-              <img src="Images/GraphicsPFP.jpg" alt="icon">
-            </div>
             <div style="flex:1">
-              <h2 class="title">Graphics Designer</h2>
-              <div class="sub">3D Modeling • Illustration • UI Assets • Aesthetics</div>
+              <h2 class="title">Full Stack Developer &amp; Graphics Designer</h2>
+              <div class="role-facts" aria-label="Full stack development and graphics design details">
+                <div class="years-stat"><span>Years active</span><b><span class="stat-number" id="GraphicsDesignAge"></span><span class="stat-unit" id="GraphicsDesignYearsLabel">years</span></b></div>
+                <div><span>Current</span><b>Freelance</b></div>
+                <div><span>Since</span><b>2024</b></div>
+              </div>
             </div>
             <div style="min-width:80px;text-align:right">
               <div class="muted">Freelance</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px">Rates on request</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">Independent work</div>
             </div>
           </div>
 
           <p class="desc">
-            I do some- graphics. <br>
+            I work on both the site itself and how it looks. That means building the front end, wiring up the parts behind it, then making sure the whole thing does not look boring. I also spend a lot of time on UI, 3D scenes, and shaders. <br>
             <!-- Read More container -->
             <span id="read-more-preview">
               <button class="read-more-btn" style="
@@ -188,19 +187,11 @@
             <!-- Original text hidden at first -->
             <span class="read-more-break" style="display:none">
               <br>
-              I do UI Design and 3D scenes mostly, but recently ive been working on web design and making shaders. I only started graphics design last year but its a good skill to learn ig.
+              Most projects bounce between web work and design. I build the page, handle the functionality, then mess with the UI, scenes, assets, and shaders until it feels right. I started taking graphics design seriously in 2024, so I am still learning as I go, but I am having a good time with it.
             </span>
 
             <span class="read-more-text"></span>
           </p>
-
-          <div class="tags">
-            <a class="tag" href="#">Illustration</a>
-            <a class="tag" href="#">Photo Editing</a>
-            <a class="tag" href="#">UI</a>
-            <a class="tag" href="#">Shaders</a>
-            <a class="tag" href="#">3D Modeling</a>
-          </div>
 
           <div class="actions">
             <a class="cta" href="https://store.anrat.link/portfolio">View Portfolio →</a>
@@ -237,6 +228,26 @@
           </div>
         </div>
       </div>
+
+    <article class="card terminal-window" id="terminalWindow" hidden>
+      <div class="head">
+        <div style="flex:1">
+          <h2 class="title">Terminal Session</h2>
+        </div>
+        <div class="muted">session log</div>
+      </div>
+      <div id="terminalHistory" class="terminal-history" role="log" aria-live="polite">
+        <p class="terminal-empty" id="terminalEmpty">Run a command to begin this session.</p>
+      </div>
+    </article>
+
+    <section class="command-line" aria-labelledby="command-label">
+      <form id="commandForm" class="command-form">
+        <label id="command-label" class="command-prompt" for="commandInput">seph@desktop:~$</label>
+        <input id="commandInput" type="text" autocomplete="off" spellcheck="false" placeholder="Type help to get started" aria-describedby="commandOutput">
+      </form>
+      <p id="commandOutput" class="command-output" aria-live="polite">Add a command with: add name :: response</p>
+    </section>
     
       <div class="songs">
         <h3 style="margin:30px 0 10px 0;">Top 3 Songs</h3>
@@ -360,11 +371,10 @@
             </div>
             <div style="flex:1">
               <h2 class="title">Project Sekai</h2>
-              <div class="sub">Hatsune Miku • Akiyama Mizuki</div>
             </div>
-            <div style="min-width:80px;text-align:right">
-              <div class="muted">Priority: 5</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px">Current Hyperfixation</div>
+            <div class="hobby-meta">
+              <span>workspace</span>
+              <b>miku / pjsk</b>
             </div>
           </div>
 
@@ -394,12 +404,6 @@
             <span class="read-more-text"></span>
           </p>
 
-          <div class="tags">
-            <a class="tag" href="#">PJSK</a>
-            <a class="tag" href="#">ごめん。。。</a>
-            <a class="tag" href="#">待って瑞稀</a>
-            <a class="tag" href="#">Mizu7</a>
-          </div>
           <div class="actions">
             <a class="cta" href="#WIPthisDoesntDoAnything">Miku Shrine →</a>
           </div>
@@ -415,11 +419,10 @@
             </div>
             <div style="flex:1">
               <h2 class="title">Roblox</h2>
-              <div class="sub">Gaming • Games • Game Dev</div>
             </div>
-            <div style="min-width:80px;text-align:right">
-              <div class="muted">Priority: 5</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px">Roblox any day, everyday</div>
+            <div class="hobby-meta">
+              <span>directory</span>
+              <b>games / roblox</b>
             </div>
           </div>
 
@@ -445,13 +448,6 @@
             <span class="read-more-text"></span>
           </p>
 
-          <div class="tags">
-            <a class="tag" href="https://www.roblox.com/home">Roblox</a>
-            <a class="tag" href="https://www.roblox.com/games/735030788/Royalloween">Royale High</a>
-            <a class="tag" href="https://www.roblox.com/games/185655149/Welcome-to-Bloxburg">Bloxburg</a>
-            <a class="tag" href="https://www.roblox.com/games/2916899287/Blackhawk-Rescue-Mission-5">BRM5</a>
-            <a class="tag" href="https://create.roblox.com/">Studio</a>
-          </div>
 
           <div class="actions">
             <a class="cta" href="https://www.roblox.com/communities/13663879/IDC-Games#!/">Join Group →</a>
@@ -467,11 +463,10 @@
             </div>
             <div style="flex:1">
               <h2 class="title">Cosplay</h2>
-              <div class="sub">Fashion • Edits • Trends</div>
             </div>
-            <div style="min-width:80px;text-align:right">
-              <div class="muted">Priority: 3</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px">Am i pretty?</div>
+            <div class="hobby-meta">
+              <span>status</span>
+              <b>personal WIP</b>
             </div>
           </div>
 
@@ -498,12 +493,6 @@
             <span class="read-more-text"></span>
           </p>
 
-          <div class="tags">
-            <a class="tag" href="#">Anime</a>
-            <a class="tag" href="#">E-Girl</a>
-            <a class="tag" href="#">Gooner bait</a>
-          </div>
-
           <div class="actions">
             I might post cosplays on discord ;) 
             <div style="white-space:nowrap">
@@ -528,11 +517,10 @@
             </div>
             <div style="flex:1">
               <h2 class="title">Guns</h2>
-              <div class="sub">Weapons • Tactics • EyeCandy</div>
             </div>
-            <div style="min-width:80px;text-align:right">
-              <div class="muted">Priority: 1</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px">Old hobby of mine</div>
+            <div class="hobby-meta">
+              <span>archive</span>
+              <b>tactics / range</b>
             </div>
           </div>
 
@@ -558,11 +546,6 @@
             <span class="read-more-text"></span>
           </p>
 
-          <div class="tags">
-            <a class="tag" href="#">Armed</a>
-            <a class="tag" href="#">E-Girl</a>
-          </div>
-
           <div class="actions">
             For legal reasons i dont *own* these guns
           </div>
@@ -577,29 +560,6 @@
       </div>-->
       <br>
 
-      <div class="card vault-card" style="backdrop-filter: blur(10px);">
-        <div class="game-card-bg" id="terminalbg" style="background-image: none;"></div>
-          <div class="head">
-            <div class="icon" aria-hidden>
-              <img src="Images/Terminal.png" id="terminalicon" alt="icon">
-            </div>
-            <div style="flex:1">
-              <h2 class="title" id="terminaltitle">Terminal</h2>
-              <div class="sub" id="terminalclass">Special • Education</div>
-            </div>
-            <div style="min-width:80px;text-align:right">
-              <div class="muted" id="terminalpriority">Priority: ???</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px" id="terminaltag">What is this?</div>
-            </div>
-          </div>
-
-        <p class="desc" id="terminaldesc" style="display:none;">
-        </p>
-        <input type="password" id="vaultInput" placeholder="Awaiting Input...">
-        <button onclick="openVault()" id="vaultButton">Run</button>
-        <p id="vaultError" style="color:red; display:none;"></p>
-    </div>
-    <br>
       <footer class="note">Rest is under construction</footer>
       <footer class="note">© <span id="year"></span> AnRat · Built with ♥ · IDC Studios</footer>
       <br>

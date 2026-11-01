@@ -1,0 +1,29 @@
+name: Sync File Explorer index
+
+on:
+  push:
+    paths:
+      - 'FileExplorer/**'
+      - 'scripts/build-file-explorer-index.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/build-file-explorer-index.mjs
+      - run: |
+          git diff --quiet -- FileExplorer/file-index.json || (
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add FileExplorer/file-index.json
+            git commit -m "chore: sync File Explorer index"
+            git push
+          )
