@@ -1,8 +1,18 @@
 // small niceties
+  const conciseWindowNames = {
+    'About Me': 'about',
+    'Game Developer': 'dev',
+    'Full Stack Developer & Graphics Designer': 'fullstack',
+    'Terminal Session': 'terminal',
+    'Music Player': 'music',
+    'Project Sekai': 'pjsk'
+  };
+
   function addWindowChrome(windowElement, title) {
+    const shortName = conciseWindowNames[title] || title.toLowerCase().replace(/\s+/g, '-');
     const chrome = document.createElement('div');
     chrome.className = 'window-chrome';
-    chrome.innerHTML = `<span>${title.toLowerCase().replace(/\s+/g, '-')}.window</span><span class="window-controls"><i aria-hidden="true">−</i><i aria-hidden="true">□</i><button class="window-close" type="button" aria-label="Close ${title}">×</button></span>`;
+    chrome.innerHTML = `<span>${shortName}.window</span><span class="window-controls"><i aria-hidden="true">−</i><i aria-hidden="true">□</i><button class="window-close" type="button" aria-label="Close ${title}">×</button></span>`;
     windowElement.prepend(chrome);
   }
 
@@ -45,19 +55,26 @@
   headerSpacer.setAttribute('aria-hidden', 'true');
   siteHeader.before(headerSpacer);
   let headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
+  const mobileLayoutQuery = window.matchMedia('(max-width: 620px)');
 
   function syncFloatingHeader() {
     const floating = siteHeader.classList.contains('is-floating');
-    if (!floating) headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
-    const shouldFloat = window.scrollY > headerStart - 12;
-
-    if (shouldFloat && !floating) {
-      headerSpacer.style.height = `${siteHeader.offsetHeight + 22}px`;
-      siteHeader.classList.add('is-floating');
-    } else if (!shouldFloat && floating) {
-      siteHeader.classList.remove('is-floating');
+    if (mobileLayoutQuery.matches) {
+      if (floating) siteHeader.classList.remove('is-floating');
       headerSpacer.style.height = '0';
       headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
+    } else {
+      if (!floating) headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
+      const shouldFloat = window.scrollY > headerStart - 12;
+
+      if (shouldFloat && !floating) {
+        headerSpacer.style.height = `${siteHeader.offsetHeight + 22}px`;
+        siteHeader.classList.add('is-floating');
+      } else if (!shouldFloat && floating) {
+        siteHeader.classList.remove('is-floating');
+        headerSpacer.style.height = '0';
+        headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
+      }
     }
 
     const wrapRect = siteHeader.parentElement.getBoundingClientRect();
@@ -71,6 +88,7 @@
 
   window.addEventListener('scroll', syncFloatingHeader, { passive: true });
   window.addEventListener('resize', syncFloatingHeader);
+  mobileLayoutQuery.addEventListener('change', syncFloatingHeader);
   syncFloatingHeader();
 
   const fileExplorer = document.getElementById('fileExplorer');
@@ -83,7 +101,30 @@
   const explorerPreviewTitle = document.getElementById('explorerPreviewTitle');
   const explorerPreviewFrame = document.getElementById('explorerPreviewFrame');
   const explorerPreviewClose = document.getElementById('explorerPreviewClose');
+  const explorerPreviewUrlForm = document.getElementById('explorerPreviewUrlForm');
+  const explorerPreviewUrl = document.getElementById('explorerPreviewUrl');
+  const explorerPreviewMinimize = document.getElementById('explorerPreviewMinimize');
+  const explorerPreviewRefresh = document.getElementById('explorerPreviewRefresh');
+  const explorerPreviewFullscreen = document.getElementById('explorerPreviewFullscreen');
+  const explorerPreviewFavicon = document.getElementById('explorerPreviewFavicon');
+  const explorerPreviewFaviconButton = document.getElementById('explorerPreviewFaviconButton');
+  const explorerTabDock = document.getElementById('explorerTabDock');
+  const explorerTabStorageKey = 'anrat-explorer-tabs';
+  let explorerTabs = [];
+  let activeExplorerTabId = null;
   let explorerTreeId = 0;
+  let explorerScrimHideTimer = null;
+
+  try {
+    const savedTabs = JSON.parse(localStorage.getItem(explorerTabStorageKey) || '[]');
+    if (Array.isArray(savedTabs)) {
+      explorerTabs = savedTabs
+        .filter(tab => tab && typeof tab.id === 'string' && typeof tab.source === 'string' && typeof tab.title === 'string' && typeof tab.favicon === 'string')
+        .map(tab => ({ ...tab, urlEditable: tab.urlEditable !== false }));
+    }
+  } catch {
+    explorerTabs = [];
+  }
 
   function positionFileExplorer() {
     const headerRect = siteHeader.getBoundingClientRect();
@@ -102,7 +143,7 @@
   }
 
   function positionExplorerPreview() {
-    if (explorerPreview.hidden) return;
+    if (explorerPreview.hidden || explorerPreview.classList.contains('is-minimized') || explorerPreview.classList.contains('is-url-fullscreen') || document.fullscreenElement === explorerPreview) return;
     const headerRect = siteHeader.getBoundingClientRect();
     const previewTop = Math.max(14, headerRect.bottom + 14);
     const terminalTop = window.innerHeight - 96 - terminalWindow.offsetHeight;
@@ -112,25 +153,175 @@
   }
 
   function closeExplorerPreview() {
+    if (document.fullscreenElement === explorerPreview) document.exitFullscreen();
     explorerPreviewFrame.src = 'about:blank';
+    explorerPreview.classList.remove('is-minimized', 'is-url-fullscreen');
     explorerPreview.hidden = true;
+    explorerTabs = explorerTabs.filter(tab => tab.id !== activeExplorerTabId);
+    activeExplorerTabId = null;
+    saveExplorerTabs();
+    renderExplorerTabDock();
+    syncPreviewAddress();
   }
 
-  function openExplorerPreview(source, title) {
+  function getPreviewFavicon(source) {
+    try {
+      const previewUrl = new URL(source, window.location.href);
+      return previewUrl.origin === window.location.origin
+        ? new URL('favicon.ico', window.location.href).href
+        : `https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(previewUrl.origin)}`;
+    } catch {
+      return 'favicon.ico';
+    }
+  }
+
+  function saveExplorerTabs() {
+    localStorage.setItem(explorerTabStorageKey, JSON.stringify(explorerTabs));
+  }
+
+  function renderExplorerTabDock() {
+    explorerTabDock.replaceChildren();
+    explorerTabs.filter(tab => tab.id !== activeExplorerTabId).forEach(tab => {
+      const tabButton = document.createElement('button');
+      tabButton.className = 'explorer-tab-icon';
+      tabButton.type = 'button';
+      tabButton.title = tab.title;
+      tabButton.style.cssText = 'position:relative;display:grid;width:48px;height:48px;place-items:center;padding:0;overflow:visible;';
+      tabButton.innerHTML = `<img width="23" height="23" alt=""><span class="explorer-tab-tooltip"></span><span class="explorer-tab-close" aria-hidden="true">×</span>`;
+      const tabFavicon = tabButton.querySelector('img');
+      tabFavicon.style.cssText = 'display:block;width:23px;height:23px;min-width:23px;min-height:23px;max-width:23px;max-height:23px;object-fit:contain;object-position:center;';
+      tabFavicon.addEventListener('error', () => { tabFavicon.src = 'favicon.ico'; }, { once: true });
+      tabFavicon.src = tab.favicon;
+      tabButton.querySelector('.explorer-tab-tooltip').textContent = tab.title;
+      tabButton.addEventListener('click', event => {
+        if (event.target.closest('.explorer-tab-close')) {
+          event.stopPropagation();
+          explorerTabs = explorerTabs.filter(savedTab => savedTab.id !== tab.id);
+          saveExplorerTabs();
+          renderExplorerTabDock();
+          return;
+        }
+        setFileExplorerOpen(true);
+        openExplorerPreview(tab.source, tab.title, tab.id);
+      });
+      explorerTabDock.append(tabButton);
+    });
+  }
+
+  function setPreviewTitle(title) {
     explorerPreviewTitle.textContent = title;
+    explorerPreview.dataset.previewTitle = title;
+    explorerPreview.title = title;
+    const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
+    if (activeTab) {
+      activeTab.title = title;
+      saveExplorerTabs();
+      renderExplorerTabDock();
+    }
+  }
+
+  function setPreviewFavicon(source) {
+    const favicon = getPreviewFavicon(source);
+    explorerPreviewFavicon.src = favicon;
+    const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
+    if (activeTab) {
+      activeTab.favicon = favicon;
+      saveExplorerTabs();
+      renderExplorerTabDock();
+    }
+  }
+
+  function setPreviewMinimized(isMinimized) {
+    if (isMinimized && document.fullscreenElement === explorerPreview) document.exitFullscreen();
+    explorerPreview.classList.toggle('is-minimized', isMinimized);
+    explorerPreviewMinimize.setAttribute('aria-label', isMinimized ? 'Restore site preview' : 'Minimize site preview');
+    explorerPreviewMinimize.textContent = isMinimized ? '□' : '−';
+    if (!isMinimized) requestAnimationFrame(positionExplorerPreview);
+    renderExplorerTabDock();
+    syncPreviewAddress();
+  }
+
+  function setPreviewUrlEditing(isEnabled) {
+    explorerPreview.classList.toggle('url-edit-disabled', !isEnabled);
+    explorerPreviewUrlForm.hidden = !isEnabled;
+  }
+
+  function normalizePreviewUrl(value) {
+    const rawUrl = value.trim();
+    if (!rawUrl) return null;
+    try {
+      const isLocalPath = /^(?:\.?\.?\/|\/|FileExplorer\/)/.test(rawUrl);
+      const candidate = /^[a-z][a-z\d+.-]*:/i.test(rawUrl)
+        ? rawUrl
+        : isLocalPath ? new URL(rawUrl, window.location.href).href : `https://${rawUrl}`;
+      const url = new URL(candidate, window.location.href);
+      return /^(https?:)$/i.test(url.protocol) ? url.href : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function isPreviewFullscreenLayout() {
+    return document.fullscreenElement === explorerPreview || explorerPreview.classList.contains('is-url-fullscreen');
+  }
+
+  function syncPreviewAddress() {
+    const pageUrl = new URL(window.location.href);
+    const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
+    if (activeTab && !explorerPreview.hidden && !explorerPreview.classList.contains('is-minimized')) {
+      pageUrl.searchParams.set('site', activeTab.source);
+      pageUrl.searchParams.set('fullscreen', String(isPreviewFullscreenLayout()));
+    } else {
+      pageUrl.searchParams.delete('site');
+      pageUrl.searchParams.delete('fullscreen');
+    }
+    history.replaceState(null, '', pageUrl);
+  }
+
+  function openExplorerPreview(source, title, tabId = null, options = {}) {
+    let tab = tabId
+      ? explorerTabs.find(savedTab => savedTab.id === tabId)
+      : explorerTabs.find(savedTab => new URL(savedTab.source, window.location.href).href === new URL(source, window.location.href).href);
+    const urlEditable = options.urlEditable ?? tab?.urlEditable ?? true;
+    if (!tab) {
+      tab = { id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`, source, title, favicon: getPreviewFavicon(source), urlEditable };
+      explorerTabs.push(tab);
+    } else {
+      tab.source = source;
+      tab.title = title;
+      tab.urlEditable = urlEditable;
+    }
+    activeExplorerTabId = tab.id;
+    saveExplorerTabs();
+    setPreviewMinimized(false);
+    setPreviewTitle(title);
+    setPreviewUrlEditing(urlEditable);
+    explorerPreviewUrl.value = source;
+    setPreviewFavicon(source);
     explorerPreviewFrame.src = source;
     explorerPreview.hidden = false;
+    renderExplorerTabDock();
+    syncPreviewAddress();
     requestAnimationFrame(positionExplorerPreview);
   }
 
   function setFileExplorerOpen(isOpen) {
+    if (mobileLayoutQuery.matches) isOpen = false;
     if (isOpen) positionFileExplorer();
     dockTerminalForExplorer(isOpen);
     document.body.classList.toggle('explorer-open', isOpen);
+    document.documentElement.classList.toggle('explorer-open', isOpen);
     fileExplorer.classList.toggle('is-open', isOpen);
     fileExplorer.setAttribute('aria-hidden', String(!isOpen));
     fileExplorerToggle.setAttribute('aria-expanded', String(isOpen));
-    fileExplorerScrim.hidden = !isOpen;
+    clearTimeout(explorerScrimHideTimer);
+    if (isOpen) {
+      fileExplorerScrim.hidden = false;
+      requestAnimationFrame(() => fileExplorerScrim.classList.add('is-active'));
+    } else {
+      fileExplorerScrim.classList.remove('is-active');
+      explorerScrimHideTimer = setTimeout(() => { fileExplorerScrim.hidden = true; }, 260);
+    }
     if (isOpen) {
       requestAnimationFrame(() => {
         animateExplorerConsole();
@@ -138,14 +329,97 @@
       });
     } else {
       [terminalWindow, commandLine].forEach(element => element.classList.remove('console-dock-enter'));
-      closeExplorerPreview();
+      if (!explorerPreview.hidden) setPreviewMinimized(true);
     }
   }
 
   fileExplorerToggle.addEventListener('click', () => setFileExplorerOpen(!fileExplorer.classList.contains('is-open')));
   fileExplorerClose.addEventListener('click', () => setFileExplorerOpen(false));
   fileExplorerScrim.addEventListener('click', () => setFileExplorerOpen(false));
+  document.addEventListener('pointerdown', event => {
+    if (!fileExplorer.classList.contains('is-open')) return;
+    if (fileExplorer.contains(event.target) || explorerPreview.contains(event.target) || terminalWindow.contains(event.target) || commandLine.contains(event.target) || fileExplorerToggle.contains(event.target)) return;
+    setFileExplorerOpen(false);
+  });
   explorerPreviewClose.addEventListener('click', closeExplorerPreview);
+  explorerPreviewMinimize.addEventListener('click', () => setPreviewMinimized(!explorerPreview.classList.contains('is-minimized')));
+  explorerPreviewRefresh.addEventListener('click', () => {
+    if (explorerPreviewFrame.src && explorerPreviewFrame.src !== 'about:blank') explorerPreviewFrame.src = explorerPreviewFrame.src;
+  });
+  explorerPreviewFaviconButton.addEventListener('click', () => {
+    if (explorerPreview.classList.contains('is-minimized')) {
+      setFileExplorerOpen(true);
+      setPreviewMinimized(false);
+    }
+  });
+  explorerPreviewFullscreen.addEventListener('click', async () => {
+    if (document.fullscreenElement === explorerPreview) await document.exitFullscreen();
+    else if (explorerPreview.classList.contains('is-url-fullscreen')) {
+      explorerPreview.classList.remove('is-url-fullscreen');
+      syncPreviewAddress();
+      positionExplorerPreview();
+    } else await explorerPreview.requestFullscreen();
+  });
+  document.addEventListener('fullscreenchange', () => {
+    const fullscreen = document.fullscreenElement === explorerPreview;
+    explorerPreview.classList.toggle('is-url-fullscreen', fullscreen);
+    explorerPreviewFullscreen.textContent = fullscreen ? '⛶' : '□';
+    explorerPreviewFullscreen.setAttribute('aria-label', fullscreen ? 'Exit fullscreen preview' : 'Show site preview fullscreen');
+    if (!fullscreen) positionExplorerPreview();
+    syncPreviewAddress();
+  });
+  explorerPreviewUrlForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const source = normalizePreviewUrl(explorerPreviewUrl.value);
+    if (!source) {
+      fileExplorerStatus.textContent = 'Enter a valid http(s) URL or local FileExplorer path.';
+      return;
+    }
+    let title = source;
+    try { title = new URL(source).hostname || source; } catch { /* source is already validated */ }
+    openExplorerPreview(source, title);
+  });
+  explorerPreviewFrame.addEventListener('load', () => {
+    try {
+      const previewDocument = explorerPreviewFrame.contentDocument;
+      if (!previewDocument || explorerPreviewFrame.src === 'about:blank') return;
+      const loadedTitle = previewDocument.title.trim();
+      if (loadedTitle) setPreviewTitle(loadedTitle);
+      const icon = previewDocument.querySelector('link[rel~="icon"]')?.getAttribute('href');
+      if (icon) {
+        const favicon = new URL(icon, explorerPreviewFrame.contentWindow.location.href).href;
+        explorerPreviewFavicon.src = favicon;
+        const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
+        if (activeTab) {
+          activeTab.favicon = favicon;
+          saveExplorerTabs();
+          renderExplorerTabDock();
+        }
+      }
+    } catch {
+      // Cross-origin previews keep the URL-derived title and favicon.
+    }
+  });
+  renderExplorerTabDock();
+  const sharedPreviewUrl = new URL(window.location.href);
+  const sharedPreviewSource = normalizePreviewUrl(sharedPreviewUrl.searchParams.get('site') || '');
+  if (sharedPreviewSource) {
+    setFileExplorerOpen(true);
+    const savedTab = explorerTabs.find(tab => {
+      try { return new URL(tab.source, window.location.href).href === sharedPreviewSource; }
+      catch { return false; }
+    });
+    let sharedPreviewTitle = sharedPreviewSource;
+    try { sharedPreviewTitle = savedTab?.title || new URL(sharedPreviewSource).hostname || sharedPreviewSource; } catch { /* source is normalized */ }
+    openExplorerPreview(sharedPreviewSource, sharedPreviewTitle, savedTab?.id || null);
+    if (sharedPreviewUrl.searchParams.get('fullscreen') === 'true') {
+      explorerPreview.classList.add('is-url-fullscreen');
+      syncPreviewAddress();
+    }
+  }
+  mobileLayoutQuery.addEventListener('change', event => {
+    if (event.matches) setFileExplorerOpen(false);
+  });
   window.addEventListener('scroll', () => {
     if (fileExplorer.classList.contains('is-open')) {
       positionFileExplorer();
@@ -160,7 +434,7 @@
   });
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
-    if (!explorerPreview.hidden) closeExplorerPreview();
+    if (!explorerPreview.hidden) setPreviewMinimized(true);
     else if (fileExplorer.classList.contains('is-open')) setFileExplorerOpen(false);
   });
 
@@ -169,6 +443,7 @@
     const icons = {
       html: ['tree-html', 'fa-file-code'],
       href: ['tree-href', 'fa-link'],
+      link: ['tree-link', 'fa-link'],
       iframe: ['tree-iframe', 'fa-window-maximize'],
       js: ['tree-js', 'fa-file-code'],
       css: ['tree-css', 'fa-file-code'],
@@ -207,10 +482,10 @@
       }
 
       const [typeClass, iconClass] = getExplorerFileIcon(entry.name);
-      const isHref = entry.name.toLowerCase().endsWith('.href');
-      const file = document.createElement(isHref ? 'button' : 'a');
+      const isShortcut = /\.(?:href|link)$/i.test(entry.name);
+      const file = document.createElement(isShortcut ? 'button' : 'a');
       file.className = `tree-file ${typeClass}`;
-      if (isHref) {
+      if (isShortcut) {
         file.type = 'button';
         file.dataset.hrefFile = entry.path;
       } else {
@@ -268,7 +543,8 @@
         const linkMatch = storedText.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
         if (!response.ok || !linkMatch) throw new Error('No valid iframe URL');
         const iframeSource = /^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`;
-        openExplorerPreview(iframeSource, fileName);
+        const urlEditable = storedText.split(/\r?\n/)[1]?.trim() === 'URLEditingEnabled=True';
+        openExplorerPreview(iframeSource, fileName, null, { urlEditable });
       } catch {
         fileExplorerStatus.textContent = `${fileName} does not contain a valid preview URL yet.`;
       }
@@ -277,6 +553,9 @@
 
     const hrefFile = event.target.closest('[data-href-file]');
     if (!hrefFile) return;
+    const opensInNewTab = hrefFile.classList.contains('tree-link');
+    const newTab = opensInNewTab ? window.open('about:blank', '_blank') : null;
+    if (newTab) newTab.opener = null;
     fileExplorerStatus.textContent = `Opening ${hrefFile.querySelector('span').textContent}…`;
     try {
       const response = await fetch(hrefFile.dataset.hrefFile);
@@ -284,8 +563,11 @@
       const linkMatch = storedText.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
       if (!response.ok || !linkMatch) throw new Error('No valid URL');
       const storedLink = /^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`;
-      window.location.assign(storedLink);
+      if (opensInNewTab && newTab) newTab.location.replace(storedLink);
+      else if (opensInNewTab) window.open(storedLink, '_blank', 'noopener,noreferrer');
+      else window.location.assign(storedLink);
     } catch {
+      newTab?.close();
       fileExplorerStatus.textContent = `${hrefFile.querySelector('span').textContent} does not contain a valid URL yet.`;
     }
   });
@@ -362,6 +644,7 @@
   }
 
   function enableMizukiScrollSpring(mizuki) {
+    if (mobileLayoutQuery.matches) return;
     let frame = null;
     let restTimer = null;
     let lastScrollPosition = window.scrollY;
@@ -598,6 +881,10 @@
   }
 
   function clearTerminalSession() {
+    if (!terminalHistory.querySelector('.terminal-entry')) {
+      terminalWindow.hidden = true;
+      return;
+    }
     terminalHistory.replaceChildren();
     const emptyState = document.createElement('p');
     emptyState.className = 'terminal-empty';
@@ -701,34 +988,44 @@
     });
   }
 
-  async function openMusicPlayer() {
+  async function openMusicPlayer(musicLink = '') {
     if (!('documentPictureInPicture' in window)) {
       return { ok: false, message: 'Document Picture-in-Picture is not supported by this browser.' };
     }
 
+    const playerSource = new URL('FileExplorer/Misc/Fun/MusicPlayer.html', window.location.href);
+    playerSource.searchParams.set('embedded', '1');
+    playerSource.searchParams.set('autoplay', '1');
+    if (musicLink) playerSource.searchParams.set('link', musicLink);
+    const successMessage = musicLink
+      ? 'Opened the supplied playlist in Document PiP.'
+      : 'Opened Shuffle Station in Document PiP.';
+
     if (musicPiPWindow && !musicPiPWindow.closed) {
+      const existingPlayer = musicPiPWindow.document.querySelector('iframe');
+      if (existingPlayer) existingPlayer.src = playerSource.href;
       musicPiPWindow.focus();
-      return { ok: true, message: 'Music player is already open in Document PiP.' };
+      return { ok: true, message: musicLink ? 'Updated the Document PiP playlist.' : 'Reset Document PiP to the default playlist.' };
     }
 
     try {
       musicPiPWindow = await window.documentPictureInPicture.requestWindow(musicPiPSize);
       musicPiPWindow.document.title = 'Shuffle Station';
-      musicPiPWindow.document.documentElement.style.cssText = `width:${musicPiPSize.width}px;height:${musicPiPSize.height}px;overflow:hidden;`;
-      musicPiPWindow.document.body.style.cssText = `margin:0;width:${musicPiPSize.width}px;height:${musicPiPSize.height}px;background:#080b10;overflow:hidden;`;
+      musicPiPWindow.document.documentElement.style.cssText = 'width:100%;height:100%;overflow:hidden;';
+      musicPiPWindow.document.body.style.cssText = 'margin:0;width:100vw;height:100dvh;background:#080b10;overflow:hidden;';
 
       const player = musicPiPWindow.document.createElement('iframe');
-      player.src = 'FileExplorer/Misc/Fun/MusicPlayer.html?embedded=1&autoplay=1';
+      player.src = playerSource.href;
       player.title = 'Shuffle Station music player';
       player.allow = 'autoplay; fullscreen';
-      player.style.cssText = `display:block;width:${musicPiPSize.width}px;height:${musicPiPSize.height}px;min-width:${musicPiPSize.width}px;min-height:${musicPiPSize.height}px;border:0;background:#080b10;`;
+      player.style.cssText = 'display:block;width:100vw;height:100dvh;border:0;background:#080b10;';
       musicPiPWindow.document.body.append(player);
 
       musicPiPWindow.addEventListener('pagehide', () => {
         musicPiPWindow = null;
       }, { once: true });
 
-      return { ok: true, message: 'Opened Shuffle Station in Document PiP.' };
+      return { ok: true, message: successMessage };
     } catch {
       musicPiPWindow = null;
       return { ok: false, message: 'Could not open the music player in Document PiP.' };
@@ -742,14 +1039,15 @@
 
     const addCommand = command.match(/^add\s+([a-z0-9_-]+)\s*::\s*(.+)$/i);
     const removeCommand = command.match(/^(?:remove|delete)\s+([a-z0-9_-]+)$/i);
+    const musicCommand = command.match(/^music(?:\s+(.+))?$/i);
     const normalizedCommand = command.toLowerCase();
 
     let message;
     let state = '';
     let record = null;
 
-    if (normalizedCommand === 'music') {
-      const result = await openMusicPlayer();
+    if (musicCommand) {
+      const result = await openMusicPlayer(musicCommand[1]?.trim() || '');
       message = result.message;
       state = result.ok ? 'success' : 'error';
     } else if (addCommand) {
@@ -770,7 +1068,7 @@
         state = 'error';
       }
     } else if (normalizedCommand === 'help') {
-      message = 'music   |   add name :: response   |   name   |   list   |   remove name   |   vault phrase';
+      message = 'music [playlist URL]   |   add name :: response   |   name   |   list   |   remove name   |   vault phrase';
     } else if (normalizedCommand === 'list') {
       const names = Object.keys(customCommands);
       message = names.length ? `Custom commands: ${names.join(', ')}` : 'No custom commands yet.';

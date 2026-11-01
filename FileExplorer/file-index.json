@@ -49,10 +49,20 @@
             "type": "file",
             "name": "secret.html",
             "path": "FileExplorer/Misc/Random/secret.html"
+          },
+          {
+            "type": "file",
+            "name": "sliders.html",
+            "path": "FileExplorer/Misc/Random/sliders.html"
           }
         ]
       }
     ]
+  },
+  {
+    "type": "directory",
+    "name": "Tools",
+    "children": []
   },
   {
     "type": "file",

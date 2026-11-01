@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 4 56 56" shape-rendering="crispEdges">
+  <!-- 16 × 16 pixel-art record, drawn at 4 × scale. -->
+  <path fill="#161720" d="M24 8h16v4h8v8h4v8h4v16h-4v8h-8v4H24v-4h-8v-8h-4V24h4v-8h8z"/>
+  <path fill="#2d2e3a" d="M24 12h16v4h8v8h4v16h-4v8h-8v4H24v-4h-8v-8h-4V24h4v-8h8z"/>
+  <path fill="#09090e" d="M24 16h16v4h4v4h4v16h-4v4h-4v4H24v-4h-4v-4h-4V24h4v-4h4z"/>
+  <path fill="#565867" d="M24 16h16v4H24zm-8 8h8v4h-8zm24 0h8v4h-8zM20 40h8v4h-8zm16 0h8v4h-8z"/>
+  <path fill="#ce62f1" d="M28 24h8v4h4v8h-4v4h-8v-4h-4v-8h4z"/>
+  <path fill="#8b29b5" d="M28 28h8v8h-8z"/>
+  <path fill="#f1c9ff" d="M28 24h8v4h-8zm-4 4h4v8h-4zm12 0h4v8h-4zm-8 8h8v4h-8z"/>
+  <path fill="#1c0926" d="M28 28h8v8h-8z"/>
+  <path fill="#fff3ff" d="M28 28h4v4h-4z"/>
+  <path fill="#fff" fill-opacity=".55" d="M20 16h8v4h-8z"/>
+</svg>

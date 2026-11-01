@@ -33,11 +33,21 @@
   <div class="explorer-scrim" id="fileExplorerScrim" hidden></div>
   <section class="explorer-preview-window" id="explorerPreview" aria-label="Explorer file preview" hidden>
     <div class="explorer-preview-titlebar">
-      <span id="explorerPreviewTitle">File Preview</span>
-      <button class="explorer-preview-close" id="explorerPreviewClose" type="button" aria-label="Close file preview">×</button>
+      <button class="explorer-preview-favicon" id="explorerPreviewFaviconButton" type="button" aria-label="Restore site preview"><img id="explorerPreviewFavicon" src="favicon.ico" width="16" height="16" alt=""></button>
+      <span class="explorer-preview-title" id="explorerPreviewTitle">File Preview</span>
+      <form class="explorer-preview-url-form" id="explorerPreviewUrlForm">
+        <input id="explorerPreviewUrl" type="text" inputmode="url" autocomplete="url" spellcheck="false" aria-label="Preview URL">
+      </form>
+      <div class="explorer-preview-controls">
+        <button class="explorer-preview-refresh" id="explorerPreviewRefresh" type="button" aria-label="Refresh site preview">↻</button>
+        <button class="explorer-preview-minimize" id="explorerPreviewMinimize" type="button" aria-label="Minimize site preview">−</button>
+        <button class="explorer-preview-fullscreen" id="explorerPreviewFullscreen" type="button" aria-label="Show site preview fullscreen">□</button>
+        <button class="explorer-preview-close" id="explorerPreviewClose" type="button" aria-label="Close file preview">×</button>
+      </div>
     </div>
     <iframe id="explorerPreviewFrame" title="Explorer file preview" allow="autoplay; fullscreen"></iframe>
   </section>
+  <div class="explorer-tab-dock" id="explorerTabDock" aria-label="Open site tabs"></div>
   <div class="wrap">
     <header>
       <div class="brand">

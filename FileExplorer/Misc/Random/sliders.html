@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08090d">
+  <title>Slider Crimes</title>
+  <style>
+    :root { --ink:#f5f7ff; --muted:#a5aabe; --paper:#08090d; --card:#12141d; --line:#2a2f3e; --hot:#b8ff4a; --pink:#ff4fd8; --blue:#70d7ff; --screen-brightness:1; }
+    * { box-sizing:border-box; }
+    html { scrollbar-color:var(--hot) #0c0e14; scrollbar-width:thin; }
+    ::-webkit-scrollbar { width:12px; height:12px; }
+    ::-webkit-scrollbar-track { background:#0c0e14; border-left:1px solid #252a38; }
+    ::-webkit-scrollbar-thumb { background:linear-gradient(#d6ff86,var(--hot)); border:3px solid #0c0e14; border-radius:999px; }
+    ::-webkit-scrollbar-thumb:hover { background:var(--pink); }
+    body { margin:0; min-height:100vh; color:var(--ink); font:16px/1.45 Inter, ui-sans-serif, system-ui, sans-serif; background:radial-gradient(circle at 50% -10%,#262445 0,transparent 35rem),var(--paper); user-select:none; -webkit-user-select:none; filter:brightness(var(--screen-brightness)); transition:filter .12s linear; }
+    main { width:min(1100px,calc(100% - 32px)); margin:auto; padding:48px 0 72px; }
+    header { margin-bottom:36px; }
+    .eyebrow { margin:0 0 8px; color:var(--hot); font:700 .75rem/1.2 ui-monospace,monospace; letter-spacing:.14em; text-transform:uppercase; }
+    h1 { margin:0; max-width:650px; font-size:clamp(2.1rem,5.8vw,4.2rem); line-height:.95; letter-spacing:-.065em; }
+    header > p { color:var(--muted); max-width:610px; margin:20px 0 0; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .card { position:relative; overflow:hidden; min-height:360px; padding:25px; background:linear-gradient(145deg,rgba(255,255,255,.06),transparent 40%),var(--card); border:1px solid var(--line); border-radius:22px; box-shadow:0 20px 60px rgba(0,0,0,.24); }
+    .card h2 { margin:0; letter-spacing:-.04em; font-size:1.55rem; }
+    .card .desc { color:var(--muted); max-width:38ch; margin:7px 0 22px; }
+    .tag { position:absolute; top:21px; right:21px; color:#11150b; background:var(--hot); border-radius:99px; padding:4px 9px; font:bold .64rem ui-monospace,monospace; letter-spacing:.08em; }
+    .rail { position:relative; height:24px; border:1px solid #384055; border-radius:99px; background:#06070a; box-shadow:inset 0 2px 6px #000; }
+    .rail::before { content:""; position:absolute; inset:7px 12px; border-radius:99px; background:repeating-linear-gradient(90deg,#2e3546 0 2px,transparent 2px 12px); }
+    .orb { position:absolute; z-index:1; top:50%; width:42px; height:42px; border:3px solid #d5ff8f; border-radius:50%; transform:translate(-50%,-50%); background:radial-gradient(circle at 32% 27%,#fff 0 6%,var(--hot) 7% 37%,#577714 78%); box-shadow:0 0 18px rgba(184,255,74,.42); transition:left .09s linear; }
+    .reading { display:flex; align-items:baseline; gap:8px; margin-top:25px; font:700 clamp(2.6rem,7vw,4rem)/1 ui-monospace,monospace; letter-spacing:-.08em; }
+    .reading small { color:var(--muted); font:700 .72rem/1 ui-monospace,monospace; letter-spacing:.05em; }
+    .tilt-zone { position:relative; margin-top:40px; padding:33px 18px; border:1px dashed #4a5368; border-radius:15px; background:linear-gradient(110deg,#171b2a,#0c0e14); transform:rotate(var(--tilt,0deg)); transition:transform .12s ease-out; touch-action:none; }
+    .tilt-hint { position:absolute; inset:8px 12px auto; color:#747b91; font-size:.72rem; text-align:center; }
+    button { cursor:pointer; color:var(--ink); font:700 .78rem ui-monospace,monospace; letter-spacing:.04em; border:1px solid #4a5368; border-radius:9px; background:#1c2130; padding:10px 12px; }
+    button:hover { border-color:var(--hot); color:var(--hot); }
+    button:focus-visible, input:focus-visible { outline:3px solid var(--pink); outline-offset:3px; }
+    .meter { display:flex; align-items:end; gap:4px; height:118px; padding:12px 0; border-bottom:1px solid var(--line); }
+    .meter i { width:100%; min-height:4px; border-radius:2px 2px 0 0; background:#303647; transition:height .06s ease,background .06s; }
+    .meter i.live { background:var(--pink); box-shadow:0 0 9px rgba(255,79,216,.65); }
+    .mic-bottom { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:20px; }
+    .db { font:800 2rem/1 ui-monospace,monospace; letter-spacing:-.1em; }
+    .small { color:var(--muted); font-size:.78rem; }
+    .stretch { margin:38px auto 30px; height:87px; max-width:300px; position:relative; }
+    .catapult { position:absolute; bottom:0; left:0; width:58px; height:66px; border:7px solid var(--blue); border-bottom:0; border-radius:50% 50% 0 0; }
+    .elastic { position:absolute; left:calc(31px + var(--pull,0px)); bottom:26px; width:var(--elastic,0px); height:3px; transform-origin:100% 50%; transform:rotate(var(--angle,0deg)); background:var(--blue); box-shadow:0 0 10px var(--blue); }
+    .ammo { position:absolute; bottom:18px; left:calc(31px + var(--pull,0px)); width:23px; height:23px; border-radius:50%; transform:translate(-50%,50%); background:var(--pink); box-shadow:0 0 14px var(--pink); cursor:grab; touch-action:none; }
+    .landing-line { position:absolute; right:8px; bottom:0; left:8px; height:5px; border-radius:99px; background:repeating-linear-gradient(90deg,#59647c 0 2px,transparent 2px 16px),#273044; }
+    @keyframes launch { 0% { transform:translate(-50%,50%) translateX(var(--launch-start)) rotate(0); animation-timing-function:cubic-bezier(.16,.78,.32,1); } 54% { transform:translate(-50%,50%) translateX(var(--launch-apex)) translateY(var(--launch-rise)) rotate(230deg); animation-timing-function:cubic-bezier(.3,0,.68,.3); } 100% { transform:translate(-50%,50%) translateX(var(--launch-end)) translateY(var(--launch-drop)) rotate(420deg); } }
+    .ammo.launched { pointer-events:none; will-change:transform; animation:launch .82s linear forwards; }
+    .range-row { display:flex; gap:12px; align-items:center; }
+    input[type=range] { width:100%; accent-color:var(--hot); }
+    .launch-value { color:var(--blue); font:800 1.7rem/1 ui-monospace,monospace; }
+    .phone { grid-column:span 2; min-height:275px; }
+    .phone-display { margin:28px 0 24px; min-height:1em; color:var(--hot); font:700 clamp(2rem,6.5vw,5.6rem)/.9 ui-monospace,monospace; letter-spacing:-.09em; white-space:nowrap; }
+    .phone-meta { display:flex; justify-content:space-between; gap:16px; color:var(--muted); font-size:.78rem; }
+    .phone input { margin-top:15px; }
+    .toast { position:fixed; z-index:2; left:50%; bottom:22px; opacity:0; transform:translate(-50%,18px); padding:10px 14px; border:1px solid #4a5368; border-radius:99px; background:#181c29; color:var(--ink); font-size:.78rem; transition:.2s; pointer-events:none; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (max-width:720px) { main{padding-top:32px}.grid{grid-template-columns:1fr}.phone{grid-column:auto}.card{min-height:330px;padding:21px}.phone-display{font-size:clamp(1.6rem,10vw,3.5rem)} }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;} }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">a deliberately terrible control panel</p>
+      <h1>Inconvenient controls.</h1>
+      <p>Set the things. In the least sensible way possible.</p>
+    </header>
+    <section class="grid" aria-label="Extremely inconvenient sliders">
+      <article class="card">
+        <span class="tag">GYROSCOPE</span>
+        <h2>Tilt to brighten</h2>
+        <p class="desc">Set brightness. Tilt the track and keep the ball balanced.</p>
+        <div class="reading"><output id="lightOutput">50</output><small>% LIGHT</small></div>
+        <div class="tilt-zone" id="tiltZone" role="slider" aria-label="Tilt brightness control" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72" tabindex="0">
+          <span class="tilt-hint">TILT THE TRACK · DON'T LET IT ESCAPE</span>
+          <div class="rail"><span class="orb" id="lightOrb" style="left:50%"></span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="tag">LOUDNESS</span>
+        <h2>Scream for volume</h2>
+        <p class="desc">Set the level by making a noise. Audio stays on this device.</p>
+        <div class="meter" id="meter" aria-label="Microphone level meter"></div>
+        <div class="mic-bottom"><div><div class="db"><output id="dbOutput">--</output><small> dB</small></div><div class="small" id="micStatus">Mic standing by.</div></div><button id="micButton" type="button">ENABLE MIC</button></div>
+      </article>
+
+      <article class="card">
+        <span class="tag">BALLISTICS</span>
+        <h2>Slingshot selector</h2>
+        <p class="desc">Pull back to choose a value. Release to launch it.</p>
+        <div class="stretch" id="stretch"><div class="catapult"></div><div class="elastic"></div><div class="landing-line" aria-hidden="true"></div><div class="ammo" id="ammo" role="slider" aria-label="Slingshot value" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"></div></div>
+        <div class="range-row"><input id="launchRange" type="range" min="0" max="100" value="0" aria-label="Slingshot value fallback"><output class="launch-value" id="launchOutput">0%</output></div>
+      </article>
+
+      <article class="card">
+        <span class="tag">WIRELESS*</span>
+        <h2>Volume by vibe</h2>
+        <p class="desc">Set volume with a slider. This one works normally.</p>
+        <div class="reading"><output id="normalOutput">50</output><small>% VOLUME</small></div>
+        <input id="normalRange" type="range" min="0" max="100" value="50" aria-label="Normal volume">
+        <p class="small">*It is not wireless. It is a CSS gradient.</p>
+      </article>
+
+      <article class="card phone">
+        <span class="tag">DO NOT CALL</span>
+        <h2>Phone number selector</h2>
+        <p class="desc">Select a phone number from 10,000 definitely real options.</p>
+        <div class="phone-display" id="phoneDisplay">+1 (555) 010-0000</div>
+        <input id="phoneRange" type="range" min="0" max="9999" value="0" step="1" aria-label="Choose a fake phone number">
+        <div class="phone-meta"><span id="contactName">Inbox Goblin</span><span>0000 / 9999 · definitely not a dial</span></div>
+      </article>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const toast = (message) => { const t=$('#toast'); t.textContent=message; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),2200); };
+
+    const tiltZone=$('#tiltZone'); let lightPosition=50, lightVelocity=0, boardTilt=0, dragging=false;
+    const renderLight = () => { const v=Math.max(0,Math.min(100,Math.round(lightPosition))); const brightness=v<=50 ? .1+v*.018 : 1+(v-50)*.02; $('#lightOutput').value=v; $('#lightOrb').style.left=v+'%'; tiltZone.setAttribute('aria-valuenow',v); document.documentElement.style.setProperty('--screen-brightness',brightness); tiltZone.style.setProperty('--tilt', boardTilt*.32+'deg'); };
+    const setTilt = value => { const clamped=Math.max(-30,Math.min(30,value)); boardTilt=Math.abs(clamped)<2.5 ? 0 : clamped; };
+    const pointTilt = e => { const r=tiltZone.getBoundingClientRect(); setTilt(((e.clientX-r.left)/r.width-.5)*60); };
+    tiltZone.addEventListener('pointerdown',e=>{dragging=true;tiltZone.setPointerCapture(e.pointerId);pointTilt(e)});
+    tiltZone.addEventListener('pointermove',e=>{if(dragging)pointTilt(e)});
+    tiltZone.addEventListener('pointerup',()=>dragging=false);
+    tiltZone.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowDown'].includes(e.key))setTilt(boardTilt-3);if(['ArrowRight','ArrowUp'].includes(e.key))setTilt(boardTilt+3)});
+    window.addEventListener('deviceorientation', e => { if (e.gamma !== null && !dragging) setTilt(e.gamma); });
+    const rollBall = () => { lightVelocity += boardTilt*.0024; lightVelocity *= .992; lightPosition += lightVelocity; if(lightPosition<=0 || lightPosition>=100){lightPosition=Math.max(0,Math.min(100,lightPosition));lightVelocity*=-.42;} renderLight(); requestAnimationFrame(rollBall); }; renderLight(); rollBall();
+
+    const meter=$('#meter'); for(let i=0;i<18;i++){const b=document.createElement('i');b.style.height=(8+i*5)+'%';meter.append(b)};
+    let audioCtx, analyser, micStream, animation;
+    $('#micButton').addEventListener('click', async () => {
+      const button=$('#micButton');
+      if(micStream){ micStream.getTracks().forEach(t=>t.stop()); cancelAnimationFrame(animation); micStream=null; button.textContent='ENABLE MIC'; $('#micStatus').textContent='Mic standing by.'; meter.querySelectorAll('i').forEach(b=>b.classList.remove('live')); return; }
+      try {
+        micStream=await navigator.mediaDevices.getUserMedia({audio:true}); audioCtx=new (window.AudioContext||window.webkitAudioContext)(); analyser=audioCtx.createAnalyser(); analyser.fftSize=512; audioCtx.createMediaStreamSource(micStream).connect(analyser); button.textContent='MUTE MIC'; $('#micStatus').textContent='Listening for ambition…'; const data=new Uint8Array(analyser.fftSize);
+        const draw=()=>{ analyser.getByteTimeDomainData(data); let sum=0; for(const n of data){const x=(n-128)/128;sum+=x*x} const rms=Math.sqrt(sum/data.length); const display=Math.round(Math.max(-60,Math.min(0,20*Math.log10(rms||.00001)))); $('#dbOutput').value=display; const bars=meter.querySelectorAll('i'); bars.forEach((b,i)=>{const active=i < (display+60)/60*bars.length;b.classList.toggle('live',active);b.style.height=(active?18+Math.random()*82:5)+'%'}); animation=requestAnimationFrame(draw); }; draw();
+      } catch(err) { $('#micStatus').textContent='Mic permission was denied or unavailable.'; toast('No scream detected. Permission needed.'); }
+    });
+
+    const range=$('#launchRange'), ammo=$('#ammo'), stretch=$('#stretch');
+    const setSelection=v=>{v=Math.max(0,Math.min(100,Math.round(v)));range.value=v;$('#launchOutput').value=v+'%';ammo.setAttribute('aria-valuenow',v);return v;};
+    const setLaunch=v=>{v=setSelection(v);stretch.style.setProperty('--pull',(-v*1.45)+'px');stretch.style.setProperty('--elastic',(v*1.45)+'px');stretch.style.setProperty('--angle',(v*.11)+'deg');};
+    range.addEventListener('input',e=>{ammo.style.removeProperty('left');ammo.style.removeProperty('transform');setLaunch(e.target.value)}); let pulling=false;
+    const pull=e=>{const r=stretch.getBoundingClientRect();setLaunch(((r.left+31)-e.clientX)/(r.width*.5)*100)};
+    const launchShot=()=>{const power=+range.value;if(power<2)return;const landed=Math.min(100,Math.round(power*.84+7));const landingX=31+(stretch.clientWidth-62)*landed/100;stretch.style.setProperty('--launch-start',(-power*1.45)+'px');stretch.style.setProperty('--launch-apex',(landingX*.58-31)+'px');stretch.style.setProperty('--launch-end',(landingX-31)+'px');stretch.style.setProperty('--launch-rise',(-28-power*.55)+'px');stretch.style.setProperty('--launch-drop','4px');ammo.classList.add('launched');setLaunch(0);toast('THWIP! Waiting for the value to land…');ammo.addEventListener('animationend',()=>{ammo.classList.remove('launched');ammo.style.left=landingX+'px';ammo.style.transform='translate(-50%,calc(50% + 4px))';setSelection(landed);toast('Landed on '+landed+'%.');},{once:true});};
+    ammo.addEventListener('pointerdown',e=>{if(ammo.classList.contains('launched'))return;ammo.style.removeProperty('left');ammo.style.removeProperty('transform');pulling=true;ammo.setPointerCapture(e.pointerId);pull(e)}); ammo.addEventListener('pointermove',e=>{if(pulling)pull(e)}); ammo.addEventListener('pointerup',()=>{if(pulling)launchShot();pulling=false});
+    ammo.addEventListener('keydown',e=>{if(e.key==='ArrowRight')setLaunch(+range.value+5);if(e.key==='ArrowLeft')setLaunch(+range.value-5)});
+
+    $('#normalRange').addEventListener('input',e=>$('#normalOutput').value=e.target.value);
+    const nameBits=[['Inbox','Pizza','Moon','Laser','Fax','Mild','Turbo','Budget','Velvet','Cosmic'],['Goblin','Emergency','Oracle','Wizard','Robot','Lobster','Operator','Sandwich','Vortex','Landline']];
+    const choosePhone=index=>{const n=String(index).padStart(4,'0');const local=String((index*7919+1087)%10000).padStart(4,'0');$('#contactName').textContent=nameBits[0][index%10]+' '+nameBits[1][Math.floor(index/10)%10];$('#phoneDisplay').textContent='+1 (555) '+n.slice(0,3)+'-'+local;document.querySelector('.phone-meta span:last-child').textContent=n+' / 9999 · definitely not a dial';};
+    $('#phoneRange').addEventListener('input',e=>choosePhone(+e.target.value)); choosePhone(0);
+  </script>
+</body>
+</html>
