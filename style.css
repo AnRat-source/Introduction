@@ -402,7 +402,7 @@
     }
 
     header::after {
-      content: "anrat@desktop: ~/profile";
+      content: "aqua@desktop: ~/profile";
       position: absolute;
       top: 9px;
       left: 12px;
