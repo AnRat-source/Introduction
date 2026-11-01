@@ -60,8 +60,10 @@
       headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
     }
 
+    const wrapRect = siteHeader.parentElement.getBoundingClientRect();
+    document.documentElement.style.setProperty('--site-window-left', `${wrapRect.left}px`);
+    document.documentElement.style.setProperty('--site-window-width', `${wrapRect.width}px`);
     if (siteHeader.classList.contains('is-floating')) {
-      const wrapRect = siteHeader.parentElement.getBoundingClientRect();
       siteHeader.style.setProperty('--floating-header-left', `${wrapRect.left}px`);
       siteHeader.style.setProperty('--floating-header-width', `${wrapRect.width}px`);
     }
@@ -77,6 +79,10 @@
   const fileExplorerScrim = document.getElementById('fileExplorerScrim');
   const fileExplorerStatus = document.getElementById('fileExplorerStatus');
   const fileExplorerTree = document.getElementById('fileExplorerTree');
+  const explorerPreview = document.getElementById('explorerPreview');
+  const explorerPreviewTitle = document.getElementById('explorerPreviewTitle');
+  const explorerPreviewFrame = document.getElementById('explorerPreviewFrame');
+  const explorerPreviewClose = document.getElementById('explorerPreviewClose');
   let explorerTreeId = 0;
 
   function positionFileExplorer() {
@@ -95,6 +101,28 @@
     fileExplorer.style.setProperty('--explorer-top', `${explorerTop}px`);
   }
 
+  function positionExplorerPreview() {
+    if (explorerPreview.hidden) return;
+    const headerRect = siteHeader.getBoundingClientRect();
+    const previewTop = Math.max(14, headerRect.bottom + 14);
+    const terminalTop = window.innerHeight - 96 - terminalWindow.offsetHeight;
+    const previewBottom = Math.max(96, window.innerHeight - terminalTop + 14);
+    explorerPreview.style.setProperty('--explorer-preview-top', `${previewTop}px`);
+    explorerPreview.style.setProperty('--explorer-preview-bottom', `${previewBottom}px`);
+  }
+
+  function closeExplorerPreview() {
+    explorerPreviewFrame.src = 'about:blank';
+    explorerPreview.hidden = true;
+  }
+
+  function openExplorerPreview(source, title) {
+    explorerPreviewTitle.textContent = title;
+    explorerPreviewFrame.src = source;
+    explorerPreview.hidden = false;
+    requestAnimationFrame(positionExplorerPreview);
+  }
+
   function setFileExplorerOpen(isOpen) {
     if (isOpen) positionFileExplorer();
     dockTerminalForExplorer(isOpen);
@@ -103,21 +131,37 @@
     fileExplorer.setAttribute('aria-hidden', String(!isOpen));
     fileExplorerToggle.setAttribute('aria-expanded', String(isOpen));
     fileExplorerScrim.hidden = !isOpen;
-    if (isOpen) requestAnimationFrame(animateExplorerConsole);
-    else [terminalWindow, commandLine].forEach(element => element.classList.remove('console-dock-enter'));
+    if (isOpen) {
+      requestAnimationFrame(() => {
+        animateExplorerConsole();
+        positionExplorerPreview();
+      });
+    } else {
+      [terminalWindow, commandLine].forEach(element => element.classList.remove('console-dock-enter'));
+      closeExplorerPreview();
+    }
   }
 
   fileExplorerToggle.addEventListener('click', () => setFileExplorerOpen(!fileExplorer.classList.contains('is-open')));
   fileExplorerClose.addEventListener('click', () => setFileExplorerOpen(false));
   fileExplorerScrim.addEventListener('click', () => setFileExplorerOpen(false));
+  explorerPreviewClose.addEventListener('click', closeExplorerPreview);
   window.addEventListener('scroll', () => {
-    if (fileExplorer.classList.contains('is-open')) positionFileExplorer();
+    if (fileExplorer.classList.contains('is-open')) {
+      positionFileExplorer();
+      positionExplorerPreview();
+    }
   }, { passive: true });
   window.addEventListener('resize', () => {
-    if (fileExplorer.classList.contains('is-open')) positionFileExplorer();
+    if (fileExplorer.classList.contains('is-open')) {
+      positionFileExplorer();
+      positionExplorerPreview();
+    }
   });
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && fileExplorer.classList.contains('is-open')) setFileExplorerOpen(false);
+    if (event.key !== 'Escape') return;
+    if (!explorerPreview.hidden) closeExplorerPreview();
+    else if (fileExplorer.classList.contains('is-open')) setFileExplorerOpen(false);
   });
 
   function getExplorerFileIcon(name) {
@@ -203,6 +247,31 @@
       folder.setAttribute('aria-expanded', String(!isOpen));
       childTree.hidden = isOpen;
       folder.querySelector('.tree-chevron').className = `fa-solid fa-chevron-${isOpen ? 'right' : 'down'} tree-chevron`;
+      return;
+    }
+
+    const previewFile = event.target.closest('.tree-html, .tree-iframe');
+    if (previewFile) {
+      event.preventDefault();
+      const fileName = previewFile.querySelector('span').textContent;
+      const filePath = previewFile.getAttribute('href');
+      fileExplorerStatus.textContent = `Opening ${fileName} in preview…`;
+
+      if (previewFile.classList.contains('tree-html')) {
+        openExplorerPreview(filePath, fileName);
+        return;
+      }
+
+      try {
+        const response = await fetch(filePath);
+        const storedText = await response.text();
+        const linkMatch = storedText.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
+        if (!response.ok || !linkMatch) throw new Error('No valid iframe URL');
+        const iframeSource = /^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`;
+        openExplorerPreview(iframeSource, fileName);
+      } catch {
+        fileExplorerStatus.textContent = `${fileName} does not contain a valid preview URL yet.`;
+      }
       return;
     }
 

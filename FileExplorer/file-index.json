@@ -1,23 +1,56 @@
 [
   {
     "type": "directory",
-    "name": "Fun",
+    "name": "Links",
     "children": [
       {
         "type": "file",
-        "name": "MusicPlayer.html",
-        "path": "FileExplorer/Fun/MusicPlayer.html"
+        "name": "Discord.link",
+        "path": "FileExplorer/Links/Discord.link"
+      },
+      {
+        "type": "file",
+        "name": "Youtube.link",
+        "path": "FileExplorer/Links/Youtube.link"
       }
     ]
   },
   {
     "type": "directory",
-    "name": "Games",
+    "name": "Misc",
     "children": [
       {
-        "type": "file",
-        "name": "Doom.iframe",
-        "path": "FileExplorer/Games/Doom.iframe"
+        "type": "directory",
+        "name": "Fun",
+        "children": [
+          {
+            "type": "file",
+            "name": "MusicPlayer.html",
+            "path": "FileExplorer/Misc/Fun/MusicPlayer.html"
+          }
+        ]
+      },
+      {
+        "type": "directory",
+        "name": "Games",
+        "children": [
+          {
+            "type": "file",
+            "name": "Doom.iframe",
+            "path": "FileExplorer/Misc/Games/Doom.iframe"
+          }
+        ]
+      },
+      {
+        "type": "directory",
+        "name": "Random",
+        "children": [
+          {
+            "type": "file",
+            "name": "secret.html",
+            "path": "FileExplorer/Misc/Random/secret.html"
+          }
+        ]
       }
     ]
   },
