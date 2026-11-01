@@ -9,7 +9,7 @@
     :root { color-scheme: dark; --deep: #0b0c12; --purple: #5f177c; --pink: #bd4fe8; --lavender: #e9c3ff; --white: #fffaff; }
     * { box-sizing: border-box; }
     body { min-height: 100dvh; margin: 0; overflow: hidden; color: var(--white); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--deep); }
-    .player, .player.in-pip { position: relative; isolation: isolate; container-type: size; width: 100vw; height: 100dvh; min-height: 0; padding: clamp(22px, 6vh, 52px) clamp(24px, 8vw, 78px); display: flex; flex-direction: column; align-items: center; overflow: hidden; border: 0; border-radius: 0; background: rgba(9, 9, 15, .58); box-shadow: none; }
+    .player, .player.in-pip { position: relative; isolation: isolate; container-type: size; width: 100vw; height: 100dvh; min-height: 0; padding: clamp(14px, 7cqh, 52px) clamp(16px, 9cqw, 78px); display: flex; flex-direction: column; align-items: center; overflow: hidden; border: 0; border-radius: 0; background: rgba(9, 9, 15, .58); box-shadow: none; }
 
     /* The current YouTube video becomes a soft moving background rather than a visible video player. */
     #youtube-player { position: absolute; z-index: -2; inset: -64px; overflow: hidden; pointer-events: none; filter: blur(28px) saturate(1.08); opacity: .56; transform: scale(1.11); }
@@ -17,32 +17,21 @@
     .video-wash { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,9,15,.38), rgba(8,9,15,.73)), radial-gradient(circle at 50% 45%, transparent 22%, rgba(8,9,15,.4) 90%); }
 
     .now-playing, .cover-wrap, #title, .progress-group, .transport { position: relative; z-index: 1; }
-    .now-playing { margin: 7px 0 31px; color: var(--lavender); font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
-    .cover-wrap { width: min(100%, 275px); aspect-ratio: 1; overflow: hidden; border: 7px solid rgba(255,255,255,.18); border-radius: 28px; background: linear-gradient(135deg, #d768ef, #43105f); box-shadow: 0 18px 38px rgba(0,0,0,.39), inset 0 0 35px rgba(255,255,255,.15); }
+    .now-playing { margin: 0 0 clamp(10px, 4cqh, 31px); color: var(--lavender); font-size: clamp(9px, 1.8cqh, 11px); font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .cover-wrap { width: min(68cqw, 44cqh, 360px); aspect-ratio: 1; flex: 0 0 auto; overflow: hidden; border: 3px solid rgba(255,255,255,.24); border-radius: clamp(14px, 4cqh, 28px); background: linear-gradient(135deg, #d768ef, #43105f); box-shadow: 0 18px 38px rgba(0,0,0,.39), inset 0 0 35px rgba(255,255,255,.15); }
     #thumbnail { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transition: opacity .2s ease; }
-    #title { width: 100%; min-height: 52px; margin: 27px 0 15px; overflow: hidden; color: var(--white); font-size: 19px; font-weight: 750; letter-spacing: -.02em; line-height: 1.3; text-align: center; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 15px #160020; }
-    .progress-group { width: 100%; }
+    #title { width: min(100%, 520px); min-height: 0; margin: clamp(10px, 4cqh, 27px) 0 clamp(8px, 2cqh, 15px); overflow: hidden; color: var(--white); font-size: clamp(14px, 3.1cqh, 21px); font-weight: 750; letter-spacing: -.02em; line-height: 1.3; text-align: center; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 2px 15px #160020; }
+    .progress-group { width: min(100%, 520px); }
     #seek { width: 100%; height: 5px; display: block; margin: 0; appearance: none; border-radius: 999px; outline: none; cursor: pointer; background: linear-gradient(to right, var(--lavender) 0%, var(--lavender) 0%, rgba(255,255,255,.25) 0%, rgba(255,255,255,.25) 100%); }
     #seek::-webkit-slider-thumb { width: 13px; height: 13px; appearance: none; border: 0; border-radius: 50%; background: var(--white); box-shadow: 0 0 12px rgba(255,255,255,.9); }
     #seek::-moz-range-thumb { width: 13px; height: 13px; border: 0; border-radius: 50%; background: var(--white); box-shadow: 0 0 12px rgba(255,255,255,.9); }
-    .time-row { display: flex; justify-content: space-between; margin-top: 10px; color: rgba(255,255,255,.74); font-size: 11px; font-variant-numeric: tabular-nums; }
-    .transport { width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 25px; margin-top: 31px; }
-    button { min-width: 56px; min-height: 56px; border: 0; color: var(--white); background: transparent; cursor: pointer; font: inherit; transition: transform .18s ease, background .18s ease; text-shadow: 0 2px 12px #180522; }
+    .time-row { display: flex; justify-content: space-between; margin-top: clamp(5px, 1.5cqh, 10px); color: rgba(255,255,255,.74); font-size: clamp(9px, 1.8cqh, 11px); font-variant-numeric: tabular-nums; }
+    .transport { width: min(100%, 520px); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: clamp(6px, 4cqw, 25px); margin-top: clamp(13px, 5cqh, 31px); }
+    button { min-width: clamp(40px, 9cqh, 56px); min-height: clamp(40px, 9cqh, 56px); border: 0; color: var(--white); background: transparent; cursor: pointer; font: inherit; transition: transform .18s ease, background .18s ease; text-shadow: 0 2px 12px #180522; }
     button:hover { transform: scale(1.07); } button:focus-visible { outline: 2px solid var(--white); outline-offset: 4px; }
     .skip { font-size: 29px; font-weight: 500; } #previous { justify-self: end; } #next { justify-self: start; }
-    #play-pause { width: 76px; height: 76px; min-width: 76px; min-height: 76px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #e485ff, #9131bb); box-shadow: 0 12px 25px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.4); font-size: 30px; text-shadow: none; }
+    #play-pause { width: clamp(54px, 12cqh, 76px); height: clamp(54px, 12cqh, 76px); min-width: clamp(54px, 12cqh, 76px); min-height: clamp(54px, 12cqh, 76px); display: grid; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #e485ff, #9131bb); box-shadow: 0 12px 25px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.4); font-size: clamp(22px, 5cqh, 30px); text-shadow: none; }
     #play-pause.is-paused { padding-left: 5px; }
-    @container (max-height: 460px) {
-      .player { padding: 14px 22px 18px; }
-      .now-playing { margin: 0 0 12px; font-size: 9px; }
-      .cover-wrap { width: min(40cqh, 155px); border-width: 4px; border-radius: 18px; }
-      #title { min-height: 25px; margin: 11px 0 8px; font-size: 15px; }
-      .time-row { margin-top: 6px; font-size: 10px; }
-      .transport { margin-top: 13px; gap: 14px; }
-      .skip { min-width: 40px; min-height: 40px; font-size: 23px; }
-      #play-pause { width: 54px; height: 54px; min-width: 54px; min-height: 54px; font-size: 22px; }
-    }
-    @container (max-width: 290px) { .player { padding-left: 14px; padding-right: 14px; } .cover-wrap { width: min(56cqw, 40cqh); } .transport { gap: 6px; } }
   </style>
 </head>
 <body>
@@ -75,7 +64,7 @@
       const playPause = document.getElementById('play-pause');
       const playerCard = document.querySelector('.player');
       const supportsDocumentPiP = 'documentPictureInPicture' in window;
-      let player, ready = false, updateTimer, lastVideoId = '', pipWindow, autoplayMuted = false;
+      let player, ready = false, updateTimer, lastVideoId = '', pipWindow;
       const formatTime = seconds => { if (!Number.isFinite(seconds) || seconds < 0) return '0:00'; return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`; };
       const setPlaybackButton = isPlaying => { playPause.textContent = isPlaying ? '❚❚' : '▶'; playPause.classList.toggle('is-paused', !isPlaying); playPause.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play'); };
       const setProgress = () => {
@@ -90,25 +79,38 @@
           thumbnail.src = `https://i.ytimg.com/vi/${data.video_id}/hqdefault.jpg`; thumbnail.onload = () => { thumbnail.style.opacity = '1'; };
         }
       };
-      const playShuffled = () => { player.setShuffle({ shufflePlaylist: true }); player.playVideo(); };
-      const makePlaybackAudible = () => {
-        if (!autoplayMuted) return;
-        player.unMute();
-        autoplayMuted = false;
+      const playShuffled = () => { player.playVideo(); };
+      const cueRandomFirstTrack = (attempt = 0) => {
+        const playlist = player.getPlaylist();
+        if (!playlist.length && attempt < 20) {
+          window.setTimeout(() => cueRandomFirstTrack(attempt + 1), 150);
+          return;
+        }
+        const randomIndex = playlist.length ? Math.floor(Math.random() * playlist.length) : 0;
+        player.cuePlaylist({ listType: 'playlist', list: PLAYLIST_ID, index: randomIndex });
+        player.setShuffle({ shufflePlaylist: true });
       };
       const openDocumentPiP = async () => {
         if (!supportsDocumentPiP || (pipWindow && !pipWindow.closed)) return;
         try {
           pipWindow = await window.documentPictureInPicture.requestWindow({ width: 390, height: 620 });
+          const syncPipSize = () => {
+            playerCard.style.width = `${pipWindow.innerWidth}px`;
+            playerCard.style.height = `${pipWindow.innerHeight}px`;
+          };
           const copiedStyle = document.createElement('style');
           copiedStyle.textContent = [...document.querySelectorAll('style')].map(style => style.textContent).join('\n');
           pipWindow.document.head.append(copiedStyle);
           pipWindow.document.body.style.cssText = 'margin:0;width:100vw;height:100dvh;overflow:hidden;background:#180522;';
           playerCard.classList.add('in-pip');
           pipWindow.document.body.append(playerCard);
+          syncPipSize();
+          pipWindow.addEventListener('resize', syncPipSize);
           pipWindow.addEventListener('pagehide', () => {
             document.body.append(playerCard);
             playerCard.classList.remove('in-pip');
+            playerCard.style.width = '';
+            playerCard.style.height = '';
             pipWindow = null;
           }, { once: true });
         } catch (error) {
@@ -120,15 +122,7 @@
           width: '600', height: '600',
           playerVars: { listType: 'playlist', list: PLAYLIST_ID, playsinline: 1, rel: 0, modestbranding: 1 },
           events: {
-            onReady: () => {
-              ready = true;
-              // Browsers permit muted autoplay but block unmuted audio until the visitor interacts.
-              player.mute();
-              autoplayMuted = true;
-              player.setShuffle({ shufflePlaylist: true });
-              setProgress();
-              playShuffled();
-            },
+            onReady: () => { ready = true; cueRandomFirstTrack(); setProgress(); },
             onStateChange: event => { const isPlaying = event.data === YT.PlayerState.PLAYING; if (isPlaying) { setPlaybackButton(true); clearInterval(updateTimer); updateTimer = setInterval(setProgress, 500); } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.CUED) { setPlaybackButton(false); setProgress(); } },
             onError: () => { title.textContent = 'Playlist unavailable'; }
           }
@@ -136,14 +130,12 @@
       };
       playPause.addEventListener('click', () => {
         if (!ready) return;
-        const wasMutedAutoplay = autoplayMuted;
-        makePlaybackAudible();
-        if (!wasMutedAutoplay && player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+        if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
         else { openDocumentPiP(); playShuffled(); }
       });
-      document.getElementById('previous').addEventListener('click', () => { if (ready) { makePlaybackAudible(); openDocumentPiP(); player.previousVideo(); player.playVideo(); } });
-      document.getElementById('next').addEventListener('click', () => { if (ready) { makePlaybackAudible(); openDocumentPiP(); player.nextVideo(); player.playVideo(); } });
-      seek.addEventListener('input', () => { if (!ready) return; makePlaybackAudible(); const total = player.getDuration(); if (total) player.seekTo((Number(seek.value) / 100) * total, true); });
+      document.getElementById('previous').addEventListener('click', () => { if (ready) { openDocumentPiP(); player.previousVideo(); player.playVideo(); } });
+      document.getElementById('next').addEventListener('click', () => { if (ready) { openDocumentPiP(); player.nextVideo(); player.playVideo(); } });
+      seek.addEventListener('input', () => { if (!ready) return; const total = player.getDuration(); if (total) player.seekTo((Number(seek.value) / 100) * total, true); });
       const api = document.createElement('script'); api.src = 'https://www.youtube.com/iframe_api'; api.async = true; document.head.append(api);
     })();
   </script>

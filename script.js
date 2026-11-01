@@ -571,6 +571,7 @@
   const commandOutput = document.getElementById('commandOutput');
   const terminalHistory = document.getElementById('terminalHistory');
   const commandStorageKey = 'anrat-custom-commands';
+  const musicPiPSize = { width: 360, height: 240 };
   let customCommands = {};
   let musicPiPWindow = null;
 
@@ -711,15 +712,16 @@
     }
 
     try {
-      musicPiPWindow = await window.documentPictureInPicture.requestWindow({ width: 720, height: 480 });
+      musicPiPWindow = await window.documentPictureInPicture.requestWindow(musicPiPSize);
       musicPiPWindow.document.title = 'Shuffle Station';
-      musicPiPWindow.document.body.style.cssText = 'margin:0;background:#080b10;overflow:hidden;';
+      musicPiPWindow.document.documentElement.style.cssText = `width:${musicPiPSize.width}px;height:${musicPiPSize.height}px;overflow:hidden;`;
+      musicPiPWindow.document.body.style.cssText = `margin:0;width:${musicPiPSize.width}px;height:${musicPiPSize.height}px;background:#080b10;overflow:hidden;`;
 
       const player = musicPiPWindow.document.createElement('iframe');
-      player.src = 'FileExplorer/Fun/MusicPlayer.html?embedded=1&autoplay=1';
+      player.src = 'FileExplorer/Misc/Fun/MusicPlayer.html?embedded=1&autoplay=1';
       player.title = 'Shuffle Station music player';
       player.allow = 'autoplay; fullscreen';
-      player.style.cssText = 'display:block;width:100vw;height:100vh;border:0;background:#080b10;';
+      player.style.cssText = `display:block;width:${musicPiPSize.width}px;height:${musicPiPSize.height}px;min-width:${musicPiPSize.width}px;min-height:${musicPiPSize.height}px;border:0;background:#080b10;`;
       musicPiPWindow.document.body.append(player);
 
       musicPiPWindow.addEventListener('pagehide', () => {
