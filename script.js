@@ -246,6 +246,19 @@
     explorerPreviewUrlForm.hidden = !isEnabled;
   }
 
+  function normalizeKnownLink(value) {
+    try {
+      const url = new URL(value, window.location.href);
+      if (url.hostname.toLowerCase() === 'store.anrat.link' && /^\/portfolio\/?$/i.test(url.pathname)) {
+        url.hostname = 'portfolio.anrat.link';
+        url.pathname = '/';
+      }
+      return url.href;
+    } catch {
+      return value;
+    }
+  }
+
   function normalizePreviewUrl(value) {
     const rawUrl = value.trim();
     if (!rawUrl) return null;
@@ -255,7 +268,7 @@
         ? rawUrl
         : isLocalPath ? new URL(rawUrl, window.location.href).href : `https://${rawUrl}`;
       const url = new URL(candidate, window.location.href);
-      return /^(https?:)$/i.test(url.protocol) ? url.href : null;
+      return /^(https?:)$/i.test(url.protocol) ? normalizeKnownLink(url.href) : null;
     } catch {
       return null;
     }
@@ -560,7 +573,7 @@
         const lines = storedText.split(/\r?\n/);
         const linkMatch = lines[0]?.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
         if (!response.ok || !linkMatch) throw new Error('No valid iframe URL');
-        const iframeSource = /^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`;
+        const iframeSource = normalizeKnownLink(/^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`);
         const urlEditable = lines[1]?.trim() === 'URLEditingEnabled=True';
         const faviconValue = lines[2]?.match(/^\s*favicon\s*=\s*(\S+)\s*$/i)?.[1] || '';
         let favicon = '';
@@ -585,7 +598,7 @@
       const storedText = await response.text();
       const linkMatch = storedText.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
       if (!response.ok || !linkMatch) throw new Error('No valid URL');
-      const storedLink = /^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`;
+      const storedLink = normalizeKnownLink(/^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`);
       if (opensInNewTab && newTab) newTab.location.replace(storedLink);
       else if (opensInNewTab) window.open(storedLink, '_blank', 'noopener,noreferrer');
       else window.location.assign(storedLink);
