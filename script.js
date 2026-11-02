@@ -318,7 +318,7 @@
     setPreviewMinimized(false);
     setPreviewTitle(title);
     setPreviewUrlEditing(urlEditable);
-    explorerPreviewUrl.value = source;
+    explorerPreviewUrl.value = normalizePreviewUrl(source);
     setPreviewFavicon(source, customFavicon);
     explorerPreviewFrame.src = source;
     explorerPreview.hidden = false;
