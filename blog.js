@@ -49,17 +49,76 @@
   });
 
   const blogPostList = document.getElementById('blogPostList');
+  const postView = document.getElementById('blogPostView');
+  const postClose = document.getElementById('blogPostClose');
+  const postTitle = document.getElementById('blogPostTitle');
+  const postMeta = document.getElementById('blogPostMeta');
+  const postBody = document.getElementById('blogPostBody');
+  const postSource = document.getElementById('blogPostSource');
+  const postComments = document.getElementById('blogPostComments');
+  const formatDate = value => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
+
+  function closePost() {
+    if (!postView) return;
+    postView.hidden = true;
+    document.body.classList.remove('post-view-open');
+    postComments?.replaceChildren();
+  }
+
+  function loadPostComments(post) {
+    if (!postComments) return;
+    postComments.replaceChildren();
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    const config = {
+      repo: 'AnRat-source/Introduction',
+      'repo-id': 'R_kgDOQU7EBg',
+      category: 'Blog',
+      'category-id': 'DIC_kwDOQU7EBs4DKMet',
+      mapping: 'number',
+      term: String(post.number),
+      strict: '0',
+      'reactions-enabled': '1',
+      'emit-metadata': '0',
+      'input-position': 'bottom',
+      theme: 'preferred_color_scheme',
+      lang: 'en'
+    };
+    Object.entries(config).forEach(([name, value]) => script.dataset[name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = value);
+    postComments.append(script);
+  }
+
+  function openPost(post) {
+    if (!postView) return;
+    postTitle.textContent = post.title;
+    postMeta.textContent = `${post.author || 'AnRat'} · ${formatDate(post.createdAt)}`;
+    postBody.textContent = post.body || post.excerpt || 'Open this post on GitHub to read more.';
+    postSource.href = post.url;
+    postView.hidden = false;
+    document.body.classList.add('post-view-open');
+    loadPostComments(post);
+    postClose?.focus();
+  }
+
+  postClose?.addEventListener('click', closePost);
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !postView?.hidden) closePost();
+  });
+
   if (blogPostList) {
-    const formatDate = value => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
     const makePost = post => {
       const article = document.createElement('article');
       article.className = 'blog-post';
-      const title = document.createElement('a');
+      const title = document.createElement('button');
       title.className = 'blog-post-title';
-      title.href = post.url;
-      title.target = '_blank';
-      title.rel = 'noreferrer';
+      title.type = 'button';
       title.textContent = post.title;
+      title.addEventListener('click', () => openPost(post));
+      article.addEventListener('click', event => {
+        if (event.target !== title) openPost(post);
+      });
       const meta = document.createElement('span');
       meta.className = 'blog-post-meta';
       meta.textContent = `${post.author || 'AnRat'} · ${formatDate(post.createdAt)}`;

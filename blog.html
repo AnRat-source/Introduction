@@ -58,36 +58,34 @@
         </div>
       </section>
 
-      <article class="card blog-window discussion-window">
-        <div class="window-chrome" aria-hidden="true"><span>blog-comments.window</span><span class="window-controls"><i>−</i><i>□</i><i class="window-close-static">×</i></span></div>
-        <div class="discussion-heading">
-          <div>
-            <p class="blog-kicker">discussion: blog</p>
-            <h2 class="title">Leave a reply</h2>
-          </div>
-          <span class="discussion-status"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub sign-in</span>
-        </div>
-        <div class="giscus-shell" aria-label="Blog discussion board">
-          <script src="https://giscus.app/client.js"
-                  data-repo="AnRat-source/Introduction"
-                  data-repo-id="R_kgDOQU7EBg"
-                  data-category="Blog"
-                  data-category-id="DIC_kwDOQU7EBs4DKMet"
-                  data-mapping="pathname"
-                  data-strict="0"
-                  data-reactions-enabled="1"
-                  data-emit-metadata="0"
-                  data-input-position="bottom"
-                  data-theme="preferred_color_scheme"
-                  data-lang="en"
-                  crossorigin="anonymous"
-                  async>
-          </script>
-        </div>
-      </article>
     </main>
     <footer class="note">© <span data-current-year></span> AnRat · Blog powered by GitHub Discussions</footer>
   </div>
+  <section class="blog-post-view" id="blogPostView" aria-label="Blog post reader" aria-modal="true" role="dialog" hidden>
+    <div class="blog-post-reader">
+      <div class="blog-reader-titlebar">
+        <span>post.window</span>
+        <button class="blog-reader-close" id="blogPostClose" type="button" aria-label="Close post">×</button>
+      </div>
+      <article class="blog-reader-content">
+        <p class="blog-kicker">blog post</p>
+        <h2 class="blog-reader-title" id="blogPostTitle"></h2>
+        <p class="blog-post-meta" id="blogPostMeta"></p>
+        <p class="blog-reader-body" id="blogPostBody"></p>
+        <a class="blog-source" id="blogPostSource" target="_blank" rel="noreferrer">View this post on GitHub <span aria-hidden="true">↗</span></a>
+      </article>
+      <section class="blog-reader-comments" aria-labelledby="blogPostCommentsTitle">
+        <div class="discussion-heading">
+          <div>
+            <p class="blog-kicker">discussion</p>
+            <h3 id="blogPostCommentsTitle">Comments</h3>
+          </div>
+          <span class="discussion-status"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub sign-in</span>
+        </div>
+        <div class="giscus-shell" id="blogPostComments" aria-label="Post comments"></div>
+      </section>
+    </div>
+  </section>
   <script src="blog.js"></script>
 </body>
 </html>

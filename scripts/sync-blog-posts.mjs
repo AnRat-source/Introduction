@@ -47,6 +47,7 @@ const posts = result.data.repository.discussions.nodes
   .map(post => ({
     number: post.number,
     title: post.title,
+    body: post.bodyText.trim(),
     excerpt: post.bodyText.trim().slice(0, 320),
     url: post.url,
     author: post.author?.login || 'AnRat',

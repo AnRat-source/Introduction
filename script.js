@@ -220,8 +220,8 @@
     }
   }
 
-  function setPreviewFavicon(source) {
-    const favicon = getPreviewFavicon(source);
+  function setPreviewFavicon(source, customFavicon = '') {
+    const favicon = customFavicon || getPreviewFavicon(source);
     explorerPreviewFavicon.src = favicon;
     const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
     if (activeTab) {
@@ -283,13 +283,22 @@
       ? explorerTabs.find(savedTab => savedTab.id === tabId)
       : explorerTabs.find(savedTab => new URL(savedTab.source, window.location.href).href === new URL(source, window.location.href).href);
     const urlEditable = options.urlEditable ?? tab?.urlEditable ?? true;
+    const customFavicon = options.favicon ?? tab?.customFavicon ?? '';
     if (!tab) {
-      tab = { id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`, source, title, favicon: getPreviewFavicon(source), urlEditable };
+      tab = {
+        id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`,
+        source,
+        title,
+        favicon: customFavicon || getPreviewFavicon(source),
+        customFavicon,
+        urlEditable
+      };
       explorerTabs.push(tab);
     } else {
       tab.source = source;
       tab.title = title;
       tab.urlEditable = urlEditable;
+      tab.customFavicon = customFavicon;
     }
     activeExplorerTabId = tab.id;
     saveExplorerTabs();
@@ -297,7 +306,7 @@
     setPreviewTitle(title);
     setPreviewUrlEditing(urlEditable);
     explorerPreviewUrl.value = source;
-    setPreviewFavicon(source);
+    setPreviewFavicon(source, customFavicon);
     explorerPreviewFrame.src = source;
     explorerPreview.hidden = false;
     renderExplorerTabDock();
@@ -392,11 +401,12 @@
       if (!previewDocument || explorerPreviewFrame.src === 'about:blank') return;
       const loadedTitle = previewDocument.title.trim();
       if (loadedTitle) setPreviewTitle(loadedTitle);
+      const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
+      if (activeTab?.customFavicon) return;
       const icon = previewDocument.querySelector('link[rel~="icon"]')?.getAttribute('href');
       if (icon) {
         const favicon = new URL(icon, explorerPreviewFrame.contentWindow.location.href).href;
         explorerPreviewFavicon.src = favicon;
-        const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
         if (activeTab) {
           activeTab.favicon = favicon;
           saveExplorerTabs();
@@ -547,11 +557,17 @@
       try {
         const response = await fetch(filePath);
         const storedText = await response.text();
-        const linkMatch = storedText.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
+        const lines = storedText.split(/\r?\n/);
+        const linkMatch = lines[0]?.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
         if (!response.ok || !linkMatch) throw new Error('No valid iframe URL');
         const iframeSource = /^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`;
-        const urlEditable = storedText.split(/\r?\n/)[1]?.trim() === 'URLEditingEnabled=True';
-        openExplorerPreview(iframeSource, fileName, null, { urlEditable });
+        const urlEditable = lines[1]?.trim() === 'URLEditingEnabled=True';
+        const faviconValue = lines[2]?.match(/^\s*favicon\s*=\s*(\S+)\s*$/i)?.[1] || '';
+        let favicon = '';
+        if (faviconValue) {
+          try { favicon = new URL(faviconValue, new URL(filePath, window.location.href)).href; } catch { /* use the normal fallback */ }
+        }
+        openExplorerPreview(iframeSource, fileName, null, { urlEditable, favicon });
       } catch {
         fileExplorerStatus.textContent = `${fileName} does not contain a valid preview URL yet.`;
       }
