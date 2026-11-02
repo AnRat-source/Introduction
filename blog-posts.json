@@ -1,6 +1,16 @@
 {
-  "generatedAt": "2026-11-02T13:31:20.100Z",
+  "generatedAt": "2026-11-02T13:33:28.259Z",
   "posts": [
+    {
+      "number": 4,
+      "title": "test 2",
+      "body": "test asadasd",
+      "excerpt": "test asadasd",
+      "url": "https://github.com/AnRat-source/Introduction/discussions/4",
+      "author": "AnRat-source",
+      "createdAt": "2026-11-02T13:33:09Z",
+      "updatedAt": "2026-11-02T13:33:09Z"
+    },
     {
       "number": 3,
       "title": "Welcome to my blog! ♡",
