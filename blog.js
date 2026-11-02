@@ -91,11 +91,24 @@
     let match;
     while ((match = codeBlock.exec(markdown))) {
       appendTextBody(markdown.slice(cursor, match.index));
+      const language = match[1].trim().toLowerCase();
+      const content = match[2].replace(/\r?\n$/, '');
+      const isHtmlEmbed = language === 'html' || /<\/?[a-z][\s\S]*>/i.test(content);
+      if (isHtmlEmbed) {
+        const frame = document.createElement('iframe');
+        frame.className = 'blog-reader-html';
+        frame.title = 'Embedded HTML from this blog post';
+        frame.sandbox = 'allow-scripts';
+        frame.srcdoc = content;
+        postBody.append(frame);
+        cursor = codeBlock.lastIndex;
+        continue;
+      }
       const pre = document.createElement('pre');
       pre.className = 'blog-reader-code';
       const code = document.createElement('code');
-      code.textContent = match[2].replace(/\r?\n$/, '');
-      if (match[1].trim()) code.dataset.language = match[1].trim();
+      code.textContent = content;
+      if (language) code.dataset.language = language;
       pre.append(code);
       postBody.append(pre);
       cursor = codeBlock.lastIndex;
