@@ -57,12 +57,51 @@
   const postSource = document.getElementById('blogPostSource');
   const postComments = document.getElementById('blogPostComments');
   const formatDate = value => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
+  let syncedPosts = [];
 
-  function closePost() {
+  function setPostAddress(number, replace = false) {
+    const address = new URL(window.location.href);
+    if (number === null) address.searchParams.delete('post');
+    else address.searchParams.set('post', String(number));
+    history[replace ? 'replaceState' : 'pushState'](null, '', address);
+  }
+
+  function closePost({ updateAddress = true } = {}) {
     if (!postView) return;
     postView.hidden = true;
     document.body.classList.remove('post-view-open');
     postComments?.replaceChildren();
+    if (updateAddress && new URL(window.location.href).searchParams.has('post')) setPostAddress(null, true);
+  }
+
+  function appendTextBody(text) {
+    if (!text.trim()) return;
+    text.trim().split(/\r?\n\s*\r?\n/).forEach(paragraphText => {
+      const paragraph = document.createElement('p');
+      paragraph.className = 'blog-reader-paragraph';
+      paragraph.textContent = paragraphText.trim();
+      postBody.append(paragraph);
+    });
+  }
+
+  function renderPostBody(markdown) {
+    postBody.replaceChildren();
+    const codeBlock = /```([^\r\n`]*)\r?\n([\s\S]*?)```/g;
+    let cursor = 0;
+    let match;
+    while ((match = codeBlock.exec(markdown))) {
+      appendTextBody(markdown.slice(cursor, match.index));
+      const pre = document.createElement('pre');
+      pre.className = 'blog-reader-code';
+      const code = document.createElement('code');
+      code.textContent = match[2].replace(/\r?\n$/, '');
+      if (match[1].trim()) code.dataset.language = match[1].trim();
+      pre.append(code);
+      postBody.append(pre);
+      cursor = codeBlock.lastIndex;
+    }
+    appendTextBody(markdown.slice(cursor));
+    if (!postBody.childElementCount) appendTextBody('Open this post on GitHub to read more.');
   }
 
   function loadPostComments(post) {
@@ -90,15 +129,16 @@
     postComments.append(script);
   }
 
-  function openPost(post) {
+  function openPost(post, { updateAddress = true } = {}) {
     if (!postView) return;
     postTitle.textContent = post.title;
     postMeta.textContent = `${post.author || 'AnRat'} · ${formatDate(post.createdAt)}`;
-    postBody.textContent = post.body || post.excerpt || 'Open this post on GitHub to read more.';
+    renderPostBody(post.body || post.excerpt || 'Open this post on GitHub to read more.');
     postSource.href = post.url;
     postView.hidden = false;
     document.body.classList.add('post-view-open');
     loadPostComments(post);
+    if (updateAddress && new URL(window.location.href).searchParams.get('post') !== String(post.number)) setPostAddress(post.number);
     postClose?.focus();
   }
 
@@ -106,6 +146,15 @@
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !postView?.hidden) closePost();
   });
+
+  function syncPostFromAddress() {
+    const requestedNumber = new URL(window.location.href).searchParams.get('post');
+    const requestedPost = syncedPosts.find(post => String(post.number) === requestedNumber);
+    if (requestedPost) openPost(requestedPost, { updateAddress: false });
+    else closePost({ updateAddress: false });
+  }
+
+  window.addEventListener('popstate', syncPostFromAddress);
 
   if (blogPostList) {
     const makePost = post => {
@@ -133,15 +182,18 @@
       .then(response => response.ok ? response.json() : Promise.reject(new Error('No blog feed yet.')))
       .then(feed => {
         const posts = Array.isArray(feed.posts) ? feed.posts : [];
+        syncedPosts = posts;
         blogPostList.replaceChildren();
         if (!posts.length) {
           const message = document.createElement('p');
           message.className = 'blog-feed-message';
           message.textContent = 'No published blog posts yet.';
           blogPostList.append(message);
+          syncPostFromAddress();
           return;
         }
         posts.forEach(post => blogPostList.append(makePost(post)));
+        syncPostFromAddress();
       })
       .catch(() => {
         blogPostList.textContent = 'Posts will appear here after the GitHub sync runs.';

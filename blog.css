@@ -45,7 +45,11 @@
 .blog-reader-close:hover, .blog-reader-close:focus-visible { background: #bd3c4a; color: #fff; outline: 0; }
 .blog-reader-content, .blog-reader-comments { padding: clamp(20px, 4vw, 42px); }
 .blog-reader-title { margin: 0; color: #f2ecff; font-size: clamp(28px, 5vw, 44px); line-height: 1.1; }
-.blog-reader-body { margin: 24px 0 18px; color: #e2e8f2; font-size: 15px; line-height: 1.7; white-space: pre-wrap; }
+.blog-reader-body { margin: 24px 0 18px; color: #e2e8f2; font-size: 15px; line-height: 1.7; }
+.blog-reader-body > :first-child { margin-top: 0; }
+.blog-reader-body > :last-child { margin-bottom: 0; }
+.blog-reader-paragraph { margin: 0 0 16px; white-space: pre-wrap; }
+.blog-reader-code { margin: 0 0 18px; padding: 14px; overflow: auto; border: 1px solid #697488; background: #090c12; color: #e9ddff; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; tab-size: 2; }
 .blog-reader-comments { border-top: 1px solid rgba(105, 116, 136, .55); background: rgba(5, 7, 11, .32); }
 body.post-view-open { overflow: hidden; }
 .blog-page footer.note { margin-top: 18px; }

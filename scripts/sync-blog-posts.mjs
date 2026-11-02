@@ -14,6 +14,7 @@ const query = `query BlogPosts($owner: String!, $name: String!, $categoryId: ID!
       nodes {
         number
         title
+        body
         bodyText
         url
         createdAt
@@ -47,7 +48,7 @@ const posts = result.data.repository.discussions.nodes
   .map(post => ({
     number: post.number,
     title: post.title,
-    body: post.bodyText.trim(),
+    body: post.body.trim(),
     excerpt: post.bodyText.trim().slice(0, 320),
     url: post.url,
     author: post.author?.login || 'AnRat',
