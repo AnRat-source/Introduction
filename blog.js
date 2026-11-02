@@ -154,24 +154,43 @@
 
   function renderPostBody(markdown) {
     postBody.replaceChildren();
-    const codeBlock = /```([^\r\n`]*)\r?\n([\s\S]*?)```/g;
+    const codeBlock = /```([^\r\n`]*?)(?:\r?\n([\s\S]*?)|)```/g;
     let cursor = 0;
     let match;
     while ((match = codeBlock.exec(markdown))) {
       appendTextBody(markdown.slice(cursor, match.index));
       const language = match[1].trim().toLowerCase();
-      const content = match[2].replace(/\r?\n$/, '');
+      const content = (match[2] || '').replace(/\r?\n$/, '');
 
-      const discussionMatch = content.trim().match(
-        /^@?(https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/discussions\/\d+\/?)$/
-      );
+      const embedText = (content || language).trim();
+      const urlMatch = embedText.match(/^@(https?:\/\/[^\s]+)$/);
 
-      if (discussionMatch) {
-        const container = document.createElement('div');
-        postBody.append(container);
+      if (urlMatch) {
+        const url = new URL(urlMatch[1]);
 
-        renderGitHubDiscussion(discussionMatch[1], container);
+        if (!['http:', 'https:'].includes(url.protocol)) {
+          cursor = codeBlock.lastIndex;
+          continue;
+        }
 
+        const frame = document.createElement('iframe');
+        frame.className = 'blog-reader-html';
+        frame.title = 'Embedded website';
+        frame.src = url.href;
+        frame.loading = 'lazy';
+        frame.referrerPolicy = 'no-referrer';
+
+        frame.style.cssText = `
+          display: block;
+          width: 100%;
+          height: 500px;
+          max-width: 100%;
+          border: none;
+          background: transparent;
+          border-radius: 10px;
+        `;
+
+        postBody.append(frame);
         cursor = codeBlock.lastIndex;
         continue;
       }
