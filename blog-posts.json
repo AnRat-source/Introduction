@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T13:41:42.981Z",
+  "generatedAt": "2026-11-02T13:41:54.762Z",
   "posts": [
     {
       "number": 3,
@@ -10,16 +10,6 @@
       "author": "AnRat-source",
       "createdAt": "2026-11-02T13:24:23Z",
       "updatedAt": "2026-11-02T13:24:23Z"
-    },
-    {
-      "number": 1,
-      "title": "blog",
-      "body": "# blog\n\nUpdates, notes, and discussion from AnRat.\n\nhttp://127.0.0.1:5500/blog.html\n\n<!-- sha1: 169254c45fa4ed7ea11c00541ffb17b0cde39625 -->",
-      "excerpt": "blog\nUpdates, notes, and discussion from AnRat.\nhttp://127.0.0.1:5500/blog.html",
-      "url": "https://github.com/AnRat-source/Introduction/discussions/1",
-      "author": "giscus",
-      "createdAt": "2026-11-02T06:43:43Z",
-      "updatedAt": "2026-11-02T13:19:39Z"
     }
   ]
 }
