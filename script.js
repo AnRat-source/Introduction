@@ -336,6 +336,13 @@
   fileExplorerToggle.addEventListener('click', () => setFileExplorerOpen(!fileExplorer.classList.contains('is-open')));
   fileExplorerClose.addEventListener('click', () => setFileExplorerOpen(false));
   fileExplorerScrim.addEventListener('click', () => setFileExplorerOpen(false));
+  document.getElementById('blogButton')?.addEventListener('click', event => {
+    const destination = event.currentTarget.href;
+    event.preventDefault();
+    document.body.classList.add('page-transitioning');
+    window.setTimeout(() => { window.location.href = destination; }, 300);
+  });
+  window.addEventListener('pageshow', () => document.body.classList.remove('page-transitioning'));
   document.addEventListener('pointerdown', event => {
     if (!fileExplorer.classList.contains('is-open')) return;
     if (fileExplorer.contains(event.target) || explorerPreview.contains(event.target) || terminalWindow.contains(event.target) || commandLine.contains(event.target) || fileExplorerToggle.contains(event.target)) return;

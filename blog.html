@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AnRat | Blog</title>
+  <meta name="description" content="Updates, notes, and discussion from AnRat.">
+  <link rel="icon" type="image/x-icon" href="Images/PFP.ico">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="blog.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body class="blog-page page-enter">
+  <div class="background" aria-hidden="true"></div>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo"><div class="icon pfp"><img src="Images/PFP.png" alt=""></div></div>
+        <div>
+          <h1>AnRat — Blog</h1>
+          <p class="lead">Notes, updates, and a place to talk.</p>
+        </div>
+      </div>
+      <nav aria-label="Site navigation">
+        <a href="index.html" class="cta" data-page-transition>Home</a>
+        <a href="general.html" class="cta" data-page-transition>General</a>
+        <a href="https://discord.gg/UDsjHHn55r" class="cta" target="_blank" rel="noreferrer">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <article class="card blog-window">
+        <div class="window-chrome" aria-hidden="true"><span>blog.window</span><span class="window-controls"><i>−</i><i>□</i><i class="window-close-static">×</i></span></div>
+        <div class="blog-intro">
+          <p class="blog-kicker">/var/log/anrat</p>
+          <h2 class="title">Blog</h2>
+          <p class="desc">Project notes, little updates, and whatever else I feel like writing. Blog posts come from maintainers; anyone signed into GitHub can join the replies below.</p>
+        </div>
+        <div class="blog-actions">
+          <a class="cta" href="https://github.com/AnRat-source/Introduction/discussions/new" target="_blank" rel="noreferrer">Write a Blog Post <span aria-hidden="true">↗</span></a>
+          <a class="cta" href="general.html" data-page-transition>Open General Board <span aria-hidden="true">→</span></a>
+          <a class="blog-source" href="https://github.com/AnRat-source/Introduction/discussions" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="author-note"><i class="fa-solid fa-pen-nib" aria-hidden="true"></i> Choose the <b>Blog</b> category in GitHub’s editor. Its announcement permissions decide who can publish.</p>
+      </article>
+
+      <section class="card blog-window blog-feed-window" aria-labelledby="latest-posts-title">
+        <div class="window-chrome" aria-hidden="true"><span>latest-posts.window</span><span class="window-controls"><i>−</i><i>□</i><i class="window-close-static">×</i></span></div>
+        <div class="discussion-heading">
+          <div>
+            <p class="blog-kicker">source: github discussions</p>
+            <h2 class="title" id="latest-posts-title">Latest posts</h2>
+          </div>
+          <span class="discussion-status"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Auto-synced</span>
+        </div>
+        <div class="blog-post-list" id="blogPostList" aria-live="polite">
+          <p class="blog-feed-message">Loading blog posts…</p>
+        </div>
+      </section>
+
+      <article class="card blog-window discussion-window">
+        <div class="window-chrome" aria-hidden="true"><span>blog-comments.window</span><span class="window-controls"><i>−</i><i>□</i><i class="window-close-static">×</i></span></div>
+        <div class="discussion-heading">
+          <div>
+            <p class="blog-kicker">discussion: blog</p>
+            <h2 class="title">Leave a reply</h2>
+          </div>
+          <span class="discussion-status"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub sign-in</span>
+        </div>
+        <div class="giscus-shell" aria-label="Blog discussion board">
+          <script src="https://giscus.app/client.js"
+                  data-repo="AnRat-source/Introduction"
+                  data-repo-id="R_kgDOQU7EBg"
+                  data-category="Blog"
+                  data-category-id="DIC_kwDOQU7EBs4DKMet"
+                  data-mapping="pathname"
+                  data-strict="0"
+                  data-reactions-enabled="1"
+                  data-emit-metadata="0"
+                  data-input-position="bottom"
+                  data-theme="preferred_color_scheme"
+                  data-lang="en"
+                  crossorigin="anonymous"
+                  async>
+          </script>
+        </div>
+      </article>
+    </main>
+    <footer class="note">© <span data-current-year></span> AnRat · Blog powered by GitHub Discussions</footer>
+  </div>
+  <script src="blog.js"></script>
+</body>
+</html>
