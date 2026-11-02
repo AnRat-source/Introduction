@@ -13,7 +13,7 @@
     .player, .player.in-pip { position: relative; isolation: isolate; container-type: size; width: 100vw; height: 100dvh; min-height: 0; padding: clamp(14px, 7cqh, 52px) clamp(16px, 9cqw, 78px); display: flex; flex-direction: column; align-items: center; overflow: hidden; border: 0; border-radius: 0; background: rgba(9, 9, 15, .58); box-shadow: none; }
 
     /* The current YouTube video becomes a soft moving background rather than a visible video player. */
-    #youtube-player { position: absolute; z-index: -2; inset: 0; overflow: hidden; pointer-events: none; filter: blur(28px) saturate(1.08); opacity: 1; transform: scale(1.08); }
+    #youtube-player { position: absolute; z-index: -2; inset: 0; overflow: hidden; pointer-events: none; filter: blur(28px) saturate(1.08); opacity: 1; transform: translateY(-100px) scale(1.08) !important;; }
     #youtube-player iframe {
         position: absolute !important;
         top: 0 !important;
