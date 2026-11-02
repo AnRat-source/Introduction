@@ -1,0 +1,359 @@
+<div id="anrat-mini-game">
+  <style>
+    #anrat-mini-game {
+      --bg: #12131b;
+      --panel: #1b1d29;
+      --border: #343647;
+      --accent: #c5a4f5;
+      --text: #e8e7f0;
+      --muted: #9293a8;
+      font: 13px "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      max-width: 520px;
+      margin: 16px auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg);
+      box-shadow: 0 12px 32px #0003;
+    }
+
+    #anrat-mini-game * {
+      box-sizing: border-box;
+    }
+
+    #anrat-mini-game .titlebar {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 11px 14px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #anrat-mini-game .app-icon {
+      color: var(--accent);
+      font-size: 16px;
+    }
+
+    #anrat-mini-game .window-title {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    #anrat-mini-game .window-controls {
+      color: var(--muted);
+      letter-spacing: 8px;
+      font-size: 12px;
+    }
+
+    #anrat-mini-game .content {
+      padding: 17px;
+    }
+
+    #anrat-mini-game .path {
+      color: var(--muted);
+      font: 11px Consolas, monospace;
+      margin-bottom: 13px;
+    }
+
+    #anrat-mini-game .stats {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    #anrat-mini-game .stat {
+      flex: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 6px;
+    }
+
+    #anrat-mini-game .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    #anrat-mini-game .stat-value {
+      font: 20px Consolas, monospace;
+      color: var(--accent);
+    }
+
+    #anrat-mini-game .field {
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background:
+        radial-gradient(ellipse at center,
+          #252139 0%, #151520 75%);
+      touch-action: manipulation;
+    }
+
+    #anrat-mini-game .field::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .13;
+      background-image:
+        linear-gradient(#777 1px, transparent 1px),
+        linear-gradient(90deg, #777 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    #anrat-mini-game .star {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      font-size: 27px;
+      cursor: pointer;
+      padding: 3px;
+      line-height: 1;
+      filter: drop-shadow(0 0 7px #c5a4f588);
+      animation: star-pop .18s ease-out;
+    }
+
+    #anrat-mini-game .star:hover {
+      transform: scale(1.15);
+    }
+
+    @keyframes star-pop {
+      from { opacity: 0; scale: .4; }
+      to { opacity: 1; scale: 1; }
+    }
+
+    #anrat-mini-game .center-message {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      pointer-events: none;
+      text-align: center;
+    }
+
+    #anrat-mini-game .center-message strong {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    #anrat-mini-game .center-message small {
+      color: var(--muted);
+    }
+
+    #anrat-mini-game .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    #anrat-mini-game .status {
+      color: var(--muted);
+      font: 11px Consolas, monospace;
+    }
+
+    #anrat-mini-game .status::before {
+      content: "●";
+      color: #7fbb9a;
+      margin-right: 7px;
+    }
+
+    #anrat-mini-game .start {
+      background: var(--accent);
+      color: #171321;
+      border: 0;
+      border-radius: 5px;
+      padding: 9px 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    #anrat-mini-game .start:hover {
+      background: #dbc4ff;
+    }
+
+    #anrat-mini-game .start:disabled {
+      opacity: .5;
+      cursor: default;
+    }
+
+    #anrat-mini-game .footer {
+      padding: 10px 16px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font: 10px Consolas, monospace;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+
+  <div class="titlebar">
+    <span class="app-icon">✦</span>
+    <span class="window-title">star_catcher.exe</span>
+    <span class="window-controls">− □ ×</span>
+  </div>
+
+  <div class="content">
+    <div class="path">
+      ~/anrat/games/star_catcher
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">Score</span>
+        <span class="stat-value" id="ag-score">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Time Left</span>
+        <span class="stat-value" id="ag-time">20s</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Best</span>
+        <span class="stat-value" id="ag-best">0</span>
+      </div>
+    </div>
+
+    <div class="field" id="ag-field">
+      <div class="center-message" id="ag-message">
+        <strong>✦ Catch the Stars</strong>
+        <small>Click the stars before they vanish!</small>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <span class="status" id="ag-status">READY</span>
+      <button class="start" id="ag-start">
+        ▶ Start Game
+      </button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>ANRAT.EXE / MINI GAMES</span>
+    <span>v1.0.0</span>
+  </div>
+
+  <script>
+    (() => {
+      const root = document.getElementById("anrat-mini-game");
+      if (root.dataset.initialized) return;
+      root.dataset.initialized = "true";
+
+      const get = id => root.querySelector("#" + id);
+      const field = get("ag-field");
+      const scoreEl = get("ag-score");
+      const timeEl = get("ag-time");
+      const bestEl = get("ag-best");
+      const message = get("ag-message");
+      const status = get("ag-status");
+      const start = get("ag-start");
+
+      let score = 0;
+      let time = 20;
+      let best = 0;
+      let running = false;
+      let timer, spawner;
+      let generation = 0;
+
+      try {
+        best = Number(localStorage.getItem("anrat-star-best")) || 0;
+      } catch (e) {}
+
+      bestEl.textContent = best;
+
+      function spawn() {
+        if (!running) return;
+
+        const star = document.createElement("button");
+        star.className = "star";
+        star.type = "button";
+        star.textContent = "✦";
+        star.setAttribute("aria-label", "Catch star");
+        star.style.color = ["#c5a4f5", "#f0c9ff", "#a9c9ff"][
+          Math.floor(Math.random() * 3)
+        ];
+
+        star.style.left =
+          Math.random() * Math.max(0, field.clientWidth - 45) + "px";
+        star.style.top =
+          Math.random() * Math.max(0, field.clientHeight - 45) + "px";
+
+        const currentGeneration = generation;
+        field.appendChild(star);
+
+        const timeout = setTimeout(() => star.remove(), 1100);
+
+        star.addEventListener("click", () => {
+          if (!running || currentGeneration !== generation) return;
+          clearTimeout(timeout);
+          score++;
+          scoreEl.textContent = score;
+          star.remove();
+        });
+      }
+
+      function end() {
+        running = false;
+        generation++;
+        clearInterval(timer);
+        clearInterval(spawner);
+        field.replaceChildren();
+
+        if (score > best) {
+          best = score;
+          bestEl.textContent = best;
+          try {
+            localStorage.setItem("anrat-star-best", best);
+          } catch (e) {}
+        }
+
+        message.innerHTML =
+          "<strong>Game Complete!</strong>" +
+          "<small>Final score: " + score + " ✦</small>";
+
+        field.appendChild(message);
+        status.textContent = "FINISHED";
+        start.textContent = "↻ Play Again";
+        start.disabled = false;
+      }
+
+      start.addEventListener("click", () => {
+        if (running) return;
+
+        score = 0;
+        time = 20;
+        generation++;
+        running = true;
+
+        scoreEl.textContent = score;
+        timeEl.textContent = time + "s";
+        field.replaceChildren();
+        status.textContent = "RUNNING";
+        start.disabled = true;
+        start.textContent = "Playing...";
+
+        spawn();
+        spawner = setInterval(spawn, 480);
+
+        timer = setInterval(() => {
+          time--;
+          timeEl.textContent = time + "s";
+          if (time <= 0) end();
+        }, 1000);
+      });
+    })();
+  </script>
+</div>

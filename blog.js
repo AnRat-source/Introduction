@@ -84,6 +84,74 @@
     });
   }
 
+  async function renderGitHubDiscussion(url, container) {
+    const match = url.match(
+      /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/discussions\/(\d+)\/?$/
+    );
+
+    if (!match) return;
+
+    const [, owner, repo, number] = match;
+
+    container.className = 'blog-github-discussion';
+    container.textContent = 'Loading GitHub discussion...';
+
+    try {
+      const apiUrl =
+        `https://api.github.com/repos/${owner}/${repo}/discussions/${number}`;
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          Accept: 'application/vnd.github+json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API returned ${response.status}`);
+      }
+
+      const discussion = await response.json();
+
+      const title = document.createElement('h3');
+      title.textContent = discussion.title;
+
+      const meta = document.createElement('div');
+      meta.className = 'blog-discussion-meta';
+      meta.textContent =
+        `${discussion.user?.login || 'Unknown'} · ` +
+        new Date(discussion.created_at).toLocaleDateString();
+
+      const body = document.createElement('div');
+      body.className = 'blog-discussion-body';
+
+      // Plain text prevents untrusted HTML injection.
+      body.textContent = discussion.body || '';
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'View discussion on GitHub ↗';
+
+      container.replaceChildren(title, meta, body, link);
+    } catch (error) {
+      container.replaceChildren();
+
+      const message = document.createElement('p');
+      message.textContent = 'Could not load this GitHub discussion.';
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'Open on GitHub ↗';
+
+      container.append(message, link);
+      console.error('GitHub discussion embed:', error);
+    }
+  }
+
+
   function renderPostBody(markdown) {
     postBody.replaceChildren();
     const codeBlock = /```([^\r\n`]*)\r?\n([\s\S]*?)```/g;
@@ -93,6 +161,21 @@
       appendTextBody(markdown.slice(cursor, match.index));
       const language = match[1].trim().toLowerCase();
       const content = match[2].replace(/\r?\n$/, '');
+
+      const discussionMatch = content.trim().match(
+        /^@?(https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/discussions\/\d+\/?)$/
+      );
+
+      if (discussionMatch) {
+        const container = document.createElement('div');
+        postBody.append(container);
+
+        renderGitHubDiscussion(discussionMatch[1], container);
+
+        cursor = codeBlock.lastIndex;
+        continue;
+      }
+
       const isHtmlEmbed = language === 'html' || /<\/?[a-z][\s\S]*>/i.test(content);
       
       if (isHtmlEmbed) {
