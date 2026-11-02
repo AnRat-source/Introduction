@@ -94,16 +94,86 @@
       const language = match[1].trim().toLowerCase();
       const content = match[2].replace(/\r?\n$/, '');
       const isHtmlEmbed = language === 'html' || /<\/?[a-z][\s\S]*>/i.test(content);
+      
       if (isHtmlEmbed) {
         const frame = document.createElement('iframe');
         frame.className = 'blog-reader-html';
         frame.title = 'Embedded HTML from this blog post';
         frame.sandbox = 'allow-scripts';
-        frame.srcdoc = content;
+        frame.setAttribute('scrolling', 'no');
+
+        frame.style.cssText = `
+          display: block;
+          width: 100%;
+          height: 1px;
+          min-height: 0;
+          border: none;
+          background: transparent;
+          overflow: hidden;
+          box-sizing: border-box;
+        `;
+
+        const frameId = crypto.randomUUID();
+        frame.dataset.embedId = frameId;
+
+        const resizeScript = `
+          <script>
+            (() => {
+              const id = ${JSON.stringify(frameId)};
+
+              document.documentElement.style.background = 'transparent';
+              document.body.style.background = 'transparent';
+
+              document.documentElement.style.overflow = 'hidden';
+              document.body.style.overflow = 'hidden';
+
+              function updateHeight() {
+                const height = Math.ceil(Math.max(
+                  document.body.scrollHeight,
+                  document.body.offsetHeight,
+                  document.documentElement.scrollHeight,
+                  document.documentElement.offsetHeight
+                ));
+
+                parent.postMessage({
+                  type: 'blog-embed-resize',
+                  id,
+                  height
+                }, '*');
+              }
+
+              new ResizeObserver(updateHeight).observe(document.body);
+
+              window.addEventListener('load', updateHeight);
+              window.addEventListener('resize', updateHeight);
+
+              document.fonts?.ready.then(updateHeight);
+
+              requestAnimationFrame(updateHeight);
+            })();
+          <\/script>
+        `;
+
+        frame.srcdoc = `
+          <style>
+            html, body {
+              background: transparent !important;
+              margin: 0;
+              padding: 0;
+            }
+            html {
+              color-scheme: normal;
+            }
+          </style>
+          ${content}
+          ${resizeScript}
+        `;
+
         postBody.append(frame);
         cursor = codeBlock.lastIndex;
         continue;
       }
+
       const pre = document.createElement('pre');
       pre.className = 'blog-reader-code';
       const code = document.createElement('code');
@@ -116,6 +186,26 @@
     appendTextBody(markdown.slice(cursor));
     if (!postBody.childElementCount) appendTextBody('Open this post on GitHub to read more.');
   }
+
+  window.addEventListener('message', event => {
+    const data = event.data;
+
+    if (!data || data.type !== 'blog-embed-resize') return;
+
+    const frame = [...document.querySelectorAll('.blog-reader-html')]
+      .find(f =>
+        f.contentWindow === event.source &&
+        f.dataset.embedId === data.id
+      );
+
+    if (!frame) return;
+
+    const height = Number(data.height);
+
+    if (!Number.isFinite(height) || height < 0) return;
+
+    frame.style.height = `${Math.ceil(height)}px`;
+  });
 
   function loadPostComments(post) {
     if (!postComments) return;

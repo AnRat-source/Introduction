@@ -52,6 +52,21 @@
 .blog-reader-code { margin: 0 0 18px; padding: 14px; overflow: auto; border: 1px solid #697488; background: #090c12; color: #e9ddff; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; tab-size: 2; }
 .blog-reader-html { display: block; width: 100%; min-height: 320px; margin: 0 0 18px; border: 1px solid #697488; background: #fff; }
 .blog-reader-comments { border-top: 1px solid rgba(105, 116, 136, .55); background: rgba(5, 7, 11, .32); }
+
+.blog-reader-html {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  min-height: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent !important;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
 body.post-view-open { overflow: hidden; }
 .blog-page footer.note { margin-top: 18px; }
 
