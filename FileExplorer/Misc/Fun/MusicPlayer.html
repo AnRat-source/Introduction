@@ -18,10 +18,6 @@
         position: absolute;
         top: 50%;
         left: 50%;
-
-        width: max(110cqw, 195.56cqh);
-        height: max(110cqh, 61.88cqw);
-
         border: 0;
         transform: translate(-50%, -50%);
         transform-origin: center;
@@ -175,7 +171,12 @@
           width: '600', height: '600',
           playerVars: { listType: 'playlist', list: PLAYLIST_ID, playsinline: 1, rel: 0, modestbranding: 1 },
           events: {
-            onReady: () => { ready = true; cueRandomFirstTrack(); setProgress(); },
+            onReady: () => {
+                ready = true;
+                centerBackgroundVideo();
+                cueRandomFirstTrack();
+                setProgress();
+            },
             onStateChange: event => { const isPlaying = event.data === YT.PlayerState.PLAYING; if (isPlaying) { setPlaybackButton(true); clearInterval(updateTimer); updateTimer = setInterval(setProgress, 500); } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.CUED) { setPlaybackButton(false); setProgress(); } },
             onError: () => { title.textContent = 'Playlist unavailable'; }
           }
@@ -190,6 +191,38 @@
       document.getElementById('next').addEventListener('click', () => { if (ready) { openDocumentPiP(); player.nextVideo(); player.playVideo(); } });
       seek.addEventListener('input', () => { if (!ready) return; const total = player.getDuration(); if (total) player.seekTo((Number(seek.value) / 100) * total, true); });
       const api = document.createElement('script'); api.src = 'https://www.youtube.com/iframe_api'; api.async = true; document.head.append(api);
+    
+      const centerBackgroundVideo = () => {
+      const container = document.getElementById('youtube-player');
+      const iframe = container.querySelector('iframe');
+
+      if (!iframe) return;
+
+      const { width, height } = container.getBoundingClientRect();
+      if (!width || !height) return;
+
+      const aspectRatio = 16 / 9;
+      const zoom = 1.15;
+
+      let videoWidth = width;
+      let videoHeight = videoWidth / aspectRatio;
+
+      if (videoHeight < height) {
+          videoHeight = height;
+          videoWidth = videoHeight * aspectRatio;
+      }
+
+      iframe.style.width = `${videoWidth * zoom}px`;
+      iframe.style.height = `${videoHeight * zoom}px`;
+      iframe.style.top = '50%';
+      iframe.style.left = '50%';
+      iframe.style.transform = 'translate(-50%, -50%)';
+  };
+
+  const videoResizeObserver = new ResizeObserver(centerBackgroundVideo);
+  videoResizeObserver.observe(document.getElementById('youtube-player'));
+
+  window.addEventListener('resize', centerBackgroundVideo);
     })();
   </script>
 </body>
