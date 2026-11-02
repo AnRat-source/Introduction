@@ -120,3 +120,35 @@ body.post-view-open { overflow: hidden; }
   .blog-post-reader { width: 100%; border: 0; box-shadow: none; }
   .blog-reader-content, .blog-reader-comments { padding: 20px 16px; }
 }
+
+
+/* Scrollbar styling */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #8b5cf6 #10111c;
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #10111c;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6545a0;
+  border-radius: 10px;
+  border: 2px solid #10111c;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a78bfa;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

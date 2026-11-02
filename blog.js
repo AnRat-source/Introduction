@@ -159,10 +159,11 @@
     let match;
     while ((match = codeBlock.exec(markdown))) {
       appendTextBody(markdown.slice(cursor, match.index));
-      const language = match[1].trim().toLowerCase();
+      const rawLanguage = match[1].trim();
+      const language = rawLanguage.toLowerCase();
       const content = (match[2] || '').replace(/\r?\n$/, '');
 
-      const embedText = (content || language).trim();
+      const embedText = (content || rawLanguage).trim();
       const urlMatch = embedText.match(/^@(https?:\/\/[^\s]+)$/);
 
       if (urlMatch) {

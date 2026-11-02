@@ -584,5 +584,27 @@
   </div>
 
   <script src="script.js"></script>
+  
+  <script>
+    function sendEmbedHeight() {
+      const height = Math.ceil(
+        Math.max(
+          document.body.scrollHeight,
+          document.documentElement.scrollHeight
+        )
+      );
+
+      window.parent.postMessage({
+        type: 'external-embed-resize',
+        height
+      }, 'https://anrat.link');
+    }
+
+    new ResizeObserver(sendEmbedHeight).observe(document.body);
+
+    window.addEventListener('load', sendEmbedHeight);
+    window.addEventListener('resize', sendEmbedHeight);
+  </script>
+
 </body>
 </html>
