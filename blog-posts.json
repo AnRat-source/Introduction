@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-02T13:37:47.463Z",
+  "generatedAt": "2026-11-02T13:40:41.425Z",
   "posts": [
     {
       "number": 4,
       "title": "test 2",
-      "body": "test asadasd",
-      "excerpt": "test asadasd",
+      "body": "",
+      "excerpt": "",
       "url": "https://github.com/AnRat-source/Introduction/discussions/4",
-      "author": "AnRat-source",
+      "author": "admin",
       "createdAt": "2026-11-02T13:33:09Z",
-      "updatedAt": "2026-11-02T13:36:45Z"
+      "updatedAt": "2026-11-02T13:40:27Z"
     },
     {
       "number": 3,
