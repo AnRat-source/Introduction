@@ -14,7 +14,18 @@
 
     /* The current YouTube video becomes a soft moving background rather than a visible video player. */
     #youtube-player { position: absolute; z-index: -2; inset: 0; overflow: hidden; pointer-events: none; filter: blur(28px) saturate(1.08); opacity: 1; transform: scale(1.08); }
-    #youtube-player iframe { position: absolute; top: 50%; left: 50%; width: max(100cqw, 177.78cqh); height: max(100cqh, 56.25cqw); min-width: 100%; min-height: 100%; border: 0; transform: translate(-50%, -50%); }
+    #youtube-player iframe {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+
+        width: max(110cqw, 195.56cqh);
+        height: max(110cqh, 61.88cqw);
+
+        border: 0;
+        transform: translate(-50%, -50%);
+        transform-origin: center;
+    }
     .video-wash { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,9,15,.38), rgba(8,9,15,.73)), radial-gradient(circle at 50% 45%, transparent 22%, rgba(8,9,15,.4) 90%); opacity: 0; }
 
     .now-playing, .cover-wrap, #title, .progress-group, .transport { position: relative; z-index: 1; }
