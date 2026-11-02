@@ -1,9 +1,10 @@
 {
-  "generatedAt": "2026-11-02T07:03:45.850Z",
+  "generatedAt": "2026-11-02T11:24:25.084Z",
   "posts": [
     {
       "number": 2,
       "title": "Test",
+      "body": "aaaaa",
       "excerpt": "aaaaa",
       "url": "https://github.com/AnRat-source/Introduction/discussions/2",
       "author": "AnRat-source",
@@ -13,6 +14,7 @@
     {
       "number": 1,
       "title": "blog",
+      "body": "blog\nUpdates, notes, and discussion from AnRat.\nhttp://127.0.0.1:5500/blog.html",
       "excerpt": "blog\nUpdates, notes, and discussion from AnRat.\nhttp://127.0.0.1:5500/blog.html",
       "url": "https://github.com/AnRat-source/Introduction/discussions/1",
       "author": "giscus",
