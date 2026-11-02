@@ -38,6 +38,11 @@
             "type": "file",
             "name": "Doom.iframe",
             "path": "FileExplorer/Misc/Games/Doom.iframe"
+          },
+          {
+            "type": "file",
+            "name": "Star-Catcher.html",
+            "path": "FileExplorer/Misc/Games/Star-Catcher.html"
           }
         ]
       },
