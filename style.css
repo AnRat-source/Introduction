@@ -919,6 +919,7 @@
       header.is-floating { position: relative; top: auto; left: auto; width: auto; margin-bottom: 22px; }
       header .brand { align-items: flex-start; }
       header nav { margin-left: 8px; }
+      header nav a[href*="discord.gg"] { display: none; }
       .card { padding: 42px 14px 14px !important; }
       .card .head { gap: 9px; }
       .icon { width: 48px; height: 48px; }
