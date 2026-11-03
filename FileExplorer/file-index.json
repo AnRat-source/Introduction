@@ -85,8 +85,8 @@
         "children": [
           {
             "type": "file",
-            "name": "ParSci-Notes.link",
-            "path": "FileExplorer/Tools/Study/ParSci-Notes.link"
+            "name": "ParSci-Notes.href",
+            "path": "FileExplorer/Tools/Study/ParSci-Notes.href"
           }
         ]
       }
