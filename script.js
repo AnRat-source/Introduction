@@ -613,7 +613,7 @@
       const storedLink = normalizeKnownLink(/^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`);
       if (opensInNewTab && newTab) newTab.location.replace(storedLink);
       else if (opensInNewTab) window.open(storedLink, '_blank', 'noopener,noreferrer');
-      else window.location.assign(storedLink);
+      else openExplorerPreview(storedLink, hrefFile.querySelector('span').textContent);
     } catch {
       newTab?.close();
       fileExplorerStatus.textContent = `${hrefFile.querySelector('span').textContent} does not contain a valid URL yet.`;
