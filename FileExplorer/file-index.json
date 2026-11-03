@@ -69,9 +69,26 @@
     "name": "Tools",
     "children": [
       {
-        "type": "file",
-        "name": "Blueprint-Maker.html",
-        "path": "FileExplorer/Tools/Blueprint-Maker.html"
+        "type": "directory",
+        "name": "Diagrams",
+        "children": [
+          {
+            "type": "file",
+            "name": "Blueprint-Maker.html",
+            "path": "FileExplorer/Tools/Diagrams/Blueprint-Maker.html"
+          }
+        ]
+      },
+      {
+        "type": "directory",
+        "name": "Study",
+        "children": [
+          {
+            "type": "file",
+            "name": "ParSci-Notes.link",
+            "path": "FileExplorer/Tools/Study/ParSci-Notes.link"
+          }
+        ]
       }
     ]
   },
