@@ -156,6 +156,7 @@
     if (document.fullscreenElement === explorerPreview) document.exitFullscreen();
     explorerPreviewFrame.src = 'about:blank';
     explorerPreview.classList.remove('is-minimized', 'is-url-fullscreen');
+    updatePreviewFullscreenState();
     explorerPreview.hidden = true;
     explorerTabs = explorerTabs.filter(tab => tab.id !== activeExplorerTabId);
     activeExplorerTabId = null;
@@ -233,7 +234,9 @@
 
   function setPreviewMinimized(isMinimized) {
     if (isMinimized && document.fullscreenElement === explorerPreview) document.exitFullscreen();
+    if (isMinimized) explorerPreview.classList.remove('is-url-fullscreen');
     explorerPreview.classList.toggle('is-minimized', isMinimized);
+    updatePreviewFullscreenState();
     explorerPreviewMinimize.setAttribute('aria-label', isMinimized ? 'Restore site preview' : 'Minimize site preview');
     explorerPreviewMinimize.textContent = isMinimized ? '□' : '−';
     if (!isMinimized) requestAnimationFrame(positionExplorerPreview);
@@ -276,6 +279,12 @@
 
   function isPreviewFullscreenLayout() {
     return document.fullscreenElement === explorerPreview || explorerPreview.classList.contains('is-url-fullscreen');
+  }
+
+  function updatePreviewFullscreenState() {
+    // URL-driven fullscreen cannot use the browser's fullscreen layer, so hide
+    // the rest of the site's floating UI while the preview owns the viewport.
+    document.body.classList.toggle('preview-fullscreen', isPreviewFullscreenLayout());
   }
 
   function syncPreviewAddress() {
@@ -385,6 +394,7 @@
     if (document.fullscreenElement === explorerPreview) await document.exitFullscreen();
     else if (explorerPreview.classList.contains('is-url-fullscreen')) {
       explorerPreview.classList.remove('is-url-fullscreen');
+      updatePreviewFullscreenState();
       syncPreviewAddress();
       positionExplorerPreview();
     } else await explorerPreview.requestFullscreen();
@@ -392,6 +402,7 @@
   document.addEventListener('fullscreenchange', () => {
     const fullscreen = document.fullscreenElement === explorerPreview;
     explorerPreview.classList.toggle('is-url-fullscreen', fullscreen);
+    updatePreviewFullscreenState();
     explorerPreviewFullscreen.textContent = fullscreen ? '⛶' : '□';
     explorerPreviewFullscreen.setAttribute('aria-label', fullscreen ? 'Exit fullscreen preview' : 'Show site preview fullscreen');
     if (!fullscreen) positionExplorerPreview();
@@ -444,6 +455,7 @@
     openExplorerPreview(sharedPreviewSource, sharedPreviewTitle, savedTab?.id || null);
     if (sharedPreviewUrl.searchParams.get('fullscreen') === 'true') {
       explorerPreview.classList.add('is-url-fullscreen');
+      updatePreviewFullscreenState();
       syncPreviewAddress();
     }
   }

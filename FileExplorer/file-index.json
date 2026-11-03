@@ -65,6 +65,17 @@
     ]
   },
   {
+    "type": "directory",
+    "name": "Tools",
+    "children": [
+      {
+        "type": "file",
+        "name": "Blueprint-Maker.html",
+        "path": "FileExplorer/Tools/Blueprint-Maker.html"
+      }
+    ]
+  },
+  {
     "type": "file",
     "name": "Portfolio.href",
     "path": "FileExplorer/Portfolio.href"

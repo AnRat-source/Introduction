@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <link rel="icon" href="../../../assets/WebPage.ico">
+  <title>Blueprint Maker</title>
+  <style>
+    :root {
+      --page: #111722; --window: rgba(25, 32, 45, .94); --window-2: #18202e;
+      --border: #66748a; --border-soft: rgba(151, 169, 194, .28); --ink: #e7edf6;
+      --muted: #98a7ba; --accent: #c4b5fd; --accent-strong: #9f7aea; --shadow: 5px 6px 0 rgba(0,0,0,.32);
+      --canvas: #0b4177; --grid-minor: rgba(191, 228, 255, .13); --grid-major: rgba(218, 241, 255, .28); --line: #eef8ff;
+    }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; min-height: 100vh; margin: 0; overflow-x: hidden; color: var(--ink); font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: radial-gradient(circle at 12% -14%, #40365f 0, transparent 32rem), radial-gradient(circle at 100% 0%, #1e3a5a 0, transparent 32rem), var(--page); scrollbar-color: #7666a8 #111824; scrollbar-width: thin; }
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { border: 1px solid #344258; background: #111824; }
+    ::-webkit-scrollbar-thumb { border: 3px solid #111824; background: linear-gradient(135deg, #c4b5fd, #7461a9); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
+    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #e0d6ff, #9178d2); }
+    ::-webkit-scrollbar-corner { background: #111824; }
+    button, select, input { font: inherit; }
+    button, select { color: var(--ink); }
+    button { cursor: pointer; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .app { width: min(1440px, calc(100% - 28px)); margin: 0 auto; padding: 18px 0 26px; }
+    .window { border: 1px solid var(--border); background: var(--window); box-shadow: var(--shadow); backdrop-filter: blur(14px); }
+    .titlebar { display: flex; align-items: center; min-height: 39px; padding: 0 11px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(79, 70, 125, .5), rgba(34, 45, 62, .82)); color: #f4f6fa; font: 700 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .075em; text-transform: uppercase; }
+    .titlebar .app-mark { display: grid; width: 22px; height: 22px; place-items: center; margin-right: 8px; border: 1px solid rgba(220, 230, 245, .38); background: #27324a; color: var(--accent); font-size: 14px; }
+    .window-controls { margin-left: auto; color: #aab7c9; letter-spacing: .38em; }
+    header.window { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; padding: 15px 17px; border-top: 0; }
+    .brand { min-width: min(100%, 340px); }
+    h1 { margin: 0; color: #f3f6fc; font-size: clamp(21px, 3vw, 30px); letter-spacing: -.045em; line-height: 1; }
+    .eyebrow { margin: 5px 0 0; color: var(--muted); font: 700 10px/1.35 ui-monospace, monospace; letter-spacing: .09em; text-transform: uppercase; }
+    .header-actions { display: flex; flex: 1; justify-content: flex-end; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .theme-picker { display: flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid var(--border); background: rgba(10, 15, 24, .45); color: var(--muted); font: 700 10px/1 ui-monospace, monospace; letter-spacing: .04em; }
+    select { min-width: 152px; border: 0; outline: 0; background: transparent; color: var(--ink); cursor: pointer; }
+    option { color: #e7edf6; background: #202938; }
+    .action { min-height: 33px; padding: 7px 10px; border: 1px solid var(--border); background: rgba(32, 42, 57, .92); box-shadow: 2px 2px 0 rgba(0,0,0,.3); font: 700 11px/1 ui-monospace, monospace; letter-spacing: .035em; }
+    .action:hover { border-color: #c0ccdc; background: #3b4860; transform: translate(-1px, -1px); }
+    .action.primary { border-color: #bca7ff; background: #7655b7; color: white; }
+    .action.primary:hover { background: #8b62d2; }
+    .workspace { display: grid; grid-template-columns: 235px minmax(0, 1fr) 218px; gap: 14px; margin-top: 14px; }
+    .panel { min-width: 0; }
+    .panel-content { padding: 12px; }
+    .tools { display: grid; gap: 6px; }
+    .tool { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 37px; padding: 7px 9px; border: 1px solid transparent; background: transparent; color: #d6dfeb; text-align: left; }
+    .tool .key { display: grid; width: 22px; height: 22px; place-items: center; border: 1px solid #647186; background: #202939; color: #c8b8ff; font: 700 10px/1 ui-monospace, monospace; }
+    .tool small { margin-left: auto; color: #8190a4; font: 10px ui-monospace, monospace; }
+    .tool:hover, .tool.active { border-color: var(--border); background: rgba(124, 107, 181, .22); }
+    .tool.active { box-shadow: inset 3px 0 0 var(--accent); color: white; }
+    .furniture-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .furniture { min-height: 56px; padding: 7px; border: 1px solid #506077; background: rgba(16, 25, 38, .58); color: #dce8f7; text-align: left; }
+    .furniture:hover, .furniture.active { border-color: #c4b5fd; background: rgba(124, 107, 181, .24); }
+    .furniture b, .furniture small { display: block; }
+    .furniture b { overflow: hidden; color: #f2efff; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .furniture small { margin-top: 2px; color: #9eaec2; font: 9px ui-monospace, monospace; }
+    .custom-furniture { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .custom-furniture input { min-width: 0; width: 100%; min-height: 31px; padding: 6px 7px; border: 1px solid #5e6c82; background: #151e2c; color: var(--ink); }
+    .custom-furniture input:first-child { grid-column: 1 / -1; }
+    .custom-furniture .action { grid-column: 1 / -1; }
+    .furniture-search { width: 100%; min-height: 31px; margin-bottom: 7px; padding: 6px 8px; border: 1px solid #5e6c82; background: #151e2c; color: var(--ink); }
+    .furniture-item { position: relative; min-width: 0; }
+    .furniture-item .furniture { width: 100%; }
+    .delete-furniture { position: absolute; z-index: 1; top: 3px; right: 3px; width: 19px; height: 19px; padding: 0; border: 1px solid #9a6871; background: #38242c; color: #ffd9de; font-size: 13px; line-height: 1; }
+    .delete-furniture:hover { background: #66323c; }
+    .furniture-pages { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; color: var(--muted); font: 10px ui-monospace, monospace; }
+    .furniture-pages .action { min-height: 27px; padding: 5px 7px; font-size: 10px; }
+    .furniture-pages .action:disabled { opacity: .4; cursor: default; transform: none; }
+    .section-label { margin: 18px 0 8px; color: #91a1b7; font: 700 10px/1 ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; }
+    .section-label:first-child { margin-top: 0; }
+    .setting { display: grid; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 11px; }
+    .setting span { display: flex; justify-content: space-between; }
+    .setting output { color: var(--accent); font-family: ui-monospace, monospace; }
+    input[type="range"] { width: 100%; accent-color: var(--accent-strong); }
+    input[type="color"] { width: 100%; height: 32px; padding: 2px; border: 1px solid var(--border); background: #111827; cursor: pointer; }
+    .stage-window { display: flex; flex-direction: column; min-height: 640px; overflow: hidden; }
+    .stage-toolbar { display: flex; align-items: center; gap: 8px; min-height: 43px; padding: 6px 9px; border-bottom: 1px solid var(--border-soft); background: rgba(10, 16, 25, .28); }
+    .stage-toolbar .file-name { flex: 1; color: #dbe7f7; font: 700 11px/1 ui-monospace, monospace; }
+    .status-dot { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: #65d6a1; box-shadow: 0 0 9px #65d6a1; }
+    .canvas-frame { position: relative; flex: 1; min-height: 490px; overflow: auto; background: #080d16; cursor: crosshair; }
+    canvas { display: block; width: 1200px; height: 760px; background-color: var(--canvas); background-image: linear-gradient(var(--grid-minor) 1px, transparent 1px), linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px), linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px); background-size: 10px 10px, 10px 10px, 50px 50px, 50px 50px; touch-action: none; }
+    .canvas-hint { position: absolute; right: 14px; bottom: 13px; padding: 6px 8px; border: 1px solid rgba(214, 235, 255, .37); background: rgba(7, 23, 41, .76); color: #deefff; font: 10px/1 ui-monospace, monospace; pointer-events: none; }
+    .stage-footer { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 8px 10px; border-top: 1px solid var(--border-soft); background: rgba(10, 16, 25, .28); color: var(--muted); font: 10px/1 ui-monospace, monospace; }
+    .stage-footer strong { color: #cde9ff; font-weight: 700; }
+    .properties { display: grid; gap: 10px; }
+    .empty-selection { padding: 11px; border: 1px dashed #5f6e84; background: rgba(13, 20, 31, .42); color: #a2b0c2; font-size: 12px; }
+    .rotation-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+    .rotation-controls[hidden] { display: none; }
+    .rotation-controls .action { min-height: 30px; padding: 6px; font-size: 10px; }
+    .text-controls { display: grid; gap: 7px; margin-top: 9px; padding: 9px; border: 1px solid var(--border-soft); background: rgba(11, 18, 29, .32); }
+    .text-controls[hidden] { display: none; }
+    .text-toggle { display: flex; align-items: center; gap: 7px; color: #cbd8e8; font-size: 11px; }
+    .text-toggle input { accent-color: var(--accent-strong); }
+    .text-scale { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
+    .text-scale input { grid-column: 1 / -1; width: 100%; accent-color: var(--accent-strong); }
+    .text-scale output { color: var(--accent); font: 700 10px ui-monospace, monospace; }
+    .label-side { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
+    .label-side select { min-width: 96px; padding: 4px 2px; border-bottom: 1px solid #596981; background: #162031; color: #e4edf7; }
+    dialog { width: min(520px, calc(100% - 26px)); max-height: min(70vh, 640px); padding: 0; border: 1px solid #8796ad; background: #182232; box-shadow: 8px 10px 0 rgba(0,0,0,.42); color: var(--ink); }
+    dialog::backdrop { background: rgba(5, 8, 14, .72); backdrop-filter: blur(3px); }
+    .draft-dialog-body { display: grid; gap: 9px; padding: 13px; }
+    .draft-list { display: grid; gap: 7px; max-height: 47vh; overflow: auto; }
+    .draft-row { display: flex; align-items: center; gap: 9px; padding: 9px; border: 1px solid #526278; background: rgba(9, 15, 25, .38); }
+    .draft-row-info { flex: 1; min-width: 0; }
+    .draft-row b, .draft-row small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .draft-row small { margin-top: 2px; color: var(--muted); font: 10px ui-monospace, monospace; }
+    .empty-drafts { padding: 22px; border: 1px dashed #687890; color: var(--muted); text-align: center; }
+    .stat { display: flex; justify-content: space-between; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border-soft); color: var(--muted); font-size: 11px; }
+    .stat b { color: #e4edf8; font-family: ui-monospace, monospace; font-weight: 600; }
+    .shortcut-list { display: grid; gap: 5px; color: var(--muted); font-size: 11px; }
+    kbd { display: inline-block; min-width: 22px; padding: 2px 5px; border: 1px solid #5f6c80; background: #222c3c; box-shadow: 1px 1px 0 rgba(0,0,0,.3); color: #dbe5f2; font: 10px ui-monospace, monospace; text-align: center; }
+    .toast { position: fixed; z-index: 3; bottom: 18px; left: 50%; opacity: 0; transform: translate(-50%, 18px); padding: 9px 12px; border: 1px solid #8e7fca; background: #25203a; box-shadow: var(--shadow); color: #f4f0ff; font: 12px ui-monospace, monospace; transition: .18s ease; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    body.theme-white { --canvas: #fafafa; --grid-minor: rgba(0,0,0,.09); --grid-major: rgba(0,0,0,.18); --line: #14171d; }
+    body.theme-black { --canvas: #090a0c; --grid-minor: rgba(255,255,255,.09); --grid-major: rgba(255,255,255,.2); --line: #f6f7f8; }
+    body.theme-graph { --canvas: #e9f0df; --grid-minor: rgba(47, 93, 55, .12); --grid-major: rgba(47, 93, 55, .25); --line: #283a2c; }
+    @media (max-width: 1050px) { .workspace { grid-template-columns: 210px minmax(0,1fr); } .properties-panel { grid-column: 1 / -1; } .properties-panel .panel-content { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; } .properties-panel .section-label { margin-top: 0; } }
+    @media (max-width: 740px) { .app { width: min(100% - 16px, 1440px); padding-top: 8px; } header.window { padding: 13px; } .header-actions { justify-content: flex-start; } .workspace { grid-template-columns: 1fr; gap: 10px; } .tool-panel { order: 2; } .stage-window { min-height: 545px; } .canvas-frame { min-height: 420px; } .properties-panel { order: 3; } .properties-panel .panel-content { grid-template-columns: 1fr; } .stage-toolbar { flex-wrap: wrap; } .theme-picker { flex: 1; } select { min-width: 0; width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body class="theme-blueprint">
+  <main class="app">
+    <div class="window titlebar"><span class="app-mark">⌗</span> tools / blueprint-maker.exe <span class="window-controls">− □ ×</span></div>
+    <header class="window">
+      <div class="brand"><h1>Blueprint Maker</h1><p class="eyebrow">Draft rooms, layouts, and perfectly questionable floor plans.</p></div>
+      <div class="header-actions">
+        <label class="theme-picker">STYLE <select id="theme" aria-label="Blueprint style"><option value="blueprint">Blueprint blue</option><option value="white">Black on white</option><option value="black">White on black</option><option value="graph">Architect graph</option></select></label>
+        <button class="action" id="loadButton" type="button">Load draft</button><button class="action" id="saveButton" type="button">Save draft</button><button class="action primary" id="exportButton" type="button">Export PNG</button>
+      </div>
+    </header>
+    <section class="workspace">
+      <aside class="panel window tool-panel" aria-label="Drawing tools">
+        <div class="titlebar"><span class="app-mark">⌘</span> toolbox</div>
+        <div class="panel-content">
+          <p class="section-label">Draw</p>
+          <div class="tools" id="tools">
+            <button class="tool active" data-tool="select" type="button"><span class="key">V</span> Select <small>move</small></button>
+            <button class="tool" data-tool="line" type="button"><span class="key">L</span> Wall line <small>draw</small></button>
+            <button class="tool" data-tool="room" type="button"><span class="key">R</span> Room <small>label</small></button>
+            <button class="tool" data-tool="rect" type="button"><span class="key">B</span> Rectangle <small>shape</small></button>
+            <button class="tool" data-tool="text" type="button"><span class="key">T</span> Note <small>text</small></button>
+          </div>
+          <p class="section-label">Canvas</p>
+          <div class="tools"><button class="tool" id="undoButton" type="button"><span class="key">↶</span> Undo <small>Ctrl Z</small></button><button class="tool" id="redoButton" type="button"><span class="key">↷</span> Redo <small>Ctrl Y</small></button><button class="tool" id="clearButton" type="button"><span class="key">×</span> Clear canvas <small>new</small></button></div>
+          <p class="section-label">Furniture library</p>
+          <input class="furniture-search" id="furnitureSearch" type="search" placeholder="Search furniture" aria-label="Search furniture">
+          <div class="furniture-grid" id="furnitureLibrary" aria-label="Furniture presets"></div>
+          <div class="furniture-pages"><button class="action" id="furniturePrevious" type="button">← Prev</button><span id="furniturePageInfo">Page 1 / 1</span><button class="action" id="furnitureNext" type="button">Next →</button></div>
+          <p class="section-label">Custom furniture</p>
+          <div class="custom-furniture"><input id="customFurnitureLabel" type="text" maxlength="22" placeholder="Label, e.g. Desk"><input id="customFurnitureWidth" type="number" min="0.1" step="0.1" placeholder="Width"><input id="customFurnitureHeight" type="number" min="0.1" step="0.1" placeholder="Length"><button class="action" id="addFurnitureButton" type="button">Add custom preset</button></div>
+          <p class="section-label">Scale</p>
+          <label class="setting"><span>Display unit</span><select id="unit" aria-label="Display unit"><option value="m">Meters (m)</option><option value="cm">Centimeters (cm)</option><option value="ft">Feet (ft)</option><option value="in">Inches (in)</option></select></label>
+          <div class="setting"><span>Grid scale <output id="gridValue">0.20 m minor · 1.00 m major</output></span></div>
+          <label class="setting"><span>Line weight <output id="weightValue">3 px</output></span><input id="lineWeight" type="range" min="1" max="10" value="3"></label>
+          <label class="setting"><span>Ink color</span><input id="inkColor" type="color" value="#eef8ff"></label>
+        </div>
+      </aside>
+      <section class="window stage-window" aria-label="Blueprint canvas">
+        <div class="titlebar"><span class="app-mark">▦</span> untitled.floorplan <span class="window-controls">_ □ ×</span></div>
+        <div class="stage-toolbar"><span class="file-name"><span class="status-dot"></span>LOCAL DRAFT · AUTO-SNAP ON</span><button class="action" id="zoomOut" type="button" aria-label="Zoom out">−</button><button class="action" id="zoomReset" type="button">100%</button><button class="action" id="zoomIn" type="button" aria-label="Zoom in">+</button></div>
+        <div class="canvas-frame" id="canvasFrame"><canvas id="canvas" width="1200" height="760" aria-label="Blueprint drawing canvas"></canvas><span class="canvas-hint" id="canvasHint">SELECT · 0 OBJECTS</span></div>
+        <footer class="stage-footer"><span><strong id="coordinates">X 0 · Y 0</strong></span><span id="status">Ready to draft</span></footer>
+      </section>
+      <aside class="panel window properties-panel" aria-label="Properties and shortcuts">
+        <div class="titlebar"><span class="app-mark">☷</span> inspector</div>
+        <div class="panel-content properties">
+          <div><p class="section-label">Selection</p><div class="empty-selection" id="selectionInfo">Nothing selected.<br>Use <b>V</b> to move an item.</div><div class="rotation-controls" id="rotationControls" hidden><button class="action" data-rotate="-90" type="button">↶ 90°</button><button class="action" data-rotate="90" type="button">90° ↷</button><button class="action" data-rotate="-15" type="button">↶ 15°</button><button class="action" data-rotate="15" type="button">15° ↷</button></div><div class="text-controls" id="textControls" hidden><label class="text-toggle"><input id="showLabel" type="checkbox" checked> Show item label</label><label class="text-toggle"><input id="showDimensions" type="checkbox" checked> Show dimensions</label><label class="label-side"><span>Horizontal label side</span><select id="horizontalLabelSide"><option value="top">Top</option><option value="bottom">Bottom</option></select></label><label class="label-side"><span>Vertical label side</span><select id="verticalLabelSide"><option value="left">Left</option><option value="right">Right</option></select></label><label class="text-scale"><span>Text size</span><output id="textScaleValue">100%</output><input id="textScale" type="range" min="0.5" max="2.5" step="0.1" value="1"></label></div></div>
+          <div><p class="section-label">Plan stats</p><div class="stat"><span>Objects</span><b id="objectCount">0</b></div><div class="stat"><span>Rooms</span><b id="roomCount">0</b></div><div class="stat"><span>Scale</span><b id="scaleInfo">50 px = 1 m</b></div><div class="stat"><span>Canvas</span><b id="canvasSize">24 × 15.2 m</b></div></div>
+          <div><p class="section-label">Shortcuts</p><div class="shortcut-list"><div><kbd>V</kbd> select / move</div><div><kbd>L</kbd> wall line</div><div><kbd>R</kbd> room</div><div><kbd>B</kbd> rectangle</div><div><kbd>T</kbd> add note</div><div><kbd>[</kbd> / <kbd>]</kbd> rotate 15°</div><div><kbd>DEL</kbd> remove selection</div></div></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+  <dialog id="draftDialog" aria-labelledby="draftDialogTitle"><div class="titlebar"><span class="app-mark">▤</span><span id="draftDialogTitle">Load a saved draft</span><button class="action" id="closeDraftDialog" type="button">Close</button></div><div class="draft-dialog-body"><div class="draft-list" id="draftList"></div></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      const canvas = document.querySelector('#canvas'); let ctx = canvas.getContext('2d');
+      const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+      const state = { tool: 'select', objects: [], selected: null, drawing: null, drag: null, zoom: 1, history: [], future: [], furniture: null, customFurniture: [], furniturePage: 0, furnitureSearch: '', drafts: [], currentDraftId: null, currentDraftName: 'Untitled plan' };
+      const FURNITURE_PER_PAGE = 10, DRAFTS_KEY = 'anrat-blueprint-drafts', LEGACY_DRAFT_KEY = 'anrat-blueprint-draft';
+      const theme = $('#theme'), lineWeight = $('#lineWeight'), inkColor = $('#inkColor'), unit = $('#unit');
+      const PX_PER_METER = 50;
+      const GRID_METERS = .2, FINE_SNAP_METERS = .05, GRID_PX = PX_PER_METER * GRID_METERS, FINE_SNAP_PX = PX_PER_METER * FINE_SNAP_METERS;
+      const units = { m: { label: 'm', multiplier: 1, digits: 2 }, cm: { label: 'cm', multiplier: 100, digits: 0 }, ft: { label: 'ft', multiplier: 3.28084, digits: 2 }, in: { label: 'in', multiplier: 39.3701, digits: 1 } };
+      const furniturePresets = [
+        { label: 'SOFA', width: 2.2, height: .9 }, { label: 'BED', width: 2, height: 1.6 },
+        { label: 'DESK', width: 1.4, height: .7 }, { label: 'TABLE', width: 1.6, height: .9 },
+        { label: 'CHAIR', width: .55, height: .55 }, { label: 'CABINET', width: 1.2, height: .45 }
+      ];
+      const toast = text => { const el = $('#toast'); el.textContent = text; el.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove('show'), 2100); };
+      const clone = value => JSON.parse(JSON.stringify(value));
+      const snap = (n, fine = false) => { const increment = fine ? FINE_SNAP_PX : GRID_PX; return Math.round(n / increment) * increment; };
+      const formatLength = px => { const selected = units[unit.value]; return `${(px / PX_PER_METER * selected.multiplier).toFixed(selected.digits)} ${selected.label}`; };
+      const dimensionText = obj => { if (obj.type === 'line') return formatLength(Math.hypot(obj.x2 - obj.x, obj.y2 - obj.y)); const b = bounds(obj); return `${formatLength(b.w)} × ${formatLength(b.h)}`; };
+      const point = event => { const r = canvas.getBoundingClientRect(), fine = event.ctrlKey; return { x: snap((event.clientX - r.left) * canvas.width / r.width, fine), y: snap((event.clientY - r.top) * canvas.height / r.height, fine) }; };
+      const pushHistory = () => { state.history.push(clone(state.objects)); if (state.history.length > 40) state.history.shift(); state.future = []; };
+      const setStatus = message => $('#status').textContent = message;
+      const draftSnapshot = () => ({ objects: clone(state.objects), theme: theme.value, unit: unit.value, savedAt: Date.now() });
+      const persistDrafts = () => { try { localStorage.setItem(DRAFTS_KEY, JSON.stringify(state.drafts)); } catch { toast('Could not save drafts in this browser.'); } };
+      const newDraftId = () => crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+      function loadDraft(draft) { state.objects = clone(draft.objects || []); state.selected = null; state.history = []; state.future = []; state.currentDraftId = draft.id; state.currentDraftName = draft.name; theme.value = draft.theme || 'blueprint'; unit.value = draft.unit || 'm'; theme.dispatchEvent(new Event('change')); $('#draftDialog').close(); setStatus(`Loaded draft: ${draft.name}`); render(); toast(`Loaded “${draft.name}”.`); }
+      function renderDraftList() { const list = $('#draftList'); list.replaceChildren(); if (!state.drafts.length) { const empty = document.createElement('div'); empty.className = 'empty-drafts'; empty.textContent = 'No saved drafts yet. Save the current canvas to add one.'; list.append(empty); return; } [...state.drafts].sort((a, b) => b.savedAt - a.savedAt).forEach(draft => { const row = document.createElement('div'), info = document.createElement('div'), name = document.createElement('b'), meta = document.createElement('small'), load = document.createElement('button'); row.className = 'draft-row'; info.className = 'draft-row-info'; name.textContent = draft.name; meta.textContent = `${draft.objects?.length || 0} objects · ${new Date(draft.savedAt).toLocaleString()}`; info.append(name, meta); load.className = 'action'; load.type = 'button'; load.textContent = 'Load'; load.addEventListener('click', () => loadDraft(draft)); row.append(info, load); list.append(row); }); }
+      const syncGrid = () => { const minor = GRID_PX * state.zoom, major = PX_PER_METER * state.zoom; canvas.style.backgroundSize = `${minor}px ${minor}px, ${minor}px ${minor}px, ${major}px ${major}px, ${major}px ${major}px`; $('#gridValue').textContent = `${formatLength(GRID_PX)} minor · ${formatLength(PX_PER_METER)} major`; };
+      const applyZoom = () => { canvas.style.width = `${1200 * state.zoom}px`; canvas.style.height = `${760 * state.zoom}px`; $('#zoomReset').textContent = `${Math.round(state.zoom * 100)}%`; syncGrid(); };
+      const objectLabel = obj => ({ line: 'Wall line', rect: 'Rectangle', room: `Room: ${obj.label}`, text: `Note: ${obj.label}`, furniture: `Furniture: ${obj.label}` })[obj?.type] || 'Nothing selected.';
+      const objectCenter = obj => { const b = bounds(obj); return { x: b.x + b.w / 2, y: b.y + b.h / 2 }; };
+      const rotatePoint = (point, center, degrees) => { const radians = degrees * Math.PI / 180, dx = point.x - center.x, dy = point.y - center.y; return { x: center.x + dx * Math.cos(radians) - dy * Math.sin(radians), y: center.y + dx * Math.sin(radians) + dy * Math.cos(radians) }; };
+      const localPoint = (point, obj) => rotatePoint(point, objectCenter(obj), -(obj.rotation || 0));
+      const rotateSelected = degrees => { if (!state.selected) return toast('Select an item to rotate.'); pushHistory(); state.selected.rotation = ((state.selected.rotation || 0) + degrees + 360) % 360; setStatus(`${objectLabel(state.selected)} rotated to ${state.selected.rotation}°`); render(); };
+      const readableAngle = angle => { let result = ((angle % Math.PI) + Math.PI) % Math.PI; if (result >= Math.PI / 2) result -= Math.PI; return result; };
+      function drawEdgeText(text, x, y, edgeAngle, objectAngle, offset = -8, scale = 1) { ctx.save(); ctx.translate(x, y); ctx.rotate(readableAngle(edgeAngle) - objectAngle); ctx.font = `700 ${10 * scale}px ui-monospace, monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 0, offset * scale); ctx.restore(); }
+      function drawObject(obj, ghost = false) {
+        ctx.save(); ctx.strokeStyle = obj.color || getComputedStyle(document.documentElement).getPropertyValue('--line'); ctx.fillStyle = ctx.strokeStyle; ctx.lineWidth = obj.weight || +lineWeight.value; ctx.lineCap = 'square'; ctx.globalAlpha = ghost ? .55 : 1;
+        const center = objectCenter(obj), objectAngle = (obj.rotation || 0) * Math.PI / 180; ctx.translate(center.x, center.y); ctx.rotate(objectAngle); ctx.translate(-center.x, -center.y);
+        if (obj.type === 'line') { const labelOffset = obj.horizontalLabelSide === 'bottom' ? 8 : -8; ctx.beginPath(); ctx.moveTo(obj.x, obj.y); ctx.lineTo(obj.x2, obj.y2); ctx.stroke(); if (obj.showDimensions !== false) drawEdgeText(dimensionText(obj), (obj.x + obj.x2) / 2, (obj.y + obj.y2) / 2, Math.atan2(obj.y2 - obj.y, obj.x2 - obj.x) + objectAngle, objectAngle, labelOffset, obj.textScale || 1); }
+        else if (obj.type === 'rect' || obj.type === 'room' || obj.type === 'furniture') { const b = bounds(obj), x = b.x, y = b.y, w = b.w, h = b.h, textScale = obj.textScale || 1, horizontalSide = obj.horizontalLabelSide || 'top', verticalSide = obj.verticalLabelSide || 'left'; if (obj.type === 'furniture') { ctx.globalAlpha = ghost ? .3 : .18; ctx.fillRect(x, y, w, h); ctx.globalAlpha = ghost ? .55 : 1; } ctx.strokeRect(x, y, w, h); if (obj.showDimensions !== false) { drawEdgeText(formatLength(w), x + w / 2, horizontalSide === 'bottom' ? y + h : y, objectAngle, objectAngle, horizontalSide === 'bottom' ? 8 : -8, textScale); drawEdgeText(formatLength(h), verticalSide === 'right' ? x + w : x, y + h / 2, objectAngle + Math.PI / 2, objectAngle, verticalSide === 'right' ? 8 : -8, textScale); } if ((obj.type === 'room' || obj.type === 'furniture') && obj.showLabel !== false) { ctx.font = `700 ${13 * textScale}px ui-monospace, monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(obj.label, x + w / 2, y + h / 2); } }
+        else if (obj.type === 'text' && obj.showLabel !== false) { ctx.font = `700 ${14 * (obj.textScale || 1)}px ui-monospace, monospace`; ctx.textBaseline = 'top'; ctx.fillText(obj.label, obj.x, obj.y); }
+        if (obj === state.selected) { ctx.setLineDash([7, 5]); ctx.strokeStyle = '#c4b5fd'; ctx.lineWidth = 1; const b = bounds(obj); ctx.strokeRect(b.x - 5, b.y - 5, b.w + 10, b.h + 10); }
+        ctx.restore();
+      }
+      function bounds(obj) { if (obj.type === 'text') { ctx.save(); ctx.font = `700 ${14 * (obj.textScale || 1)}px ui-monospace, monospace`; const width = ctx.measureText(obj.label).width || 80; ctx.restore(); return { x: obj.x, y: obj.y, w: width, h: 18 * (obj.textScale || 1) }; } if (obj.type === 'furniture') return { x: obj.x, y: obj.y, w: obj.width, h: obj.height }; const x = Math.min(obj.x, obj.x2 ?? obj.x), y = Math.min(obj.y, obj.y2 ?? obj.y); return { x, y, w: Math.abs((obj.x2 ?? obj.x) - obj.x) || 8, h: Math.abs((obj.y2 ?? obj.y) - obj.y) || 8 }; }
+      function renderFurnitureLibrary() { const library = $('#furnitureLibrary'), query = state.furnitureSearch.trim().toLowerCase(), entries = [...furniturePresets.map(preset => ({ preset, custom: false })), ...state.customFurniture.map((preset, customIndex) => ({ preset, custom: true, customIndex }))].filter(({ preset }) => preset.label.toLowerCase().includes(query)), pageCount = Math.max(1, Math.ceil(entries.length / FURNITURE_PER_PAGE)); state.furniturePage = Math.min(state.furniturePage, pageCount - 1); const pageItems = entries.slice(state.furniturePage * FURNITURE_PER_PAGE, (state.furniturePage + 1) * FURNITURE_PER_PAGE); library.replaceChildren(); pageItems.forEach(entry => { const item = document.createElement('div'), button = document.createElement('button'), name = document.createElement('b'), size = document.createElement('small'); item.className = 'furniture-item'; button.className = 'furniture'; button.type = 'button'; name.textContent = entry.preset.label; size.textContent = `${formatLength(entry.preset.width * PX_PER_METER)} × ${formatLength(entry.preset.height * PX_PER_METER)}`; button.append(name, size); button.classList.toggle('active', state.furniture === entry.preset); button.addEventListener('click', () => { state.furniture = entry.preset; setTool('furniture'); setStatus(`Place ${entry.preset.label}: click the canvas`); }); item.append(button); if (entry.custom) { const remove = document.createElement('button'); remove.className = 'delete-furniture'; remove.type = 'button'; remove.title = `Delete ${entry.preset.label}`; remove.setAttribute('aria-label', `Delete ${entry.preset.label}`); remove.textContent = '×'; remove.addEventListener('click', () => { if (!confirm(`Delete custom furniture preset “${entry.preset.label}”?`)) return; state.customFurniture.splice(entry.customIndex, 1); if (state.furniture === entry.preset) state.furniture = null; try { localStorage.setItem('anrat-blueprint-furniture', JSON.stringify(state.customFurniture)); } catch { /* storage is optional */ } render(); }); item.append(remove); } library.append(item); }); $('#furniturePageInfo').textContent = `Page ${state.furniturePage + 1} / ${pageCount}`; $('#furniturePrevious').disabled = state.furniturePage === 0; $('#furnitureNext').disabled = state.furniturePage >= pageCount - 1; }
+      function render() { ctx.clearRect(0, 0, canvas.width, canvas.height); state.objects.forEach(obj => drawObject(obj)); if (state.drawing) drawObject(state.drawing, true); $('#objectCount').textContent = state.objects.length; $('#roomCount').textContent = state.objects.filter(x => x.type === 'room').length; $('#scaleInfo').textContent = `${PX_PER_METER} px = ${formatLength(PX_PER_METER)}`; $('#canvasSize').textContent = `${formatLength(canvas.width)} × ${formatLength(canvas.height)}`; $('#canvasHint').textContent = `${state.tool.toUpperCase()} · ${state.objects.length} OBJECT${state.objects.length === 1 ? '' : 'S'} · CTRL: ${formatLength(FINE_SNAP_PX)} SNAP`; const info = $('#selectionInfo'), rotationControls = $('#rotationControls'), textControls = $('#textControls'), showLabel = $('#showLabel'), showDimensions = $('#showDimensions'), textScale = $('#textScale'), horizontalSide = $('#horizontalLabelSide'), verticalSide = $('#verticalLabelSide'); info.replaceChildren(); rotationControls.hidden = !state.selected; textControls.hidden = !state.selected; if (state.selected) { const selected = state.selected, isText = selected.type === 'text', isLine = selected.type === 'line', heading = document.createElement('b'); heading.textContent = objectLabel(selected); info.append(heading, document.createElement('br'), document.createTextNode(isText ? 'Text annotation' : dimensionText(selected)), document.createElement('br'), document.createTextNode(`Rotation: ${selected.rotation || 0}° · Press [ or ] to rotate.`)); showLabel.checked = selected.showLabel !== false; showDimensions.checked = selected.showDimensions !== false; horizontalSide.value = selected.horizontalLabelSide || 'top'; verticalSide.value = selected.verticalLabelSide || 'left'; showLabel.disabled = isLine; showDimensions.disabled = isText; horizontalSide.disabled = isText; verticalSide.disabled = isText || isLine; showLabel.parentElement.style.opacity = isLine ? '.45' : '1'; showDimensions.parentElement.style.opacity = isText ? '.45' : '1'; horizontalSide.parentElement.style.opacity = isText ? '.45' : '1'; verticalSide.parentElement.style.opacity = isText || isLine ? '.45' : '1'; textScale.value = selected.textScale || 1; $('#textScaleValue').textContent = `${Math.round((selected.textScale || 1) * 100)}%`; } else { info.append('Nothing selected.', document.createElement('br'), 'Use ', Object.assign(document.createElement('b'), { textContent: 'V' }), ' to move an item.'); } renderFurnitureLibrary(); }
+      function setTool(tool) { state.tool = tool; state.selected = null; $$('.tool[data-tool]').forEach(button => button.classList.toggle('active', button.dataset.tool === tool)); setStatus(`${tool === 'select' ? 'Select or move an object' : tool === 'furniture' ? 'Click to place furniture' : `Drawing ${tool}`}`); render(); }
+      function addObject(obj) { pushHistory(); state.objects.push(obj); state.selected = obj; setStatus(`${objectLabel(obj)} added`); render(); }
+      function hitObject(p) { return [...state.objects].reverse().find(obj => { const local = localPoint(p, obj), b = bounds(obj); if (obj.type === 'line') { const d = Math.abs((obj.y2 - obj.y) * local.x - (obj.x2 - obj.x) * local.y + obj.x2 * obj.y - obj.y2 * obj.x) / Math.hypot(obj.y2 - obj.y, obj.x2 - obj.x); return d < 10 && local.x >= b.x - 9 && local.x <= b.x + b.w + 9 && local.y >= b.y - 9 && local.y <= b.y + b.h + 9; } return local.x >= b.x - 6 && local.x <= b.x + b.w + 6 && local.y >= b.y - 6 && local.y <= b.y + b.h + 6; }); }
+      canvas.addEventListener('pointerdown', event => { const p = point(event); canvas.setPointerCapture(event.pointerId); if (state.tool === 'furniture') { if (!state.furniture) return toast('Choose a furniture preset first.'); addObject({ type: 'furniture', x: p.x, y: p.y, width: state.furniture.width * PX_PER_METER, height: state.furniture.height * PX_PER_METER, label: state.furniture.label, color: inkColor.value, weight: +lineWeight.value }); return; } if (state.tool === 'text') { const label = prompt('Note text:', 'ENTRY'); if (label?.trim()) addObject({ type: 'text', x: p.x, y: p.y, label: label.trim(), color: inkColor.value, weight: +lineWeight.value }); return; } if (state.tool === 'select') { state.selected = hitObject(p) || null; if (state.selected) { pushHistory(); state.drag = { point: p, original: clone(state.selected) }; setStatus(`Moving ${objectLabel(state.selected)}`); } else setStatus('Nothing selected'); render(); return; } state.drawing = { type: state.tool, x: p.x, y: p.y, x2: p.x, y2: p.y, color: inkColor.value, weight: +lineWeight.value }; });
+      canvas.addEventListener('pointermove', event => { const p = point(event); $('#coordinates').textContent = `X ${p.x} · Y ${p.y}`; if (state.drawing) { state.drawing.x2 = p.x; state.drawing.y2 = p.y; render(); } else if (state.drag && state.selected) { const dx = p.x - state.drag.point.x, dy = p.y - state.drag.point.y, o = state.drag.original; state.selected.x = o.x + dx; state.selected.y = o.y + dy; if ('x2' in state.selected) { state.selected.x2 = o.x2 + dx; state.selected.y2 = o.y2 + dy; } render(); } });
+      canvas.addEventListener('pointerup', () => { if (state.drawing) { const obj = state.drawing; state.drawing = null; if (Math.abs(obj.x2 - obj.x) + Math.abs(obj.y2 - obj.y) > 8) { if (obj.type === 'room') { const label = prompt('Room name:', 'ROOM'); if (!label?.trim()) { render(); return; } obj.label = label.trim().toUpperCase(); } addObject(obj); } else render(); } if (state.drag) { state.drag = null; setStatus('Object moved'); render(); } });
+      $('#tools').addEventListener('click', event => { const button = event.target.closest('[data-tool]'); if (button) setTool(button.dataset.tool); });
+      $('#rotationControls').addEventListener('click', event => { const button = event.target.closest('[data-rotate]'); if (button) rotateSelected(Number(button.dataset.rotate)); });
+      const updateSelectedText = (property, value) => { if (!state.selected || state.selected[property] === value) return; pushHistory(); state.selected[property] = value; setStatus(`${objectLabel(state.selected)} text updated`); render(); };
+      $('#showLabel').onchange = event => updateSelectedText('showLabel', event.target.checked);
+      $('#showDimensions').onchange = event => updateSelectedText('showDimensions', event.target.checked);
+      $('#textScale').oninput = event => updateSelectedText('textScale', Number(event.target.value));
+      $('#horizontalLabelSide').onchange = event => updateSelectedText('horizontalLabelSide', event.target.value);
+      $('#verticalLabelSide').onchange = event => updateSelectedText('verticalLabelSide', event.target.value);
+      $('#undoButton').onclick = () => { if (!state.history.length) return toast('Nothing to undo.'); state.future.push(clone(state.objects)); state.objects = state.history.pop(); state.selected = null; setStatus('Undo'); render(); };
+      $('#redoButton').onclick = () => { if (!state.future.length) return toast('Nothing to redo.'); state.history.push(clone(state.objects)); state.objects = state.future.pop(); state.selected = null; setStatus('Redo'); render(); };
+      $('#clearButton').onclick = () => { if (!state.objects.length || !confirm('Clear this draft?')) return; pushHistory(); state.objects = []; state.selected = null; setStatus('Blank canvas'); render(); };
+      theme.onchange = () => { document.body.className = `theme-${theme.value}`; const colors = { blueprint: '#eef8ff', white: '#14171d', black: '#f6f7f8', graph: '#283a2c' }; inkColor.value = colors[theme.value]; render(); };
+      lineWeight.oninput = () => $('#weightValue').value = `${lineWeight.value} px`;
+      unit.onchange = () => { const label = units[unit.value].label; $('#customFurnitureWidth').placeholder = `Width (${label})`; $('#customFurnitureHeight').placeholder = `Length (${label})`; syncGrid(); render(); };
+      $('#addFurnitureButton').onclick = () => { const label = $('#customFurnitureLabel').value.trim().toUpperCase(), width = Number($('#customFurnitureWidth').value), height = Number($('#customFurnitureHeight').value); if (!label || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return toast('Enter a label and two positive dimensions.'); const selected = units[unit.value]; const preset = { label, width: width / selected.multiplier, height: height / selected.multiplier }; state.customFurniture.push(preset); try { localStorage.setItem('anrat-blueprint-furniture', JSON.stringify(state.customFurniture)); } catch { /* storage is optional */ } $('#customFurnitureLabel').value = ''; $('#customFurnitureWidth').value = ''; $('#customFurnitureHeight').value = ''; state.furniture = preset; setTool('furniture'); toast(`${label} preset added.`); };
+      $('#furnitureSearch').oninput = event => { state.furnitureSearch = event.target.value; state.furniturePage = 0; renderFurnitureLibrary(); };
+      $('#furniturePrevious').onclick = () => { state.furniturePage = Math.max(0, state.furniturePage - 1); renderFurnitureLibrary(); };
+      $('#furnitureNext').onclick = () => { state.furniturePage += 1; renderFurnitureLibrary(); };
+      $('#zoomIn').onclick = () => { state.zoom = Math.min(1.5, state.zoom + .1); applyZoom(); };
+      $('#zoomOut').onclick = () => { state.zoom = Math.max(.5, state.zoom - .1); applyZoom(); };
+      $('#zoomReset').onclick = () => { state.zoom = 1; applyZoom(); };
+      $('#loadButton').onclick = () => { renderDraftList(); $('#draftDialog').showModal(); };
+      $('#closeDraftDialog').onclick = () => $('#draftDialog').close();
+      $('#saveButton').onclick = () => { const requestedName = prompt('Save draft as:', state.currentDraftName); if (requestedName === null) return; const name = requestedName.trim() || 'Untitled plan', snapshot = { id: state.currentDraftId || newDraftId(), name, ...draftSnapshot() }, existingIndex = state.drafts.findIndex(draft => draft.id === snapshot.id); if (existingIndex >= 0) state.drafts[existingIndex] = snapshot; else state.drafts.push(snapshot); state.currentDraftId = snapshot.id; state.currentDraftName = name; persistDrafts(); toast(`Saved “${name}”.`); };
+      $('#exportButton').onclick = () => { const exportScale = 4, exportCanvas = document.createElement('canvas'); exportCanvas.width = canvas.width * exportScale; exportCanvas.height = canvas.height * exportScale; const exportCtx = exportCanvas.getContext('2d'), root = getComputedStyle(document.documentElement), styles = getComputedStyle(canvas), grid = GRID_PX, screenContext = ctx, selected = state.selected; exportCtx.fillStyle = styles.backgroundColor; exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height); exportCtx.save(); exportCtx.scale(exportScale, exportScale); exportCtx.lineWidth = 1 / exportScale; for (let i = 0; i <= canvas.width; i += grid) { exportCtx.beginPath(); exportCtx.strokeStyle = i % PX_PER_METER === 0 ? root.getPropertyValue('--grid-major') : root.getPropertyValue('--grid-minor'); exportCtx.moveTo(i, 0); exportCtx.lineTo(i, canvas.height); exportCtx.stroke(); } for (let i = 0; i <= canvas.height; i += grid) { exportCtx.beginPath(); exportCtx.strokeStyle = i % PX_PER_METER === 0 ? root.getPropertyValue('--grid-major') : root.getPropertyValue('--grid-minor'); exportCtx.moveTo(0, i); exportCtx.lineTo(canvas.width, i); exportCtx.stroke(); } ctx = exportCtx; state.selected = null; state.objects.forEach(obj => drawObject(obj)); state.selected = selected; ctx = screenContext; exportCtx.restore(); const a = document.createElement('a'); a.download = 'blueprint-draft-hd.png'; a.href = exportCanvas.toDataURL('image/png'); a.click(); toast('4× HD PNG export ready.'); };
+      document.addEventListener('keydown', event => { if (event.target.matches('input, select')) return; const key = event.key.toLowerCase(); if ((event.ctrlKey || event.metaKey) && key === 'z') { event.preventDefault(); $('#undoButton').click(); return; } if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); $('#redoButton').click(); return; } if (event.key === '[') { event.preventDefault(); rotateSelected(-15); return; } if (event.key === ']') { event.preventDefault(); rotateSelected(15); return; } if (event.key === 'Delete' && state.selected) { pushHistory(); state.objects = state.objects.filter(x => x !== state.selected); state.selected = null; setStatus('Object removed'); render(); return; } const map = { v: 'select', l: 'line', r: 'room', b: 'rect', t: 'text' }; if (map[key]) setTool(map[key]); });
+      try { const customFurniture = JSON.parse(localStorage.getItem('anrat-blueprint-furniture')); if (Array.isArray(customFurniture)) state.customFurniture = customFurniture.filter(item => item && typeof item.label === 'string' && Number.isFinite(item.width) && Number.isFinite(item.height)); const storedDrafts = JSON.parse(localStorage.getItem(DRAFTS_KEY) || '[]'); if (Array.isArray(storedDrafts)) state.drafts = storedDrafts.filter(draft => draft && typeof draft.id === 'string' && typeof draft.name === 'string' && Array.isArray(draft.objects)); const legacy = JSON.parse(localStorage.getItem(LEGACY_DRAFT_KEY) || 'null'); const migratedKey = 'anrat-blueprint-draft-migrated'; if (legacy?.objects && !localStorage.getItem(migratedKey)) { state.drafts.push({ id: newDraftId(), name: 'Recovered legacy draft', objects: legacy.objects, theme: legacy.theme || 'blueprint', unit: legacy.unit || 'm', savedAt: Date.now() }); persistDrafts(); localStorage.setItem(migratedKey, '1'); } } catch { /* local storage is optional */ }
+      unit.dispatchEvent(new Event('change')); syncGrid(); render();
+    })();
+  </script>
+</body>
+</html>

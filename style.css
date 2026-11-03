@@ -561,7 +561,15 @@
     .explorer-preview-close:hover { background: #bd3c4a !important; color: #fff !important; }
     .explorer-preview-window iframe { width: 100%; min-height: 0; flex: 1; border: 0; background: #0c1017; }
     .explorer-preview-window:fullscreen,
-    .explorer-preview-window.is-url-fullscreen { inset: 0 !important; width: 100vw !important; height: 100vh !important; max-width: none; max-height: none; border: 0; }
+    .explorer-preview-window.is-url-fullscreen { inset: 0 !important; z-index: 2147483647 !important; width: 100vw !important; height: 100vh !important; max-width: none; max-height: none; border: 0; }
+    /* A shared ?fullscreen=true URL is CSS fullscreen, not browser fullscreen.
+       Hide the other fixed layers so it behaves like the real fullscreen button. */
+    body.preview-fullscreen header,
+    body.preview-fullscreen .terminal-window,
+    body.preview-fullscreen .command-line,
+    body.preview-fullscreen .explorer-sidebar,
+    body.preview-fullscreen .explorer-scrim,
+    body.preview-fullscreen .explorer-tab-dock { display: none !important; }
     .explorer-preview-window.is-minimized { top: 50%; right: 14px; bottom: auto; left: auto; width: 48px; min-height: 48px; height: 48px; transform: translateY(-50%); overflow: visible; }
     .explorer-preview-window.is-minimized .explorer-preview-titlebar { flex: 1; border: 0; }
     .explorer-preview-window.is-minimized .explorer-preview-favicon { display: grid; flex: 0 0 48px; width: 48px; min-width: 48px; max-width: 48px; height: 48px; min-height: 48px; max-height: 48px; place-items: center; cursor: pointer; }
