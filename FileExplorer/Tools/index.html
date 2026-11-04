@@ -16,6 +16,12 @@
     h1 { margin: 0 0 8px; font-size: clamp(21px, 5vw, 32px); }
     p { color: #aebbd0; line-height: 1.6; }
     #tools { display: grid; gap: 10px; margin-top: 24px; }
+    details { border: 1px solid #53647b; background: #182232; }
+    summary { display: flex; align-items: center; gap: 10px; padding: 14px; cursor: pointer; font-weight: 700; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: '›'; color: #f5c55b; font-size: 18px; transition: transform .16s ease; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    .folder-contents { display: grid; gap: 8px; padding: 0 10px 10px; }
     button { display: flex; width: 100%; align-items: center; gap: 12px; padding: 14px; border: 1px solid #53647b; background: #182232; color: inherit; font: inherit; text-align: left; cursor: pointer; }
     button:hover, button:focus-visible { border-color: #f5c55b; background: #253247; outline: none; }
     .icon { color: #60a5fa; font-size: 20px; }
@@ -39,39 +45,49 @@
   <script>
     const tools = document.getElementById('tools');
     const frame = document.getElementById('toolFrame');
-    const toolsRoot = 'FileExplorer/Tools';
-
     function findTools(entries) {
       return entries.find(entry => entry.type === 'directory' && entry.name === 'Tools')?.children || [];
     }
 
     async function resolveShortcut(path) {
       const text = await fetch(`../../${path}`).then(response => response.text());
-      const match = text.match(/(?:https?:\\/\\/)?(?:[\\w-]+\\.)+[a-z]{2,}(?:\\/[^\\s]*)?/i)?.[0];
-      return match && (/^https?:\\/\\//i.test(match) ? match : `https://${match}`);
+      const match = text.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
+      return match && (/^https?:\/\//i.test(match) ? match : `https://${match}`);
     }
 
-    function addFile(entry, depth = 0) {
+    function openTool(source) {
+      frame.src = source;
+      frame.classList.add('open');
+      frame.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function addEntry(entry, parent) {
       if (entry.name === 'index.html') return;
       if (entry.type === 'directory') {
-        entry.children?.forEach(child => addFile(child, depth + 1));
+        const folder = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.innerHTML = '<span class="icon">▰</span><span></span>';
+        summary.querySelector('span:last-child').textContent = entry.name;
+        const contents = document.createElement('div');
+        contents.className = 'folder-contents';
+        entry.children?.forEach(child => addEntry(child, contents));
+        folder.append(summary, contents);
+        parent.append(folder);
         return;
       }
       const item = document.createElement('button');
       const extension = entry.name.split('.').pop().toUpperCase();
       item.innerHTML = `<span class="icon">${extension === 'HREF' ? '↗' : '▤'}</span><span class="name"></span><span class="type">${extension}</span>`;
-      item.querySelector('.name').textContent = `${'› '.repeat(depth)}${entry.name}`;
+      item.querySelector('.name').textContent = entry.name;
       item.addEventListener('click', async () => {
-        if (/\\.href$/i.test(entry.name)) {
+        if (/\.href$/i.test(entry.name)) {
           const target = await resolveShortcut(entry.path);
-          if (target) window.location.assign(target);
+          if (target) openTool(target);
           return;
         }
-        frame.src = `../../${entry.path}`;
-        frame.classList.add('open');
-        frame.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        openTool(`../../${entry.path}`);
       });
-      tools.append(item);
+      parent.append(item);
     }
 
     fetch('../file-index.json', { cache: 'no-store' })
@@ -80,7 +96,7 @@
         tools.replaceChildren();
         const toolEntries = findTools(entries);
         if (!toolEntries.length) tools.innerHTML = '<p class="empty">No tools are available yet.</p>';
-        toolEntries.forEach(entry => addFile(entry));
+        toolEntries.forEach(entry => addEntry(entry, tools));
       })
       .catch(() => { tools.innerHTML = '<p class="empty">The tool index could not be loaded.</p>'; });
   </script>
