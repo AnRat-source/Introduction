@@ -24,6 +24,54 @@
     addWindowChrome(card, 'Music Player');
   });
 
+  function makeWindowDraggable(windowElement, handle, canDrag = () => true) {
+    let drag = null;
+    handle.addEventListener('pointerdown', event => {
+      if (event.button !== 0 || mobileLayoutQuery?.matches || !canDrag()) return;
+      if (event.target.closest('button, input, textarea, select, a, .window-controls')) return;
+
+      const bounds = windowElement.getBoundingClientRect();
+      drag = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        baseX: Number(windowElement.dataset.dragX || 0),
+        baseY: Number(windowElement.dataset.dragY || 0),
+        bounds
+      };
+      windowElement.classList.add('is-dragging');
+      handle.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    handle.addEventListener('pointermove', event => {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      const minX = 12 - drag.bounds.left;
+      const maxX = window.innerWidth - 12 - drag.bounds.right;
+      const minY = 12 - drag.bounds.top;
+      const maxY = window.innerHeight - 12 - drag.bounds.bottom;
+      const x = Math.min(maxX, Math.max(minX, drag.baseX + event.clientX - drag.startX));
+      const y = Math.min(maxY, Math.max(minY, drag.baseY + event.clientY - drag.startY));
+      windowElement.dataset.dragX = String(x);
+      windowElement.dataset.dragY = String(y);
+      windowElement.style.setProperty('--window-drag-x', `${x}px`);
+      windowElement.style.setProperty('--window-drag-y', `${y}px`);
+    });
+
+    const finishDrag = event => {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+      drag = null;
+      windowElement.classList.remove('is-dragging');
+    };
+    handle.addEventListener('pointerup', finishDrag);
+    handle.addEventListener('pointercancel', finishDrag);
+  }
+
+  document.querySelectorAll('.card, .music-card').forEach(windowElement => {
+    makeWindowDraggable(windowElement, windowElement.querySelector('.window-chrome'));
+  });
+
   // Keep a stable return point for the terminal. When the explorer is open the
   // terminal is placed at the document root, so its fixed coordinates are
   // always relative to the viewport rather than the page's content wrapper.
@@ -63,6 +111,7 @@
       if (floating) siteHeader.classList.remove('is-floating');
       headerSpacer.style.height = '0';
       headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
+      return;
     } else {
       if (!floating) headerStart = siteHeader.getBoundingClientRect().top + window.scrollY;
       const shouldFloat = window.scrollY > headerStart - 12;
@@ -85,11 +134,6 @@
       siteHeader.style.setProperty('--floating-header-width', `${wrapRect.width}px`);
     }
   }
-
-  window.addEventListener('scroll', syncFloatingHeader, { passive: true });
-  window.addEventListener('resize', syncFloatingHeader);
-  mobileLayoutQuery.addEventListener('change', syncFloatingHeader);
-  syncFloatingHeader();
 
   const fileExplorer = document.getElementById('fileExplorer');
   const fileExplorerToggle = document.getElementById('fileExplorerToggle');
@@ -114,6 +158,13 @@
   let activeExplorerTabId = null;
   let explorerTreeId = 0;
   let explorerScrimHideTimer = null;
+
+  makeWindowDraggable(fileExplorer, fileExplorer.querySelector('.explorer-titlebar'), () => fileExplorer.classList.contains('is-open'));
+  makeWindowDraggable(explorerPreview, explorerPreview.querySelector('.explorer-preview-titlebar'), () => (
+    !explorerPreview.hidden &&
+    !explorerPreview.classList.contains('is-minimized') &&
+    !isPreviewFullscreenLayout()
+  ));
 
   try {
     const savedTabs = JSON.parse(localStorage.getItem(explorerTabStorageKey) || '[]');
@@ -459,21 +510,43 @@
       syncPreviewAddress();
     }
   }
-  mobileLayoutQuery.addEventListener('change', event => {
-    if (event.matches) setFileExplorerOpen(false);
-  });
-  window.addEventListener('scroll', () => {
+  function positionDesktopWindows() {
     if (fileExplorer.classList.contains('is-open')) {
       positionFileExplorer();
       positionExplorerPreview();
     }
-  }, { passive: true });
-  window.addEventListener('resize', () => {
-    if (fileExplorer.classList.contains('is-open')) {
-      positionFileExplorer();
-      positionExplorerPreview();
+  }
+
+  let desktopRuntimeActive = false;
+  const onDesktopScroll = () => {
+    syncFloatingHeader();
+    positionDesktopWindows();
+  };
+  const onDesktopResize = () => {
+    syncFloatingHeader();
+    positionDesktopWindows();
+  };
+  function syncDesktopRuntime() {
+    if (mobileLayoutQuery.matches) {
+      if (desktopRuntimeActive) {
+        window.removeEventListener('scroll', onDesktopScroll);
+        window.removeEventListener('resize', onDesktopResize);
+        desktopRuntimeActive = false;
+      }
+      setFileExplorerOpen(false);
+      syncFloatingHeader();
+      return;
     }
-  });
+    if (!desktopRuntimeActive) {
+      window.addEventListener('scroll', onDesktopScroll, { passive: true });
+      window.addEventListener('resize', onDesktopResize);
+      desktopRuntimeActive = true;
+    }
+    syncFloatingHeader();
+    positionDesktopWindows();
+  }
+  mobileLayoutQuery.addEventListener('change', syncDesktopRuntime);
+  syncDesktopRuntime();
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
     if (!explorerPreview.hidden) setPreviewMinimized(true);
@@ -719,6 +792,10 @@
     };
 
     const stepSpring = now => {
+      if (mobileLayoutQuery.matches) {
+        frame = null;
+        return;
+      }
       const seconds = Math.min((now - lastFrameTime) / 1000, 0.04);
       lastFrameTime = now;
       const target = getTarget(now);
@@ -761,7 +838,7 @@
       }
     };
 
-    window.addEventListener('scroll', () => {
+    const handleMizukiScroll = () => {
       const scrollPosition = window.scrollY;
       const distance = scrollPosition - lastScrollPosition;
       lastScrollPosition = scrollPosition;
@@ -780,13 +857,29 @@
         returningToRest = true;
         wakeSpring();
       }, 300);
-    }, { passive: true });
-    window.addEventListener('resize', wakeSpring);
+    };
+    const handleMizukiResize = () => wakeSpring();
+    const stopMizukiForMobile = event => {
+      if (!event.matches) return;
+      clearTimeout(restTimer);
+      if (frame) cancelAnimationFrame(frame);
+      frame = null;
+      window.removeEventListener('scroll', handleMizukiScroll);
+      window.removeEventListener('resize', handleMizukiResize);
+      mobileLayoutQuery.removeEventListener('change', stopMizukiForMobile);
+    };
+    window.addEventListener('scroll', handleMizukiScroll, { passive: true });
+    window.addEventListener('resize', handleMizukiResize);
+    mobileLayoutQuery.addEventListener('change', stopMizukiForMobile);
     wakeSpring();
   }
 
   // Main preloader
   document.addEventListener("DOMContentLoaded", async () => {
+    if (mobileLayoutQuery.matches) {
+      document.getElementById("loader").remove();
+      return;
+    }
     await waitForAllImages();
     const loader = document.getElementById("loader");
     loader.classList.add("fade-out");
@@ -1235,4 +1328,4 @@ function showNextWord() {
     index = (index + 1) % SelfNames.length;
 }
 
-setInterval(showNextWord, 2000);
+if (!mobileLayoutQuery.matches) setInterval(showNextWord, 2000);

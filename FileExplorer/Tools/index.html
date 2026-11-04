@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tools Directory</title>
+  <style>
+    :root { color-scheme: dark; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; padding: clamp(18px, 5vw, 64px); background: #111722; color: #dfe7f2; }
+    main { width: min(840px, 100%); margin: 0 auto; border: 1px solid #64748b; background: rgba(19, 26, 37, .96); box-shadow: 8px 8px 0 rgba(0, 0, 0, .35); }
+    header { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 10px 14px; border-bottom: 1px solid #64748b; background: #293447; font-size: 12px; }
+    header strong { color: #f5c55b; }
+    .path { margin-left: auto; color: #aebbd0; }
+    .content { padding: 24px; }
+    h1 { margin: 0 0 8px; font-size: clamp(21px, 5vw, 32px); }
+    p { color: #aebbd0; line-height: 1.6; }
+    #tools { display: grid; gap: 10px; margin-top: 24px; }
+    button { display: flex; width: 100%; align-items: center; gap: 12px; padding: 14px; border: 1px solid #53647b; background: #182232; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    button:hover, button:focus-visible { border-color: #f5c55b; background: #253247; outline: none; }
+    .icon { color: #60a5fa; font-size: 20px; }
+    .name { font-weight: 700; }
+    .type { margin-left: auto; color: #93a4ba; font-size: 11px; }
+    iframe { display: none; width: 100%; min-height: 62vh; margin-top: 24px; border: 1px solid #64748b; background: #fff; }
+    iframe.open { display: block; }
+    .empty { padding: 14px; border: 1px dashed #53647b; color: #aebbd0; }
+  </style>
+</head>
+<body>
+  <main>
+    <header><strong>▣ TOOLS</strong><span class="path">/FileExplorer/Tools</span></header>
+    <div class="content">
+      <h1>Tools directory</h1>
+      <p>Small utilities, diagrams, and study resources from this site.</p>
+      <div id="tools" aria-live="polite"><p class="empty">Loading tools…</p></div>
+      <iframe id="toolFrame" title="Tool preview"></iframe>
+    </div>
+  </main>
+  <script>
+    const tools = document.getElementById('tools');
+    const frame = document.getElementById('toolFrame');
+    const toolsRoot = 'FileExplorer/Tools';
+
+    function findTools(entries) {
+      return entries.find(entry => entry.type === 'directory' && entry.name === 'Tools')?.children || [];
+    }
+
+    async function resolveShortcut(path) {
+      const text = await fetch(`../../${path}`).then(response => response.text());
+      const match = text.match(/(?:https?:\\/\\/)?(?:[\\w-]+\\.)+[a-z]{2,}(?:\\/[^\\s]*)?/i)?.[0];
+      return match && (/^https?:\\/\\//i.test(match) ? match : `https://${match}`);
+    }
+
+    function addFile(entry, depth = 0) {
+      if (entry.name === 'index.html') return;
+      if (entry.type === 'directory') {
+        entry.children?.forEach(child => addFile(child, depth + 1));
+        return;
+      }
+      const item = document.createElement('button');
+      const extension = entry.name.split('.').pop().toUpperCase();
+      item.innerHTML = `<span class="icon">${extension === 'HREF' ? '↗' : '▤'}</span><span class="name"></span><span class="type">${extension}</span>`;
+      item.querySelector('.name').textContent = `${'› '.repeat(depth)}${entry.name}`;
+      item.addEventListener('click', async () => {
+        if (/\\.href$/i.test(entry.name)) {
+          const target = await resolveShortcut(entry.path);
+          if (target) window.location.assign(target);
+          return;
+        }
+        frame.src = `../../${entry.path}`;
+        frame.classList.add('open');
+        frame.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      tools.append(item);
+    }
+
+    fetch('../file-index.json', { cache: 'no-store' })
+      .then(response => response.ok ? response.json() : Promise.reject())
+      .then(entries => {
+        tools.replaceChildren();
+        const toolEntries = findTools(entries);
+        if (!toolEntries.length) tools.innerHTML = '<p class="empty">No tools are available yet.</p>';
+        toolEntries.forEach(entry => addFile(entry));
+      })
+      .catch(() => { tools.innerHTML = '<p class="empty">The tool index could not be loaded.</p>'; });
+  </script>
+</body>
+</html>

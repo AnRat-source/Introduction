@@ -439,8 +439,21 @@
       color: #e6e9ee;
       font-size: 11px;
       letter-spacing: .025em;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: grab;
+      touch-action: none;
     }
+
+    .explorer-titlebar,
+    .explorer-preview-titlebar { cursor: grab; touch-action: none; }
+    .is-dragging { cursor: grabbing !important; user-select: none; }
+    .is-dragging .window-chrome,
+    .is-dragging .explorer-titlebar,
+    .is-dragging .explorer-preview-titlebar { cursor: grabbing; }
+    .card,
+    .music-card,
+    .explorer-sidebar,
+    .explorer-preview-window { translate: var(--window-drag-x, 0) var(--window-drag-y, 0); }
 
     .window-controls { display: flex; height: 100%; pointer-events: auto; }
     .window-controls i {
