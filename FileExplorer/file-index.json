@@ -81,11 +81,6 @@
       },
       {
         "type": "directory",
-        "name": "Format",
-        "children": []
-      },
-      {
-        "type": "directory",
         "name": "Study",
         "children": [
           {
