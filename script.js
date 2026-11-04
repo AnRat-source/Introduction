@@ -586,13 +586,35 @@
         folder.setAttribute('aria-controls', folderId);
         folder.innerHTML = `<i class="fa-solid fa-chevron-${isOpen ? 'down' : 'right'} tree-chevron" aria-hidden="true"></i><i class="fa-solid fa-folder tree-folder-icon" aria-hidden="true"></i><span></span>`;
         folder.querySelector('span').textContent = entry.name;
+        const isToolsDirectory = entry.name === 'Tools' && depth === 0;
+        if (isToolsDirectory) {
+          folder.dataset.toolsDirectory = 'true';
+          folder.addEventListener('dblclick', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            window.location.assign(new URL('FileExplorer/Tools/', window.location.href).href);
+          });
+        }
 
         const children = document.createElement('div');
         children.className = 'tree-children';
         children.id = folderId;
         children.hidden = !isOpen;
         children.append(makeExplorerTree(entry.children || [], depth + 1));
-        fragment.append(folder, children);
+        if (isToolsDirectory) {
+          const folderRow = document.createElement('div');
+          folderRow.className = 'tree-folder-row';
+          const popout = document.createElement('a');
+          popout.className = 'tree-folder-popout';
+          popout.href = 'FileExplorer/Tools/';
+          popout.title = 'Open Tools directory';
+          popout.setAttribute('aria-label', 'Open Tools directory');
+          popout.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>';
+          folderRow.append(folder, popout);
+          fragment.append(folderRow, children);
+        } else {
+          fragment.append(folder, children);
+        }
         return;
       }
 
@@ -691,6 +713,12 @@
       newTab?.close();
       fileExplorerStatus.textContent = `${hrefFile.querySelector('span').textContent} does not contain a valid URL yet.`;
     }
+  });
+
+  fileExplorerTree.addEventListener('dblclick', event => {
+    const toolsFolder = event.target.closest('.tree-folder[data-tools-directory="true"]');
+    if (!toolsFolder) return;
+    window.location.assign(new URL('FileExplorer/Tools/', window.location.href).href);
   });
 
   refreshFileExplorer();

@@ -96,6 +96,13 @@
 
     .actions{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
     .cta{background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.5);text-decoration:none;color:inherit;font-weight:600;backdrop-filter: blur(5px);}
+    .mobile-links { display: none; position: relative; }
+    .mobile-links summary { list-style: none; cursor: pointer; }
+    .mobile-links summary::-webkit-details-marker { display: none; }
+    .mobile-links summary span { margin-left: 4px; }
+    .mobile-links-menu { position: absolute; z-index: 10; top: calc(100% + 6px); right: 0; min-width: 150px; border: 1px solid var(--window-border); background: rgba(24, 30, 42, .96); box-shadow: var(--shadow); }
+    .mobile-links-menu a { display: block; padding: 10px 12px; color: #e6e9ee; font-size: 12px; text-decoration: none; }
+    .mobile-links-menu a:hover, .mobile-links-menu a:focus-visible { background: rgba(132, 149, 176, .2); color: #fff; outline: 0; }
     .socials{display:flex;gap:8px}
     .social{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.02);text-decoration:none;color:inherit;backdrop-filter: blur(5px);}
 
@@ -611,6 +618,10 @@
     .explorer-tree { padding: 0 8px; font-size: 13px; }
     .tree-folder, .tree-file { display: flex; align-items: center; width: 100%; min-height: 29px; padding: 4px 6px; border: 0; background: transparent; color: #d7dfeb; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
     .tree-folder:hover, .tree-file:hover { background: rgba(132, 149, 176, .18); }
+    .tree-folder-row { display: flex; align-items: stretch; }
+    .tree-folder-row .tree-folder { flex: 1; min-width: 0; }
+    .tree-folder-popout { display: grid; width: 29px; place-items: center; color: #93a4ba; text-decoration: none; }
+    .tree-folder-popout:hover, .tree-folder-popout:focus-visible { background: rgba(132, 149, 176, .18); color: #f5c55b; outline: 0; }
     .tree-children { padding-left: 18px; }
     .tree-chevron { width: 14px; color: #93a4ba; font-size: 10px; }
     .tree-folder-icon { width: 19px; color: #f5c55b; font-size: 14px; }
@@ -940,6 +951,8 @@
       header.is-floating { position: relative; top: auto; left: auto; width: auto; margin-bottom: 22px; }
       header .brand { align-items: flex-start; }
       header nav { margin-left: 8px; }
+      header nav #blogButton { display: none; }
+      header nav .mobile-links { display: block; }
       header nav a[href*="discord.gg"] { display: none; }
       .card { padding: 42px 14px 14px !important; }
       .card .head { gap: 9px; }
