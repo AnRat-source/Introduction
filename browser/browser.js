@@ -4,9 +4,14 @@
   const searchInput = document.getElementById('googleSearch');
   const resultsStatus = document.getElementById('browserResultsStatus');
   const resultsList = document.getElementById('browserResults');
+  const loadMoreButton = document.getElementById('browserLoadMore');
   const doubleEnterDelay = 550;
+  const resultsPerBatch = 8;
   let lastSearch = { query: '', submittedAt: 0 };
   let activeSearch = 0;
+  let currentQuery = '';
+  let currentResults = [];
+  let visibleResults = 0;
 
   if (greeting) {
     const hour = new Date().getHours();
@@ -35,8 +40,43 @@
     card.append(element);
   }
 
+  function truncateSnippet(value, maximumLength = 260) {
+    if (typeof value !== 'string') return '';
+    const normalized = value.replace(/\s+/g, ' ').trim();
+    return normalized.length > maximumLength ? `${normalized.slice(0, maximumLength - 1).trimEnd()}…` : normalized;
+  }
+
+  function updateResultsStatus() {
+    if (!currentResults.length) {
+      resultsStatus.textContent = `No results for “${currentQuery}”.`;
+      return;
+    }
+    resultsStatus.textContent = `Showing ${visibleResults} of ${currentResults.length} results for “${currentQuery}”.`;
+  }
+
+  function renderNextResults() {
+    const nextResults = currentResults.slice(visibleResults, visibleResults + resultsPerBatch);
+    const cards = nextResults.map(result => {
+      const card = document.createElement('li');
+      card.className = 'browser-result';
+      const link = document.createElement('a');
+      link.href = result.url;
+      link.textContent = result.title || result.url;
+      card.append(link);
+      addResultText(card, 'browser-result-url', result.url);
+      addResultText(card, 'browser-result-snippet', truncateSnippet(result.snippet));
+      addResultText(card, 'browser-result-date', result.datePublished);
+      return card;
+    });
+    resultsList.append(...cards);
+    visibleResults += cards.length;
+    updateResultsStatus();
+    loadMoreButton.hidden = visibleResults >= currentResults.length;
+  }
+
   function renderError(message) {
     resultsStatus.textContent = 'Search unavailable.';
+    loadMoreButton.hidden = true;
     const card = document.createElement('li');
     card.className = 'browser-result browser-result-error';
     card.textContent = message;
@@ -53,6 +93,7 @@
     document.body.classList.add('has-search-results');
     resultsStatus.textContent = 'Searching…';
     resultsList.replaceChildren();
+    loadMoreButton.hidden = true;
 
     try {
       const response = await fetch('https://api.anrat.link/search', {
@@ -64,23 +105,10 @@
       if (!response.ok) throw new Error(payload.error || 'The search request failed.');
       if (searchId !== activeSearch) return;
 
-      const entries = Array.isArray(payload.results) ? payload.results : [];
-      resultsStatus.textContent = entries.length
-        ? `${entries.length} result${entries.length === 1 ? '' : 's'} for “${query}”.`
-        : `No results for “${query}”.`;
-      const cards = entries.map(result => {
-        const card = document.createElement('li');
-        card.className = 'browser-result';
-        const link = document.createElement('a');
-        link.href = result.url;
-        link.textContent = result.title || result.url;
-        card.append(link);
-        addResultText(card, 'browser-result-url', result.url);
-        addResultText(card, 'browser-result-snippet', result.snippet);
-        addResultText(card, 'browser-result-date', result.datePublished);
-        return card;
-      });
-      resultsList.replaceChildren(...cards);
+      currentQuery = query;
+      currentResults = Array.isArray(payload.results) ? payload.results : [];
+      visibleResults = 0;
+      renderNextResults();
     } catch (error) {
       if (searchId === activeSearch) renderError(error instanceof Error ? error.message : 'The search request failed.');
     }
@@ -110,4 +138,6 @@
     lastSearch = { query, submittedAt };
     await search(query);
   });
+
+  loadMoreButton?.addEventListener('click', renderNextResults);
 })();
