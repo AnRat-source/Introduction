@@ -1177,7 +1177,7 @@
       return { ok: false, message: 'Document Picture-in-Picture is not supported by this browser.' };
     }
 
-    const playerSource = new URL('FileExplorer/Misc/Fun/MusicPlayer.html', window.location.href);
+    const playerSource = "https://anrat.link/FileExplorer/Misc/Fun/MusicPlayer.html";
     playerSource.searchParams.set('embedded', '1');
     playerSource.searchParams.set('autoplay', '1');
     if (musicLink) playerSource.searchParams.set('link', musicLink);
