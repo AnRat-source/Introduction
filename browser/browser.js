@@ -83,6 +83,12 @@
     resultsList.replaceChildren(card);
   }
 
+  function updateSearchUrl(query) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', query);
+    history.pushState(null, '', url);
+  }
+
   async function search(query) {
     const searchId = ++activeSearch;
     const header = document.querySelector('header');
@@ -114,9 +120,7 @@
     }
   }
 
-  searchForm?.addEventListener('submit', async event => {
-    event.preventDefault();
-    const query = searchInput?.value.trim();
+  async function submitQuery(query, { updateUrl = true } = {}) {
     if (!query) {
       searchInput?.focus();
       return;
@@ -136,8 +140,21 @@
       return;
     }
     lastSearch = { query, submittedAt };
+    if (updateUrl) updateSearchUrl(query);
     await search(query);
+  }
+
+  searchForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const query = searchInput?.value.trim();
+    await submitQuery(query);
   });
 
   loadMoreButton?.addEventListener('click', renderNextResults);
+
+  const initialSearch = new URLSearchParams(window.location.search).get('search')?.trim();
+  if (initialSearch) {
+    searchInput.value = initialSearch;
+    submitQuery(initialSearch, { updateUrl: false });
+  }
 })();
