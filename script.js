@@ -1038,7 +1038,7 @@
   const commandOutput = document.getElementById('commandOutput');
   const terminalHistory = document.getElementById('terminalHistory');
   const commandStorageKey = 'anrat-custom-commands';
-  const musicPiPSize = { width: 360, height: 240 };
+  const musicPiPSize = { width: 150, height: 360 };
   let customCommands = {};
   let musicPiPWindow = null;
 
@@ -1175,6 +1175,9 @@
   async function openMusicPlayer(musicLink = '') {
     if (!('documentPictureInPicture' in window)) {
       return { ok: false, message: 'Document Picture-in-Picture is not supported by this browser.' };
+    }
+    if (musicLink === "main") { 
+      musicLink = "https://youtube.com/playlist?list=PLAEnfbyXD6Vk6_9HUA1h1fPhpOjBKkIcS&si=sFVHzRXsc_NoyMYL"; 
     }
 
     const playerSource = new URL('FileExplorer/Misc/Fun/MusicPlayer.html', window.location.origin);
