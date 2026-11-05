@@ -415,6 +415,15 @@
     }
   }
 
+  // Pages outside the main profile can use the established explorer preview
+  // without duplicating its tab, URL, and window-management behavior.
+  document.addEventListener('explorer:open-preview', event => {
+    const { source, title, options } = event.detail || {};
+    if (typeof source !== 'string' || !source) return;
+    setFileExplorerOpen(true);
+    openExplorerPreview(source, typeof title === 'string' && title ? title : 'File Preview', null, options || {});
+  });
+
   fileExplorerToggle.addEventListener('click', () => setFileExplorerOpen(!fileExplorer.classList.contains('is-open')));
   fileExplorerClose.addEventListener('click', () => setFileExplorerOpen(false));
   fileExplorerScrim.addEventListener('click', () => setFileExplorerOpen(false));
@@ -723,7 +732,8 @@
 
   refreshFileExplorer();
 
-    document.getElementById('year').textContent = new Date().getFullYear();
+    const yearElement = document.getElementById('year');
+    if (yearElement) yearElement.textContent = new Date().getFullYear();
 
     const birthDate = new Date("2010-01-13");
     const today = new Date();
@@ -737,14 +747,19 @@
 
     if (!hasHadBirthdayThisYear) years--;
 
-    document.getElementById("age").textContent = years;
+    const ageElement = document.getElementById("age");
+    if (ageElement) ageElement.textContent = years;
     const gameDevYears = years - 8;
-    document.getElementById("GameDevAge").textContent = gameDevYears;
-    document.getElementById("GameDevYearsLabel").textContent = gameDevYears === 1 ? 'year' : 'years';
+    const gameDevAgeElement = document.getElementById("GameDevAge");
+    const gameDevYearsLabelElement = document.getElementById("GameDevYearsLabel");
+    if (gameDevAgeElement) gameDevAgeElement.textContent = gameDevYears;
+    if (gameDevYearsLabelElement) gameDevYearsLabelElement.textContent = gameDevYears === 1 ? 'year' : 'years';
     const graphicsDesignStartYear = 2024;
     const graphicsDesignYears = Math.max(0, today.getFullYear() - graphicsDesignStartYear);
-    document.getElementById("GraphicsDesignAge").textContent = graphicsDesignYears;
-    document.getElementById("GraphicsDesignYearsLabel").textContent = graphicsDesignYears === 1 ? 'year' : 'years';
+    const graphicsDesignAgeElement = document.getElementById("GraphicsDesignAge");
+    const graphicsDesignYearsLabelElement = document.getElementById("GraphicsDesignYearsLabel");
+    if (graphicsDesignAgeElement) graphicsDesignAgeElement.textContent = graphicsDesignYears;
+    if (graphicsDesignYearsLabelElement) graphicsDesignYearsLabelElement.textContent = graphicsDesignYears === 1 ? 'year' : 'years';
 
     // smooth anchor scrolling
     document.querySelectorAll('a[href^="#"]').forEach(a => {
