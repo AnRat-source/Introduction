@@ -7,7 +7,7 @@
   const loadMoreButton = document.getElementById('browserLoadMore');
   const savedLinksList = document.getElementById('savedLinksList');
   const savedLinksEmpty = document.getElementById('savedLinksEmpty');
-  const savedLinkAdd = document.getElementById('savedLinkAdd');
+  const savedLinksEdit = document.getElementById('savedLinksEdit');
   const doubleEnterDelay = 550;
   const resultsPerBatch = 8;
   const savedLinksStorageKey = 'anrat-browser-saved-links';
@@ -17,6 +17,7 @@
   let currentResults = [];
   let visibleResults = 0;
   let savedLinks = [];
+  let savedLinksEditing = false;
 
   if (greeting) {
     const hour = new Date().getHours();
@@ -44,8 +45,9 @@
       savedLinks = storedLinks.flatMap(link => {
         const url = getNavigationUrl(link?.url || '');
         if (!url) return [];
-        const title = typeof link.title === 'string' && link.title.trim() ? link.title.trim() : new URL(url).hostname;
-        return [{ id: typeof link.id === 'string' ? link.id : crypto.randomUUID(), title, url }];
+        const title = typeof link.title === 'string' ? link.title.trim() : '';
+        const icon = getNavigationUrl(link?.icon || '') || '';
+        return [{ id: typeof link.id === 'string' ? link.id : crypto.randomUUID(), title, url, icon }];
       });
     } catch {
       savedLinks = [];
@@ -56,35 +58,118 @@
     localStorage.setItem(savedLinksStorageKey, JSON.stringify(savedLinks));
   }
 
+  function getFaviconUrl(url) {
+    try {
+      return new URL('/favicon.ico', url).href;
+    } catch {
+      return '';
+    }
+  }
+
+  function createSavedLinkIcon(link) {
+    const icon = document.createElement('img');
+    icon.className = 'saved-link-icon';
+    icon.src = link.icon || getFaviconUrl(link.url);
+    icon.alt = '';
+    icon.addEventListener('error', () => { icon.style.visibility = 'hidden'; }, { once: true });
+    return icon;
+  }
+
+  function removeSavedLink(id) {
+    savedLinks = savedLinks.filter(link => link.id !== id);
+    saveSavedLinks();
+    renderSavedLinks();
+  }
+
+  function customizeSavedLinkIcon(link) {
+    const enteredIcon = window.prompt('Custom icon URL (leave blank to use the site favicon):', link.icon || '');
+    if (enteredIcon === null) return;
+    if (enteredIcon.trim() && !getNavigationUrl(enteredIcon)) {
+      window.alert('Enter a valid http(s) icon URL.');
+      return;
+    }
+    link.icon = getNavigationUrl(enteredIcon) || '';
+    saveSavedLinks();
+    renderSavedLinks();
+  }
+
   function renderSavedLinks() {
     savedLinksList.replaceChildren();
-    savedLinksEmpty.hidden = savedLinks.length > 0;
+    savedLinksEmpty.hidden = savedLinks.length > 0 || savedLinksEditing;
     savedLinks.forEach(link => {
       const item = document.createElement('li');
       item.className = 'saved-link';
-      const anchor = document.createElement('a');
-      anchor.href = link.url;
-      anchor.textContent = link.title;
-      anchor.title = link.url;
-      const edit = document.createElement('button');
-      edit.type = 'button';
-      edit.className = 'saved-link-edit';
-      edit.setAttribute('aria-label', `Edit ${link.title}`);
-      edit.innerHTML = '<i class="fa-solid fa-pen" aria-hidden="true"></i>';
-      edit.addEventListener('click', () => editSavedLink(link.id));
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.className = 'saved-link-remove';
-      remove.setAttribute('aria-label', `Remove ${link.title}`);
-      remove.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
-      remove.addEventListener('click', () => {
-        savedLinks = savedLinks.filter(savedLink => savedLink.id !== link.id);
-        saveSavedLinks();
-        renderSavedLinks();
-      });
-      item.append(anchor, edit, remove);
+
+      if (!savedLinksEditing) {
+        const anchor = document.createElement('a');
+        anchor.className = 'saved-link-shortcut';
+        anchor.href = link.url;
+        anchor.target = '_blank';
+        anchor.rel = 'noopener noreferrer';
+        anchor.title = link.url;
+        anchor.append(createSavedLinkIcon(link));
+        const name = document.createElement('span');
+        name.className = 'saved-link-name';
+        name.textContent = link.title || new URL(link.url).hostname;
+        anchor.append(name);
+        item.append(anchor);
+      } else {
+        const editor = document.createElement('div');
+        editor.className = 'saved-link-editor';
+        const iconButton = document.createElement('button');
+        iconButton.type = 'button';
+        iconButton.className = 'saved-link-icon-button';
+        iconButton.title = 'Change icon';
+        iconButton.setAttribute('aria-label', `Change icon for ${link.title || link.url}`);
+        iconButton.append(createSavedLinkIcon(link));
+        iconButton.addEventListener('click', () => customizeSavedLinkIcon(link));
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.value = link.title;
+        titleInput.placeholder = 'Link name';
+        titleInput.setAttribute('aria-label', 'Link name');
+        titleInput.addEventListener('input', () => {
+          link.title = titleInput.value.trim();
+          saveSavedLinks();
+        });
+        const urlInput = document.createElement('input');
+        urlInput.type = 'url';
+        urlInput.value = link.url;
+        urlInput.placeholder = 'https://example.com';
+        urlInput.setAttribute('aria-label', 'Link URL');
+        urlInput.addEventListener('change', () => {
+          const url = getNavigationUrl(urlInput.value);
+          if (!url) {
+            window.alert('Enter a valid http(s) URL.');
+            urlInput.value = link.url;
+            return;
+          }
+          link.url = url;
+          saveSavedLinks();
+        });
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'saved-link-remove';
+        remove.setAttribute('aria-label', `Remove ${link.title || link.url}`);
+        remove.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+        remove.addEventListener('click', () => removeSavedLink(link.id));
+        editor.append(iconButton, titleInput, urlInput);
+        item.append(editor, remove);
+      }
       savedLinksList.append(item);
     });
+
+    if (savedLinksEditing) {
+      const item = document.createElement('li');
+      item.className = 'saved-link';
+      const add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'saved-link-add';
+      add.innerHTML = '<i class="fa-solid fa-plus" aria-hidden="true"></i><span>Add link</span>';
+      add.addEventListener('click', addSavedLink);
+      item.append(add);
+      savedLinksList.append(item);
+    }
   }
 
   function addSavedLink() {
@@ -97,25 +182,7 @@
       window.alert('Enter a valid http(s) URL.');
       return;
     }
-    savedLinks.push({ id: crypto.randomUUID(), title: title.trim() || new URL(url).hostname, url });
-    saveSavedLinks();
-    renderSavedLinks();
-  }
-
-  function editSavedLink(id) {
-    const link = savedLinks.find(savedLink => savedLink.id === id);
-    if (!link) return;
-    const title = window.prompt('Link name:', link.title);
-    if (title === null) return;
-    const enteredUrl = window.prompt('Link URL:', link.url);
-    if (enteredUrl === null) return;
-    const url = getNavigationUrl(enteredUrl);
-    if (!url) {
-      window.alert('Enter a valid http(s) URL.');
-      return;
-    }
-    link.title = title.trim() || new URL(url).hostname;
-    link.url = url;
+    savedLinks.push({ id: crypto.randomUUID(), title: title.trim() || new URL(url).hostname, url, icon: '' });
     saveSavedLinks();
     renderSavedLinks();
   }
@@ -239,7 +306,13 @@
   });
 
   loadMoreButton?.addEventListener('click', renderNextResults);
-  savedLinkAdd?.addEventListener('click', addSavedLink);
+  savedLinksEdit?.addEventListener('click', () => {
+    savedLinksEditing = !savedLinksEditing;
+    savedLinksEdit.setAttribute('aria-pressed', String(savedLinksEditing));
+    savedLinksEdit.setAttribute('aria-label', savedLinksEditing ? 'Finish editing saved links' : 'Edit saved links');
+    savedLinksEdit.title = savedLinksEditing ? 'Finish editing' : 'Edit saved links';
+    renderSavedLinks();
+  });
   loadSavedLinks();
   renderSavedLinks();
 
