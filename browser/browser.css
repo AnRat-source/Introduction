@@ -202,3 +202,13 @@
   .browser-search-row button { width: 100%; }
   .browser-page .mizuki-bg { inset: 6vh auto auto 7vw; }
 }
+
+#browser-header::after {
+    content: "aqua@desktop: ~/browser" !important;
+    position: absolute;
+    top: 9px;
+    left: 12px;
+    color: #e6e9ee;
+    font-size: 11px;
+    letter-spacing: .025em;
+}
