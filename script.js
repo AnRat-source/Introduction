@@ -218,9 +218,9 @@
 
   function getPreviewFavicon(source) {
     try {
-      const previewUrl = new URL(source, window.location.href);
+      const previewUrl = new URL(source, window.location.origin);
       return previewUrl.origin === window.location.origin
-        ? new URL('favicon.ico', window.location.href).href
+        ? new URL('favicon.ico', window.location.origin).href
         : `https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(previewUrl.origin)}`;
     } catch {
       return 'favicon.ico';
@@ -302,7 +302,7 @@
 
   function normalizeKnownLink(value) {
     try {
-      const url = new URL(value, window.location.href);
+      const url = new URL(value, window.location.origin);
       if (url.hostname.toLowerCase() === 'store.anrat.link' && /^\/portfolio\/?$/i.test(url.pathname)) {
         url.hostname = 'portfolio.anrat.link';
         url.pathname = '/';
@@ -320,8 +320,8 @@
       const isLocalPath = /^(?:\.?\.?\/|\/|FileExplorer\/)/.test(rawUrl);
       const candidate = /^[a-z][a-z\d+.-]*:/i.test(rawUrl)
         ? rawUrl
-        : isLocalPath ? new URL(rawUrl, window.location.href).href : `https://${rawUrl}`;
-      const url = new URL(candidate, window.location.href);
+        : isLocalPath ? new URL(rawUrl, window.location.origin).href : `https://${rawUrl}`;
+      const url = new URL(candidate, window.location.origin);
       return /^(https?:)$/i.test(url.protocol) ? normalizeKnownLink(url.href) : null;
     } catch {
       return null;
@@ -339,7 +339,7 @@
   }
 
   function syncPreviewAddress() {
-    const pageUrl = new URL(window.location.href);
+    const pageUrl = new URL(window.location.origin);
     const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
     if (activeTab && !explorerPreview.hidden && !explorerPreview.classList.contains('is-minimized')) {
       pageUrl.searchParams.set('site', activeTab.source);
@@ -354,7 +354,7 @@
   function openExplorerPreview(source, title, tabId = null, options = {}) {
     let tab = tabId
       ? explorerTabs.find(savedTab => savedTab.id === tabId)
-      : explorerTabs.find(savedTab => new URL(savedTab.source, window.location.href).href === new URL(source, window.location.href).href);
+      : explorerTabs.find(savedTab => new URL(savedTab.source, window.location.origin).href === new URL(source, window.location.origin).href);
     const urlEditable = options.urlEditable ?? tab?.urlEditable ?? true;
     const customFavicon = options.favicon ?? tab?.customFavicon ?? '';
     if (!tab) {
@@ -502,12 +502,12 @@
     }
   });
   renderExplorerTabDock();
-  const sharedPreviewUrl = new URL(window.location.href);
+  const sharedPreviewUrl = new URL(window.location.origin);
   const sharedPreviewSource = normalizePreviewUrl(sharedPreviewUrl.searchParams.get('site') || '');
   if (sharedPreviewSource) {
     setFileExplorerOpen(true);
     const savedTab = explorerTabs.find(tab => {
-      try { return new URL(tab.source, window.location.href).href === sharedPreviewSource; }
+      try { return new URL(tab.source, window.location.origin).href === sharedPreviewSource; }
       catch { return false; }
     });
     let sharedPreviewTitle = sharedPreviewSource;
@@ -601,7 +601,7 @@
           folder.addEventListener('dblclick', event => {
             event.preventDefault();
             event.stopPropagation();
-            window.location.assign(new URL('FileExplorer/Tools/', window.location.href).href);
+            window.location.assign(new URL('FileExplorer/Tools/', window.location.origin).href);
           });
         }
 
@@ -727,7 +727,7 @@
   fileExplorerTree.addEventListener('dblclick', event => {
     const toolsFolder = event.target.closest('.tree-folder[data-tools-directory="true"]');
     if (!toolsFolder) return;
-    window.location.assign(new URL('FileExplorer/Tools/', window.location.href).href);
+    window.location.assign(new URL('FileExplorer/Tools/', window.location.origin).href);
   });
 
   refreshFileExplorer();
@@ -1177,7 +1177,7 @@
       return { ok: false, message: 'Document Picture-in-Picture is not supported by this browser.' };
     }
 
-    const playerSource = "https://anrat.link/FileExplorer/Misc/Fun/MusicPlayer.html";
+    const playerSource = new URL('FileExplorer/Misc/Fun/MusicPlayer.html', window.location.origin);
     playerSource.searchParams.set('embedded', '1');
     playerSource.searchParams.set('autoplay', '1');
     if (musicLink) playerSource.searchParams.set('link', musicLink);
