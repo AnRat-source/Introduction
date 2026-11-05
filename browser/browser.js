@@ -8,6 +8,7 @@
   const savedLinksList = document.getElementById('savedLinksList');
   const savedLinksEmpty = document.getElementById('savedLinksEmpty');
   const savedLinksEdit = document.getElementById('savedLinksEdit');
+  const savedLinksSection = document.querySelector('.saved-links');
   const doubleEnterDelay = 550;
   const resultsPerBatch = 8;
   const savedLinksStorageKey = 'anrat-browser-saved-links';
@@ -308,6 +309,7 @@
   loadMoreButton?.addEventListener('click', renderNextResults);
   savedLinksEdit?.addEventListener('click', () => {
     savedLinksEditing = !savedLinksEditing;
+    savedLinksSection?.classList.toggle('is-editing', savedLinksEditing);
     savedLinksEdit.setAttribute('aria-pressed', String(savedLinksEditing));
     savedLinksEdit.setAttribute('aria-label', savedLinksEditing ? 'Finish editing saved links' : 'Edit saved links');
     savedLinksEdit.title = savedLinksEditing ? 'Finish editing' : 'Edit saved links';
