@@ -63,28 +63,27 @@
         </div>
       </div>
       <nav>
-        <a href="blog.html" class="cta" id="blogButton">Blog</a>
-        <details class="mobile-links">
-          <summary class="cta">Links <span aria-hidden="true">⌄</span></summary>
-          <div class="mobile-links-menu">
-            <a href="blog.html">Blog</a>
-            <a href="FileExplorer/Tools/">Tools Directory</a>
-          </div>
-        </details>
-        <a href="https://discord.gg/UDsjHHn55r" class="cta" target="_blank" rel="noopener noreferrer">Contact</a>
+        <a href="https://mail.google.com/mail/u/0/" class="cta" target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-envelope" aria-hidden="true"></i> Gmail
+        </a>
       </nav>
     </header>
 
-    <main class="browser-workspace" aria-label="Google search">
-      <form class="browser-search" action="browser/results.html" method="get" role="search">
+    <main class="browser-workspace" aria-label="Web search">
+      <form class="browser-search" action="browser/" method="get" role="search">
         <h2 class="browser-greeting" id="browserGreeting">Good day, Aqua</h2>
-        <label for="googleSearch">Search DuckDuckGo or enter a URL</label>
+        <label for="googleSearch">Search the web or enter a URL</label>
         <div class="browser-search-row">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-          <input id="googleSearch" name="q" type="search" autocomplete="off" placeholder="Search DuckDuckGo or enter a URL" autofocus>
+          <input id="googleSearch" name="q" type="search" autocomplete="off" placeholder="Search the web or enter a URL" autofocus>
           <button type="submit">Search</button>
         </div>
       </form>
+    </main>
+
+    <main class="browser-results" aria-live="polite" aria-label="Search results">
+      <p class="browser-results-status" id="browserResultsStatus">Search the web or enter a URL.</p>
+      <ol class="browser-results-list" id="browserResults"></ol>
     </main>
 
     <div class="note browser-splash" style="display:flex;gap:12px;align-items:center">
