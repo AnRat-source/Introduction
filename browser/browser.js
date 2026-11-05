@@ -112,6 +112,7 @@
         const name = document.createElement('span');
         name.className = 'saved-link-name';
         name.textContent = link.title || new URL(link.url).hostname;
+        name.textContent = name.textContent+".exe";
         anchor.append(name);
         item.append(anchor);
       } else {
