@@ -5,13 +5,18 @@
   const resultsStatus = document.getElementById('browserResultsStatus');
   const resultsList = document.getElementById('browserResults');
   const loadMoreButton = document.getElementById('browserLoadMore');
+  const savedLinksList = document.getElementById('savedLinksList');
+  const savedLinksEmpty = document.getElementById('savedLinksEmpty');
+  const savedLinkAdd = document.getElementById('savedLinkAdd');
   const doubleEnterDelay = 550;
   const resultsPerBatch = 8;
+  const savedLinksStorageKey = 'anrat-browser-saved-links';
   let lastSearch = { query: '', submittedAt: 0 };
   let activeSearch = 0;
   let currentQuery = '';
   let currentResults = [];
   let visibleResults = 0;
+  let savedLinks = [];
 
   if (greeting) {
     const hour = new Date().getHours();
@@ -30,6 +35,89 @@
     } catch {
       return null;
     }
+  }
+
+  function loadSavedLinks() {
+    try {
+      const storedLinks = JSON.parse(localStorage.getItem(savedLinksStorageKey) || '[]');
+      if (!Array.isArray(storedLinks)) return;
+      savedLinks = storedLinks.flatMap(link => {
+        const url = getNavigationUrl(link?.url || '');
+        if (!url) return [];
+        const title = typeof link.title === 'string' && link.title.trim() ? link.title.trim() : new URL(url).hostname;
+        return [{ id: typeof link.id === 'string' ? link.id : crypto.randomUUID(), title, url }];
+      });
+    } catch {
+      savedLinks = [];
+    }
+  }
+
+  function saveSavedLinks() {
+    localStorage.setItem(savedLinksStorageKey, JSON.stringify(savedLinks));
+  }
+
+  function renderSavedLinks() {
+    savedLinksList.replaceChildren();
+    savedLinksEmpty.hidden = savedLinks.length > 0;
+    savedLinks.forEach(link => {
+      const item = document.createElement('li');
+      item.className = 'saved-link';
+      const anchor = document.createElement('a');
+      anchor.href = link.url;
+      anchor.textContent = link.title;
+      anchor.title = link.url;
+      const edit = document.createElement('button');
+      edit.type = 'button';
+      edit.className = 'saved-link-edit';
+      edit.setAttribute('aria-label', `Edit ${link.title}`);
+      edit.innerHTML = '<i class="fa-solid fa-pen" aria-hidden="true"></i>';
+      edit.addEventListener('click', () => editSavedLink(link.id));
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'saved-link-remove';
+      remove.setAttribute('aria-label', `Remove ${link.title}`);
+      remove.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+      remove.addEventListener('click', () => {
+        savedLinks = savedLinks.filter(savedLink => savedLink.id !== link.id);
+        saveSavedLinks();
+        renderSavedLinks();
+      });
+      item.append(anchor, edit, remove);
+      savedLinksList.append(item);
+    });
+  }
+
+  function addSavedLink() {
+    const title = window.prompt('Link name (optional):');
+    if (title === null) return;
+    const enteredUrl = window.prompt('Link URL:');
+    if (enteredUrl === null) return;
+    const url = getNavigationUrl(enteredUrl);
+    if (!url) {
+      window.alert('Enter a valid http(s) URL.');
+      return;
+    }
+    savedLinks.push({ id: crypto.randomUUID(), title: title.trim() || new URL(url).hostname, url });
+    saveSavedLinks();
+    renderSavedLinks();
+  }
+
+  function editSavedLink(id) {
+    const link = savedLinks.find(savedLink => savedLink.id === id);
+    if (!link) return;
+    const title = window.prompt('Link name:', link.title);
+    if (title === null) return;
+    const enteredUrl = window.prompt('Link URL:', link.url);
+    if (enteredUrl === null) return;
+    const url = getNavigationUrl(enteredUrl);
+    if (!url) {
+      window.alert('Enter a valid http(s) URL.');
+      return;
+    }
+    link.title = title.trim() || new URL(url).hostname;
+    link.url = url;
+    saveSavedLinks();
+    renderSavedLinks();
   }
 
   function addResultText(card, className, value) {
@@ -151,6 +239,9 @@
   });
 
   loadMoreButton?.addEventListener('click', renderNextResults);
+  savedLinkAdd?.addEventListener('click', addSavedLink);
+  loadSavedLinks();
+  renderSavedLinks();
 
   const initialSearch = new URLSearchParams(window.location.search).get('search')?.trim();
   if (initialSearch) {

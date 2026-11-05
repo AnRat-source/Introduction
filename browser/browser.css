@@ -22,6 +22,9 @@
   width: min(100%, 650px);
 }
 
+.browser-home { width: min(100%, 650px); }
+.browser-home .browser-search { width: 100%; }
+
 .browser-greeting {
   margin: 0 0 16px;
   color: #eef2f7;
@@ -90,6 +93,29 @@
   background: #3b4659;
   outline: 0;
 }
+
+.google-menu { position: relative; }
+.google-menu summary { display: grid; width: 40px; height: 38px; place-items: center; padding: 0; list-style: none; cursor: pointer; }
+.google-menu summary::-webkit-details-marker { display: none; }
+.google-menu summary i { font-size: 16px; }
+.google-menu-list { position: absolute; z-index: 110; top: calc(100% + 7px); right: 0; min-width: 164px; border: 1px solid #697488; background: #1b2330; box-shadow: 3px 3px 0 rgba(0, 0, 0, .35); }
+.google-menu-list a { display: flex; align-items: center; gap: 9px; padding: 10px 12px; color: #e6ebf4; font-size: 12px; text-decoration: none; }
+.google-menu-list a i { width: 15px; color: #c4b5fd; text-align: center; }
+.google-menu-list a:hover, .google-menu-list a:focus-visible { background: #3b4659; color: #fff; outline: 0; }
+
+.saved-links { margin-top: 18px; padding: 14px; border: 1px solid #526075; background: rgba(20, 26, 36, .72); box-shadow: 3px 3px 0 rgba(0, 0, 0, .3); }
+.saved-links-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.saved-links h2 { margin: 0; color: #e6edf7; font-size: 14px; }
+.saved-link-add { padding: 7px 9px; border: 1px solid #697488; background: rgba(32, 38, 49, .9); box-shadow: 2px 2px 0 rgba(0, 0, 0, .35); color: #e6ebf4; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
+.saved-link-add:hover, .saved-link-add:focus-visible { border-color: #b5c1d3; background: #3b4659; outline: 0; }
+.saved-links-empty { margin: 11px 0 0; color: #9ca9ba; font-size: 12px; }
+.saved-links-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 9px; margin: 11px 0 0; padding: 0; list-style: none; }
+.saved-link { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 6px; min-width: 0; padding: 8px; border: 1px solid #526075; background: rgba(12, 16, 23, .72); }
+.saved-link a { overflow: hidden; color: #d8ccff; font-size: 12px; font-weight: 600; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.saved-link a:hover, .saved-link a:focus-visible { color: #fff; text-decoration: underline; outline: 0; }
+.saved-link button { width: 25px; height: 25px; padding: 0; border: 1px solid #697488; background: #202631; color: #cbd5e1; cursor: pointer; }
+.saved-link button:hover, .saved-link button:focus-visible { border-color: #b5c1d3; background: #3b4659; color: #fff; outline: 0; }
+.saved-link-remove:hover, .saved-link-remove:focus-visible { border-color: #fca5a5 !important; background: #742f3a !important; }
 
 .browser-results {
   display: none;
