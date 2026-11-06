@@ -49,11 +49,21 @@
 
   const savedLinksSection = document.querySelector('.saved-links');
 
+  const bookmarksList = document.getElementById('bookmarksList');
+
+  const bookmarksEmpty = document.getElementById('bookmarksEmpty');
+
+  const bookmarkEdit = document.getElementById('bookmarkEdit');
+
+  const bookmarksMenu = document.querySelector('.bookmarks-menu');
+
   const doubleEnterDelay = 550;
 
   const resultsPerBatch = 8;
 
   const savedLinksStorageKey = 'anrat-browser-saved-links';
+
+  const bookmarksStorageKey = 'anrat-browser-bookmarks';
 
   let lastSearch = { query: '', submittedAt: 0 };
 
@@ -68,6 +78,10 @@
   let savedLinks = [];
 
   let savedLinksEditing = false;
+
+  let bookmarks = [];
+
+  let bookmarksEditing = false;
 
 
 
@@ -110,6 +124,212 @@
       return null;
 
     }
+
+  }
+
+
+
+  function makeLocalId() {
+
+    return crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+
+  }
+
+
+
+  function loadBookmarks() {
+
+    try {
+
+      const stored = JSON.parse(localStorage.getItem(bookmarksStorageKey) || '[]');
+
+      if (!Array.isArray(stored)) return;
+
+      bookmarks = stored.flatMap(bookmark => {
+
+        const url = getNavigationUrl(bookmark?.url || '');
+
+        if (!url) return [];
+
+        const title = typeof bookmark.title === 'string' && bookmark.title.trim()
+          ? bookmark.title.trim()
+          : new URL(url).hostname;
+
+        return [{ id: typeof bookmark.id === 'string' ? bookmark.id : makeLocalId(), title, url }];
+
+      });
+
+    } catch {
+
+      bookmarks = [];
+
+    }
+
+  }
+
+
+
+  function saveBookmarks() {
+
+    localStorage.setItem(bookmarksStorageKey, JSON.stringify(bookmarks));
+
+  }
+
+
+
+  function renderBookmarks() {
+
+    bookmarksList?.replaceChildren();
+
+    if (!bookmarksList || !bookmarksEmpty) return;
+
+    bookmarksEmpty.hidden = bookmarks.length > 0 || bookmarksEditing;
+
+    bookmarks.forEach(bookmark => {
+
+      const item = document.createElement('li');
+
+      item.className = 'bookmark';
+
+      const anchor = document.createElement('a');
+
+      anchor.href = bookmark.url;
+
+      anchor.title = bookmark.url;
+
+      anchor.textContent = bookmark.title;
+
+      const actions = document.createElement('div');
+
+      actions.className = 'bookmark-actions';
+
+      const edit = document.createElement('button');
+
+      edit.type = 'button';
+
+      edit.title = 'Edit bookmark';
+
+      edit.setAttribute('aria-label', `Edit ${bookmark.title}`);
+
+      edit.innerHTML = '<i class="fa-solid fa-pen" aria-hidden="true"></i>';
+
+      edit.addEventListener('click', () => editBookmark(bookmark.id));
+
+      const remove = document.createElement('button');
+
+      remove.type = 'button';
+
+      remove.className = 'bookmark-remove';
+
+      remove.title = 'Delete bookmark';
+
+      remove.setAttribute('aria-label', `Delete ${bookmark.title}`);
+
+      remove.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+
+      remove.addEventListener('click', () => {
+
+        bookmarks = bookmarks.filter(item => item.id !== bookmark.id);
+
+        saveBookmarks();
+
+        renderBookmarks();
+
+      });
+
+      actions.append(edit, remove);
+
+      item.append(anchor, actions);
+
+      bookmarksList.append(item);
+
+    });
+
+    if (bookmarksEditing) {
+
+      const item = document.createElement('li');
+
+      const add = document.createElement('button');
+
+      add.type = 'button';
+
+      add.className = 'bookmark-add';
+
+      add.innerHTML = '<i class="fa-solid fa-plus" aria-hidden="true"></i> Add bookmark';
+
+      add.addEventListener('click', addBookmark);
+
+      item.append(add);
+
+      bookmarksList.append(item);
+
+    }
+
+  }
+
+
+
+  function addBookmark() {
+
+    const title = window.prompt('Bookmark title (optional):');
+
+    if (title === null) return;
+
+    const enteredUrl = window.prompt('Bookmark URL:');
+
+    if (enteredUrl === null) return;
+
+    const url = getNavigationUrl(enteredUrl);
+
+    if (!url) {
+
+      window.alert('Enter a valid http(s) URL.');
+
+      return;
+
+    }
+
+    bookmarks.push({ id: makeLocalId(), title: title.trim() || new URL(url).hostname, url });
+
+    saveBookmarks();
+
+    renderBookmarks();
+
+  }
+
+
+
+  function editBookmark(id) {
+
+    const bookmark = bookmarks.find(item => item.id === id);
+
+    if (!bookmark) return;
+
+    const title = window.prompt('Bookmark title:', bookmark.title);
+
+    if (title === null) return;
+
+    const enteredUrl = window.prompt('Bookmark URL:', bookmark.url);
+
+    if (enteredUrl === null) return;
+
+    const url = getNavigationUrl(enteredUrl);
+
+    if (!url) {
+
+      window.alert('Enter a valid http(s) URL.');
+
+      return;
+
+    }
+
+    bookmark.title = title.trim() || new URL(url).hostname;
+
+    bookmark.url = url;
+
+    saveBookmarks();
+
+    renderBookmarks();
 
   }
 
@@ -293,10 +513,6 @@
         anchor.className = 'saved-link-shortcut';
 
         anchor.href = link.url;
-
-        anchor.target = '_blank';
-
-        anchor.rel = 'noopener noreferrer';
 
         anchor.title = link.url;
 
@@ -722,6 +938,32 @@
 
   loadMoreButton?.addEventListener('click', renderNextResults);
 
+  bookmarkEdit?.addEventListener('click', () => {
+
+    bookmarksEditing = !bookmarksEditing;
+
+    bookmarksMenu?.classList.toggle('is-editing', bookmarksEditing);
+
+    bookmarkEdit.setAttribute('aria-pressed', String(bookmarksEditing));
+
+    bookmarkEdit.setAttribute('aria-label', bookmarksEditing ? 'Finish editing bookmarks' : 'Edit bookmarks');
+
+    bookmarkEdit.title = bookmarksEditing ? 'Finish editing' : 'Edit bookmarks';
+
+    renderBookmarks();
+
+  });
+
+  document.addEventListener('pointerdown', event => {
+
+    if (bookmarksMenu?.open && !bookmarksMenu.contains(event.target)) {
+
+      bookmarksMenu.open = false;
+
+    }
+
+  });
+
   savedLinksEdit?.addEventListener('click', () => {
 
     savedLinksEditing = !savedLinksEditing;
@@ -737,6 +979,10 @@
     renderSavedLinks();
 
   });
+
+  loadBookmarks();
+
+  renderBookmarks();
 
   loadSavedLinks();
 

@@ -8,7 +8,7 @@
   <link rel="icon" type="image/x-icon" href="Images/PFP.ico">
   <link rel="stylesheet" href="style.css">
   <script src="background-time.js" defer></script>
-  <link rel="stylesheet" href="browser/browser.css?v=4">
+  <link rel="stylesheet" href="browser/browser.css?v=7">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body class="browser-page">
@@ -64,16 +64,27 @@
         </div>
       </div>
       <nav>
+        <details class="bookmarks-menu">
+          <summary class="cta" aria-label="Bookmarks"><i class="fa-solid fa-bookmark" aria-hidden="true"></i></summary>
+          <div class="bookmarks-menu-list">
+            <div class="bookmarks-menu-head">
+              <span>Bookmarks</span>
+              <button id="bookmarkEdit" type="button" aria-pressed="false" aria-label="Edit bookmarks" title="Edit bookmarks"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+            </div>
+            <p class="bookmarks-empty" id="bookmarksEmpty">No bookmarks yet.</p>
+            <ul class="bookmarks-list" id="bookmarksList"></ul>
+          </div>
+        </details>
         <details class="google-menu">
           <summary class="cta" aria-label="Google apps"><i class="fa-brands fa-google" aria-hidden="true"></i></summary>
           <div class="google-menu-list">
-            <a href="https://mail.google.com/mail/u/0/" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-envelope" aria-hidden="true"></i> Gmail</a>
-            <a href="https://github.com/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
-            <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-comments" aria-hidden="true"></i> ChatGPT</a>
-            <a href="https://classroom.google.com/u/0/h/st" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i> Classroom</a>
-            <a href="https://drive.google.com/drive/home" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-google-drive" aria-hidden="true"></i> Drive</a>
-            <a href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Calendar</a>
-            <a href="https://docs.google.com/" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Docs</a>
+            <a href="https://mail.google.com/mail/u/0/"><i class="fa-solid fa-envelope" aria-hidden="true"></i> Gmail</a>
+            <a href="https://github.com/"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
+            <a href="https://chatgpt.com/"><i class="fa-solid fa-comments" aria-hidden="true"></i> ChatGPT</a>
+            <a href="https://classroom.google.com/u/0/h/st"><i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i> Classroom</a>
+            <a href="https://drive.google.com/drive/home"><i class="fa-brands fa-google-drive" aria-hidden="true"></i> Drive</a>
+            <a href="https://calendar.google.com/"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Calendar</a>
+            <a href="https://docs.google.com/"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Docs</a>
           </div>
         </details>
       </nav>
@@ -107,10 +118,6 @@
       <button class="browser-load-more" id="browserLoadMore" type="button" hidden>Load more</button>
     </main>
 
-    <div class="note browser-splash" style="display:flex;gap:12px;align-items:center">
-      <div style="flex:1;color:var(--muted)" id="SplashText">.</div>
-    </div>
-
     <article class="card terminal-window" id="terminalWindow" hidden>
       <div class="head">
         <div style="flex:1"><h2 class="title">Terminal Session</h2></div>
@@ -128,9 +135,13 @@
       </form>
       <p id="commandOutput" class="command-output" aria-live="polite">Add a command with: add name :: response</p>
     </section>
+
+    <div class="note browser-splash" style="display:flex;gap:12px;align-items:center">
+      <div style="flex:1;color:var(--muted)" id="SplashText">.</div>
+    </div>
   </div>
 
   <script src="script.js?v=rest-hours"></script>
-  <script src="browser/browser.js?v=4"></script>
+  <script src="browser/browser.js?v=7"></script>
 </body>
 </html>
