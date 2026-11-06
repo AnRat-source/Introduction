@@ -74,14 +74,103 @@
     if (updateAddress && new URL(window.location.href).searchParams.has('post')) setPostAddress(null, true);
   }
 
-  function appendTextBody(text) {
-    if (!text.trim()) return;
-    text.trim().split(/\r?\n\s*\r?\n/).forEach(paragraphText => {
-      const paragraph = document.createElement('p');
-      paragraph.className = 'blog-reader-paragraph';
-      paragraph.textContent = paragraphText.trim();
-      postBody.append(paragraph);
+  const escapeHTML = value => value.replace(/[&<>"']/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[character]);
+
+  function safeMarkdownUrl(value) {
+    try {
+      const url = new URL(value, window.location.href);
+      return /^(https?:|mailto:)$/i.test(url.protocol) ? url.href : null;
+    } catch {
+      return value.startsWith('/') || value.startsWith('#') ? value : null;
+    }
+  }
+
+  function renderInlineMarkdown(value) {
+    const tokens = [];
+    const protect = markup => `\u0000${tokens.push(markup) - 1}\u0000`;
+    let html = escapeHTML(value);
+    html = html.replace(/`([^`]+)`/g, (_, code) => protect(`<code>${code}</code>`));
+    html = html.replace(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+&quot;([^&]*)&quot;)?\)/g, (_, alt, source, title = '') => {
+      const url = safeMarkdownUrl(source);
+      return url ? protect(`<img src="${escapeHTML(url)}" alt="${alt}"${title ? ` title="${title}"` : ''}>`) : alt;
     });
+    html = html.replace(/\[([^\]]+)\]\(([^\s)]+)(?:\s+&quot;([^&]*)&quot;)?\)/g, (_, label, source, title = '') => {
+      const url = safeMarkdownUrl(source);
+      return url ? protect(`<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer"${title ? ` title="${title}"` : ''}>${label}</a>`) : label;
+    });
+    html = html.replace(/&lt;(https?:\/\/[^\s&]+|mailto:[^\s&]+)&gt;/g, (_, source) => {
+      const url = safeMarkdownUrl(source);
+      return url ? protect(`<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${source.replace(/^mailto:/, '')}</a>`) : source;
+    });
+    html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
+    html = html.replace(/\*\*(.+?)\*\*|__(.+?)__/g, '<strong>$1$2</strong>');
+    html = html.replace(/(^|[^*])\*([^*\n]+)\*|(^|[^_\w])_([^_\n]+)_/g, '$1$3<em>$2$4</em>');
+    html = html.replace(/\u0000(\d+)\u0000/g, (_, index) => tokens[Number(index)]);
+    return html;
+  }
+
+  function appendMarkdownBlocks(source) {
+    const lines = source.replace(/\r\n?/g, '\n').split('\n');
+    let index = 0;
+    const add = html => postBody.insertAdjacentHTML('beforeend', html);
+    const isTableDivider = line => /^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+    const cells = line => line.trim().replace(/^\||\|$/g, '').split('|').map(cell => cell.trim());
+
+    while (index < lines.length) {
+      const line = lines[index];
+      if (!line.trim()) { index += 1; continue; }
+
+      const heading = line.match(/^(#{1,6})\s+(.+)$/);
+      if (heading) {
+        const level = heading[1].length;
+        add(`<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`);
+        index += 1;
+        continue;
+      }
+      if (/^\s{0,3}([-*_])(?:\s*\1){2,}\s*$/.test(line) || /^\s{0,3}---+\s*$/.test(line)) {
+        add('<hr>'); index += 1; continue;
+      }
+      if (index + 1 < lines.length && line.includes('|') && isTableDivider(lines[index + 1])) {
+        const header = cells(line);
+        index += 2;
+        const rows = [];
+        while (index < lines.length && lines[index].includes('|') && lines[index].trim()) rows.push(cells(lines[index++]));
+        const head = header.map(cell => `<th>${renderInlineMarkdown(cell)}</th>`).join('');
+        const body = rows.map(row => `<tr>${header.map((_, cell) => `<td>${renderInlineMarkdown(row[cell] || '')}</td>`).join('')}</tr>`).join('');
+        add(`<div class="blog-markdown-table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`);
+        continue;
+      }
+      if (/^>\s?/.test(line)) {
+        const quote = [];
+        while (index < lines.length && /^>\s?/.test(lines[index])) quote.push(lines[index++].replace(/^>\s?/, ''));
+        const alert = quote[0]?.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/i);
+        const content = (alert ? quote.slice(1) : quote).join('\n');
+        const className = alert ? ` blog-markdown-alert ${alert[1].toLowerCase()}` : '';
+        const title = alert ? `<strong>${alert[1][0]}${alert[1].slice(1).toLowerCase()}</strong>` : '';
+        add(`<blockquote class="blog-markdown-quote${className}">${title}${renderInlineMarkdown(content)}</blockquote>`);
+        continue;
+      }
+      const list = line.match(/^\s*(?:([-+*])|(\d+)\.)\s+(.+)$/);
+      if (list) {
+        const ordered = Boolean(list[2]);
+        const items = [];
+        while (index < lines.length) {
+          const entry = lines[index].match(/^\s*(?:[-+*]|\d+\.)\s+(.+)$/);
+          if (!entry) break;
+          const task = entry[1].match(/^\[([ xX])\]\s+([\s\S]*)$/);
+          items.push(`<li${task ? ' class="task-list-item"' : ''}>${task ? `<input type="checkbox" disabled${task[1].toLowerCase() === 'x' ? ' checked' : ''}> ` : ''}${renderInlineMarkdown(task ? task[2] : entry[1])}</li>`);
+          index += 1;
+        }
+        add(`<${ordered ? 'ol' : 'ul'}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`);
+        continue;
+      }
+      const paragraph = [line];
+      index += 1;
+      while (index < lines.length && lines[index].trim() && !/^(#{1,6})\s+|^>\s?|^\s*(?:[-+*]|\d+\.)\s+/.test(lines[index]) && !(lines[index].includes('|') && isTableDivider(lines[index + 1] || ''))) paragraph.push(lines[index++]);
+      add(`<p class="blog-reader-paragraph">${renderInlineMarkdown(paragraph.join('\n'))}</p>`);
+    }
   }
 
   async function renderGitHubDiscussion(url, container) {
@@ -158,7 +247,7 @@
     let cursor = 0;
     let match;
     while ((match = codeBlock.exec(markdown))) {
-      appendTextBody(markdown.slice(cursor, match.index));
+      appendMarkdownBlocks(markdown.slice(cursor, match.index));
       const rawLanguage = match[1].trim();
       const language = rawLanguage.toLowerCase();
       const content = (match[2] || '').replace(/\r?\n$/, '');
@@ -286,8 +375,8 @@
       postBody.append(pre);
       cursor = codeBlock.lastIndex;
     }
-    appendTextBody(markdown.slice(cursor));
-    if (!postBody.childElementCount) appendTextBody('Open this post on GitHub to read more.');
+    appendMarkdownBlocks(markdown.slice(cursor));
+    if (!postBody.childElementCount) appendMarkdownBlocks('Open this post on GitHub to read more.');
   }
 
   window.addEventListener('message', event => {
@@ -328,7 +417,7 @@
       'reactions-enabled': '1',
       'emit-metadata': '0',
       'input-position': 'bottom',
-      theme: 'preferred_color_scheme',
+      theme: new URL('giscus-theme.css', window.location.href).href,
       lang: 'en'
     };
     Object.entries(config).forEach(([name, value]) => script.dataset[name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = value);
