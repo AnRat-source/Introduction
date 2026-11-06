@@ -1,5 +1,9 @@
 (() => {
 
+  // Keep the browser quiet during the same midnight-to-6 AM rest window
+  // used by its greeting.
+  document.documentElement.classList.toggle('browser-rest-hours', new Date().getHours() < 6);
+
   const greeting = document.getElementById('browserGreeting');
 
   const searchForm = document.querySelector('.browser-search');

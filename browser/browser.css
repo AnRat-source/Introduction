@@ -18,6 +18,11 @@
   inset: 10vh auto auto 10vw;
 }
 
+.browser-rest-hours .browser-page .mizuki-bg {
+  display: none !important;
+  background-image: none !important;
+}
+
 .browser-search {
   width: min(100%, 650px);
 }

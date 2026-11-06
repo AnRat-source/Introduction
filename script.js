@@ -919,6 +919,8 @@
 
   // Main preloader
   document.addEventListener("DOMContentLoaded", async () => {
+    const skipMizuki = document.documentElement.classList.contains('browser-rest-hours');
+    if (skipMizuki) document.getElementById("mizuki")?.remove();
     if (mobileLayoutQuery.matches) {
       document.getElementById("loader").remove();
       return;
@@ -929,8 +931,10 @@
     
     setTimeout(() => loader.remove(), 800);
     setTimeout(() => {
+      if (skipMizuki) return;
       console.log("Adding loaded class...");
       const mizuki = document.getElementById("mizuki");
+      if (!mizuki) return;
       mizuki.classList.add("loaded");
       enableMizukiScrollSpring(mizuki);
     }, 200);
