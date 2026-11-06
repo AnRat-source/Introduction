@@ -26,6 +26,11 @@
         transform: none !important;
     }
     .video-wash { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,9,15,.38), rgba(8,9,15,.73)), radial-gradient(circle at 50% 45%, transparent 22%, rgba(8,9,15,.4) 90%); opacity: 0; }
+    .volume-control { position: absolute; z-index: 3; top: clamp(12px, 3cqh, 24px); left: clamp(12px, 3cqw, 28px); width: 40px; height: 40px; display: flex; align-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.4); backdrop-filter: blur(10px); transition: width .2s ease, background .2s ease; }
+    .volume-control.expanded, .volume-control:focus-within { width: min(160px, calc(100cqw - 24px)); background: rgba(8,9,15,.66); }
+    #volume-toggle { width: 38px; min-width: 38px; height: 38px; min-height: 38px; padding: 0; display: grid; place-items: center; font-size: 17px; text-shadow: none; }
+    #volume-slider { width: 0; min-width: 0; margin: 0; opacity: 0; accent-color: var(--lavender); cursor: pointer; transition: width .2s ease, opacity .15s ease; }
+    .volume-control.expanded #volume-slider, .volume-control:focus-within #volume-slider { width: 104px; min-width: 104px; margin-right: 12px; opacity: 1; }
 
     .now-playing, .cover-wrap, #title, .progress-group, .transport { position: relative; z-index: 1; }
     .now-playing { margin: 0 0 clamp(10px, 4cqh, 31px); color: var(--lavender); font-size: clamp(9px, 1.8cqh, 11px); font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
@@ -72,6 +77,10 @@
   <main class="player" aria-label="Music player">
     <div id="youtube-player" aria-hidden="true"></div>
     <div class="video-wash" aria-hidden="true"></div>
+    <div class="volume-control" id="volume-control">
+      <button id="volume-toggle" type="button" aria-label="Adjust volume" aria-expanded="false">🔊</button>
+      <input id="volume-slider" type="range" min="0" max="100" value="100" aria-label="Volume">
+    </div>
     <p class="now-playing">Now playing</p>
     <div class="cover-wrap"><img id="thumbnail" src="https://i.ytimg.com/vi/default/hqdefault.jpg" alt="Current track thumbnail"></div>
     <h1 id="title">Loading playlist…</h1>
@@ -110,6 +119,9 @@
       const elapsed = document.getElementById('elapsed');
       const duration = document.getElementById('duration');
       const playPause = document.getElementById('play-pause');
+      const volumeControl = document.getElementById('volume-control');
+      const volumeToggle = document.getElementById('volume-toggle');
+      const volumeSlider = document.getElementById('volume-slider');
       const playerCard = document.querySelector('.player');
       const supportsDocumentPiP = 'documentPictureInPicture' in window;
       const embeddedInDocumentPiP = new URLSearchParams(window.location.search).has('embedded');
@@ -117,6 +129,27 @@
       let player, ready = false, updateTimer, lastVideoId = '', pipWindow;
       const formatTime = seconds => { if (!Number.isFinite(seconds) || seconds < 0) return '0:00'; return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`; };
       const setPlaybackButton = isPlaying => { playPause.textContent = isPlaying ? '❚❚' : '▶'; playPause.classList.toggle('is-paused', !isPlaying); playPause.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play'); };
+      const setVolumeIcon = value => { volumeToggle.textContent = value === 0 ? '🔇' : value < 50 ? '🔉' : '🔊'; };
+      const setThumbnail = source => {
+        thumbnail.style.opacity = '.5';
+        thumbnail.onload = () => { thumbnail.style.opacity = '1'; };
+        thumbnail.src = source;
+      };
+      const updateArtwork = async (videoId, trackTitle, artistName) => {
+        const youtubeFallback = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+        setThumbnail(youtubeFallback);
+        const searchTerm = [trackTitle, artistName].filter(Boolean).join(' ').replace(/[\[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!searchTerm) return;
+        try {
+          const response = await fetch(`https://itunes.apple.com/search?media=music&entity=song&limit=1&term=${encodeURIComponent(searchTerm)}`);
+          if (!response.ok) return;
+          const result = await response.json();
+          const artwork = result.results?.[0]?.artworkUrl100;
+          if (artwork && lastVideoId === videoId) setThumbnail(artwork.replace(/100x100bb$/, '600x600bb'));
+        } catch {
+          // Keep the YouTube image when iTunes has no matching artwork or is unavailable.
+        }
+      };
       const setProgress = () => {
         if (!ready) return;
         const total = player.getDuration(), current = player.getCurrentTime(), percent = total ? (current / total) * 100 : 0;
@@ -126,7 +159,7 @@
         const data = player.getVideoData();
         if (data?.video_id && data.video_id !== lastVideoId) {
           lastVideoId = data.video_id; title.textContent = data.title || 'Untitled track'; thumbnail.style.opacity = '.5';
-          thumbnail.src = `https://i.ytimg.com/vi/${data.video_id}/maxresdefault.jpg`; thumbnail.onload = () => { thumbnail.style.opacity = '1'; };
+          updateArtwork(data.video_id, data.title, data.author);
         }
       };
       const playShuffled = () => { player.playVideo(); };
@@ -176,6 +209,7 @@
           events: {
             onReady: () => {
                 ready = true;
+                player.setVolume(Number(volumeSlider.value));
                 centerBackgroundVideo();
                 cueRandomFirstTrack();
                 setProgress();
@@ -189,6 +223,18 @@
         if (!ready) return;
         if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
         else { openDocumentPiP(); playShuffled(); }
+      });
+      volumeToggle.addEventListener('click', () => {
+        const expanded = volumeControl.classList.toggle('expanded');
+        volumeToggle.setAttribute('aria-expanded', String(expanded));
+        if (expanded) volumeSlider.focus();
+      });
+      volumeSlider.addEventListener('input', () => {
+        const volume = Number(volumeSlider.value);
+        setVolumeIcon(volume);
+        if (!ready) return;
+        if (volume > 0) player.unMute();
+        player.setVolume(volume);
       });
       document.getElementById('previous').addEventListener('click', () => { if (ready) { openDocumentPiP(); player.previousVideo(); player.playVideo(); } });
       document.getElementById('next').addEventListener('click', () => { if (ready) { openDocumentPiP(); player.nextVideo(); player.playVideo(); } });
