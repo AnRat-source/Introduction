@@ -20,6 +20,7 @@ const query = `query BlogPosts($owner: String!, $name: String!, $categoryId: ID!
         createdAt
         updatedAt
         author { login }
+        labels(first: 100) { nodes { name } }
       }
     }
   }
@@ -45,6 +46,7 @@ if (!response.ok || result.errors) {
 
 const posts = result.data.repository.discussions.nodes
   .filter(post => post.author?.login !== 'giscus[bot]')
+  .filter(post => !post.labels.nodes.some(label => label.name.trim().toLowerCase() === 'hidden'))
   .map(post => ({
     number: post.number,
     title: post.title,
@@ -52,6 +54,7 @@ const posts = result.data.repository.discussions.nodes
     excerpt: post.bodyText.trim().slice(0, 320),
     url: post.url,
     author: post.author?.login || 'AnRat',
+    labels: post.labels.nodes.map(label => label.name),
     createdAt: post.createdAt,
     updatedAt: post.updatedAt
   }));

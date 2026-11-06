@@ -90,7 +90,27 @@
   function renderInlineMarkdown(value) {
     const tokens = [];
     const protect = markup => `\u0000${tokens.push(markup) - 1}\u0000`;
-    let html = escapeHTML(value);
+    const attribute = (attributes, name) => {
+      const match = attributes.match(new RegExp(`${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i'));
+      return match?.[1] ?? match?.[2] ?? match?.[3] ?? '';
+    };
+    const dimension = value => {
+      const number = Number.parseInt(value, 10);
+      return Number.isFinite(number) && number > 0 && number <= 4096 ? ` width="${number}"` : '';
+    };
+    const rawAttachments = value
+      .replace(/<img\b([^>]*)\/?\s*>/gi, (original, attributes) => {
+        const source = safeMarkdownUrl(attribute(attributes, 'src'));
+        if (!source) return original;
+        const alt = escapeHTML(attribute(attributes, 'alt'));
+        return protect(`<img src="${escapeHTML(source)}" alt="${alt}"${dimension(attribute(attributes, 'width'))}>`);
+      })
+      .replace(/<video\b([^>]*)\/?\s*>/gi, (original, attributes) => {
+        const source = safeMarkdownUrl(attribute(attributes, 'src'));
+        if (!source) return original;
+        return protect(`<video controls preload="metadata" src="${escapeHTML(source)}"></video>`);
+      });
+    let html = escapeHTML(rawAttachments);
     html = html.replace(/`([^`]+)`/g, (_, code) => protect(`<code>${code}</code>`));
     html = html.replace(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+&quot;([^&]*)&quot;)?\)/g, (_, alt, source, title = '') => {
       const url = safeMarkdownUrl(source);
@@ -476,7 +496,9 @@
     fetch(`blog-posts.json?updated=${Date.now()}`, { cache: 'no-store' })
       .then(response => response.ok ? response.json() : Promise.reject(new Error('No blog feed yet.')))
       .then(feed => {
-        const posts = Array.isArray(feed.posts) ? feed.posts : [];
+        const posts = Array.isArray(feed.posts)
+          ? feed.posts.filter(post => !post.labels?.some(label => String(label).trim().toLowerCase() === 'hidden'))
+          : [];
         syncedPosts = posts;
         blogPostList.replaceChildren();
         if (!posts.length) {

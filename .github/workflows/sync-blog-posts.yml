@@ -2,7 +2,7 @@ name: Sync Blog posts
 
 on:
   discussion:
-    types: [created, edited, deleted, category_changed]
+    types: [created, edited, deleted, category_changed, labeled, unlabeled]
   push:
     branches: [main]
     paths:

@@ -57,7 +57,7 @@
 .blog-reader-body a:hover { color: #eee6ff; }
 .blog-reader-body code { padding: 2px 5px; border: 1px solid rgba(105, 116, 136, .6); background: #090c12; color: #e9ddff; font: .9em ui-monospace, SFMono-Regular, Consolas, monospace; }
 .blog-reader-body del { color: #9ca9ba; }
-.blog-reader-body img { display: block; max-width: 100%; height: auto; margin: 14px 0; border: 1px solid #526075; }
+.blog-reader-body img, .blog-reader-body video { display: block; max-width: 100%; height: auto; margin: 14px 0; border: 1px solid #526075; }
 .blog-reader-body ul, .blog-reader-body ol { margin: 0 0 16px; padding-left: 26px; }
 .blog-reader-body li { margin: 5px 0; }
 .blog-reader-body .task-list-item { list-style: none; margin-left: -22px; }
