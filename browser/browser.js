@@ -155,7 +155,13 @@
 
     try {
 
-      return new URL('/favicon.ico', url).href;
+      const pageUrl = new URL(url);
+
+      if (pageUrl.hostname === 'portfolio.anrat.link') {
+        return new URL('/assets/favicon.ico', pageUrl).href;
+      }
+
+      return new URL('/favicon.ico', pageUrl).href;
 
     } catch {
 
