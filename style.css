@@ -217,7 +217,7 @@
       position: fixed;
       overflow: visible;
       z-index: -100;
-      background: url("Images/FullBackground.gif") bottom/cover no-repeat;
+      background: var(--full-background-image, url("Images/FullBackground.gif")) bottom/cover no-repeat;
       top: -20px;
       width: 105vw;
       height: 105vh;
@@ -268,7 +268,7 @@
       z-index: 9999;
       transition: opacity 0.6s ease, visibility 0.6s ease;
 
-      background: url("Images/FullBackground.gif") bottom/cover no-repeat;
+      background: var(--full-background-image, url("Images/FullBackground.gif")) bottom/cover no-repeat;
       top: -20px;
       width: 105vw;
       height: 105vh;
