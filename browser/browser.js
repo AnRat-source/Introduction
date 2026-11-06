@@ -71,9 +71,15 @@
 
     const hour = new Date().getHours();
 
-    const timeOfDay = hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
+    const greetings = hour < 6
+      ? ['Time to rest, Aqua', 'Aqua, it is time to rest', 'Still awake, Aqua? Time to rest']
+      : hour < 12
+        ? ['Good morning, Aqua', 'Morning, Aqua', 'Rise and shine, Aqua']
+        : hour < 18
+          ? ['Good afternoon, Aqua', 'Afternoon, Aqua', 'Hope your day is going well, Aqua']
+          : ['Good evening, Aqua', 'Evening, Aqua', 'Hope you had a good day, Aqua'];
 
-    greeting.textContent = `Good ${timeOfDay}, Aqua`;
+    greeting.textContent = greetings[Math.floor(Math.random() * greetings.length)];
 
   }
 
