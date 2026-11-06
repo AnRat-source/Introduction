@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T16:50:26.570Z",
+  "generatedAt": "2026-11-06T17:06:11.493Z",
   "posts": [
     {
       "number": 5,
@@ -8,6 +8,7 @@
       "excerpt": "Header\nBold\nItalic\n\nQuote - Me\n\nlocal code = test\nurl!",
       "url": "https://github.com/AnRat-source/Introduction/discussions/5",
       "author": "AnRat-source",
+      "labels": [],
       "createdAt": "2026-11-06T16:26:18Z",
       "updatedAt": "2026-11-06T16:50:03Z"
     },
@@ -18,6 +19,7 @@
       "excerpt": "Heya! Welcome to my little corner of the internet!\nI'm Seph, and this is where I'll be sharing random thoughts, life updates, personal projects, and whatever else comes to mind. Expect a little bit of everything, from coding and games to my everyday experiences.\nThanks for stopping by, and I hope you enjoy your stay! \ud83d",
       "url": "https://github.com/AnRat-source/Introduction/discussions/3",
       "author": "AnRat-source",
+      "labels": [],
       "createdAt": "2026-11-02T13:24:23Z",
       "updatedAt": "2026-11-02T13:57:42Z"
     }
