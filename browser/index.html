@@ -8,7 +8,7 @@
   <link rel="icon" type="image/x-icon" href="Images/PFP.ico">
   <link rel="stylesheet" href="style.css">
   <script src="background-time.js" defer></script>
-  <link rel="stylesheet" href="browser/browser.css?v=9">
+  <link rel="stylesheet" href="browser/browser.css?v=10">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body class="browser-page">
@@ -85,6 +85,7 @@
             <a href="https://drive.google.com/drive/home"><i class="fa-brands fa-google-drive" aria-hidden="true"></i> Drive</a>
             <a href="https://calendar.google.com/"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Calendar</a>
             <a href="https://docs.google.com/"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Docs</a>
+            <button class="google-menu-settings" id="browserSettingsButton" type="button"><i class="fa-solid fa-gear" aria-hidden="true"></i> Settings</button>
           </div>
         </details>
       </nav>
@@ -141,7 +142,27 @@
     </div>
   </div>
 
+  <dialog class="browser-settings" id="browserSettingsDialog" aria-labelledby="browserSettingsTitle">
+    <form id="browserSettingsForm" method="dialog">
+      <div class="browser-settings-head">
+        <h2 id="browserSettingsTitle">Browser settings</h2>
+        <button type="button" id="browserSettingsClose" aria-label="Close settings">×</button>
+      </div>
+      <label for="browserName">Display name</label>
+      <input id="browserName" name="name" type="text" maxlength="50" placeholder="Aqua">
+      <label for="browserOpeningGreetings">Opening greetings <span>one per line</span></label>
+      <textarea id="browserOpeningGreetings" name="openingGreetings" rows="5" placeholder="Leave blank to use the time-based defaults"></textarea>
+      <label for="browserPromptGreetings">Minute prompts <span>one per line</span></label>
+      <textarea id="browserPromptGreetings" name="promptGreetings" rows="6" placeholder="Leave blank to use the time-based defaults"></textarea>
+      <p>Use <code>{name}</code> to insert the display name.</p>
+      <div class="browser-settings-actions">
+        <button type="button" id="browserSettingsReset">Use defaults</button>
+        <button type="submit">Save settings</button>
+      </div>
+    </form>
+  </dialog>
+
   <script src="script.js?v=rest-hours"></script>
-  <script src="browser/browser.js?v=11"></script>
+  <script src="browser/browser.js?v=12"></script>
 </body>
 </html>

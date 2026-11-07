@@ -57,6 +57,24 @@
 
   const bookmarksMenu = document.querySelector('.bookmarks-menu');
 
+  const googleMenu = document.querySelector('.google-menu');
+
+  const browserSettingsButton = document.getElementById('browserSettingsButton');
+
+  const browserSettingsDialog = document.getElementById('browserSettingsDialog');
+
+  const browserSettingsForm = document.getElementById('browserSettingsForm');
+
+  const browserSettingsClose = document.getElementById('browserSettingsClose');
+
+  const browserSettingsReset = document.getElementById('browserSettingsReset');
+
+  const browserName = document.getElementById('browserName');
+
+  const browserOpeningGreetings = document.getElementById('browserOpeningGreetings');
+
+  const browserPromptGreetings = document.getElementById('browserPromptGreetings');
+
   const doubleEnterDelay = 550;
 
   const resultsPerBatch = 8;
@@ -64,6 +82,8 @@
   const savedLinksStorageKey = 'anrat-browser-saved-links';
 
   const bookmarksStorageKey = 'anrat-browser-bookmarks';
+
+  const browserSettingsStorageKey = 'anrat-browser-settings';
 
   let lastSearch = { query: '', submittedAt: 0 };
 
@@ -83,6 +103,62 @@
 
   let bookmarksEditing = false;
 
+  let browserSettings = { name: 'Aqua', openingGreetings: [], promptGreetings: [] };
+
+  let refreshGreeting = () => {};
+
+
+
+  function greetingLines(value) {
+
+    return typeof value === 'string'
+      ? value.split(/\r?\n/).map(line => line.trim()).filter(Boolean).slice(0, 30)
+      : [];
+
+  }
+
+
+
+  function loadBrowserSettings() {
+
+    try {
+
+      const saved = JSON.parse(localStorage.getItem(browserSettingsStorageKey) || '{}');
+
+      browserSettings = {
+        name: typeof saved.name === 'string' && saved.name.trim() ? saved.name.trim().slice(0, 50) : 'Aqua',
+        openingGreetings: Array.isArray(saved.openingGreetings) ? saved.openingGreetings.filter(value => typeof value === 'string' && value.trim()).slice(0, 30) : [],
+        promptGreetings: Array.isArray(saved.promptGreetings) ? saved.promptGreetings.filter(value => typeof value === 'string' && value.trim()).slice(0, 30) : []
+      };
+
+    } catch {
+
+      browserSettings = { name: 'Aqua', openingGreetings: [], promptGreetings: [] };
+
+    }
+
+  }
+
+
+
+  function saveBrowserSettings() {
+
+    localStorage.setItem(browserSettingsStorageKey, JSON.stringify(browserSettings));
+
+  }
+
+
+
+  function personalizeGreeting(text) {
+
+    return text.replaceAll('{name}', browserSettings.name).replaceAll('Aqua', browserSettings.name);
+
+  }
+
+
+
+  loadBrowserSettings();
+
 
 
   if (greeting) {
@@ -92,6 +168,8 @@
     const getTimeOfDay = () => new Date().getHours();
 
     const getOpeningGreetings = () => {
+
+      if (browserSettings.openingGreetings.length) return browserSettings.openingGreetings;
 
       const hour = getTimeOfDay();
 
@@ -126,6 +204,8 @@
     };
 
     const getFollowUpOptions = () => {
+
+      if (browserSettings.promptGreetings.length) return browserSettings.promptGreetings;
 
       const hour = getTimeOfDay();
 
@@ -213,7 +293,7 @@
 
       const availableOptions = options.filter(option => option !== previousGreeting);
 
-      greeting.textContent = (availableOptions.length ? availableOptions : options)[Math.floor(Math.random() * (availableOptions.length || options.length))];
+      greeting.textContent = personalizeGreeting((availableOptions.length ? availableOptions : options)[Math.floor(Math.random() * (availableOptions.length || options.length))]);
 
       previousGreeting = greeting.textContent;
 
@@ -224,6 +304,8 @@
     };
 
     rotateGreeting(true);
+
+    refreshGreeting = () => rotateGreeting(true);
 
     window.setInterval(rotateGreeting, 60_000);
 
@@ -1091,6 +1173,58 @@
       bookmarksMenu.open = false;
 
     }
+
+  });
+
+  function populateSettingsForm() {
+
+    if (!browserName || !browserOpeningGreetings || !browserPromptGreetings) return;
+
+    browserName.value = browserSettings.name;
+
+    browserOpeningGreetings.value = browserSettings.openingGreetings.join('\n');
+
+    browserPromptGreetings.value = browserSettings.promptGreetings.join('\n');
+
+  }
+
+  browserSettingsButton?.addEventListener('click', () => {
+
+    populateSettingsForm();
+
+    googleMenu?.removeAttribute('open');
+
+    browserSettingsDialog?.showModal();
+
+  });
+
+  browserSettingsClose?.addEventListener('click', () => browserSettingsDialog?.close());
+
+  browserSettingsReset?.addEventListener('click', () => {
+
+    if (browserName) browserName.value = 'Aqua';
+
+    if (browserOpeningGreetings) browserOpeningGreetings.value = '';
+
+    if (browserPromptGreetings) browserPromptGreetings.value = '';
+
+  });
+
+  browserSettingsForm?.addEventListener('submit', event => {
+
+    event.preventDefault();
+
+    browserSettings = {
+      name: browserName?.value.trim().slice(0, 50) || 'Aqua',
+      openingGreetings: greetingLines(browserOpeningGreetings?.value || ''),
+      promptGreetings: greetingLines(browserPromptGreetings?.value || '')
+    };
+
+    saveBrowserSettings();
+
+    browserSettingsDialog?.close();
+
+    refreshGreeting();
 
   });
 

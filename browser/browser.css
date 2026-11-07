@@ -118,9 +118,28 @@
 .google-menu summary::-webkit-details-marker { display: none; }
 .google-menu summary i { font-size: 16px; }
 .google-menu-list { position: absolute; z-index: 110; top: calc(100% + 7px); right: 0; min-width: 164px; border: 1px solid #697488; background: #1b2330; box-shadow: 3px 3px 0 rgba(0, 0, 0, .35); }
-.google-menu-list a { display: flex; align-items: center; gap: 9px; padding: 10px 12px; color: #e6ebf4; font-size: 12px; text-decoration: none; }
-.google-menu-list a i { width: 15px; color: #c4b5fd; text-align: center; }
-.google-menu-list a:hover, .google-menu-list a:focus-visible { background: #3b4659; color: #fff; outline: 0; }
+.google-menu-list a, .google-menu-settings { display: flex; align-items: center; gap: 9px; width: 100%; padding: 10px 12px; border: 0; background: transparent; color: #e6ebf4; font: inherit; font-size: 12px; text-align: left; text-decoration: none; cursor: pointer; }
+.google-menu-list a i, .google-menu-settings i { width: 15px; color: #c4b5fd; text-align: center; }
+.google-menu-list a:hover, .google-menu-list a:focus-visible, .google-menu-settings:hover, .google-menu-settings:focus-visible { background: #3b4659; color: #fff; outline: 0; }
+
+.browser-settings { width: min(470px, calc(100vw - 28px)); padding: 0; border: 1px solid #697488; background: #1b2330; box-shadow: 7px 7px 0 rgba(0, 0, 0, .42); color: #e6ebf4; }
+.browser-settings::backdrop { background: rgba(3, 5, 9, .62); backdrop-filter: blur(5px); }
+.browser-settings form { display: grid; gap: 8px; padding: 18px; }
+.browser-settings-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+.browser-settings h2 { margin: 0; font-size: 17px; }
+.browser-settings-head button { width: 29px; height: 29px; border: 1px solid #697488; background: #202631; color: #fca5a5; font: 19px/1 inherit; cursor: pointer; }
+.browser-settings label { color: #dce5f2; font-size: 12px; font-weight: 700; }
+.browser-settings label span, .browser-settings p { color: #9ca9ba; font-weight: 400; }
+.browser-settings input, .browser-settings textarea { width: 100%; border: 1px solid #526075; background: #11161f; color: #eef2f7; font: inherit; font-size: 13px; outline: 0; }
+.browser-settings input { height: 36px; padding: 8px; }
+.browser-settings textarea { resize: vertical; padding: 8px; line-height: 1.4; }
+.browser-settings input:focus, .browser-settings textarea:focus { border-color: #c4b5fd; }
+.browser-settings p { margin: 2px 0 5px; font-size: 11px; }
+.browser-settings code { color: #d8ccff; }
+.browser-settings-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.browser-settings-actions button { padding: 8px 10px; border: 1px solid #697488; background: #202631; color: #e6ebf4; font: inherit; font-size: 12px; cursor: pointer; }
+.browser-settings-actions button[type="submit"] { border-color: #a78bfa; background: #47306d; }
+.browser-settings-actions button:hover, .browser-settings-actions button:focus-visible, .browser-settings-head button:hover, .browser-settings-head button:focus-visible { background: #3b4659; outline: 0; }
 
 header nav { display: flex; align-items: center; gap: 8px; }
 .bookmarks-menu { position: relative; }
