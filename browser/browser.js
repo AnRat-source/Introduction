@@ -87,17 +87,21 @@
 
   if (greeting) {
 
-    const hour = new Date().getHours();
+    let previousGreeting = '';
 
-    const greetings = hour < 6
-      ? ['Time to rest, Aqua', 'Aqua, it is time to rest', 'Still awake, Aqua? Time to rest']
-      : hour < 12
-        ? ['Good morning, Aqua', 'Morning, Aqua', 'Rise and shine, Aqua']
-        : hour < 18
-          ? ['Good afternoon, Aqua', 'Afternoon, Aqua', 'Hope your day is going well, Aqua']
-          : ['Good evening, Aqua', 'Evening, Aqua', 'Hope you had a good day, Aqua'];
+    const getGreetingOptions = () => {
 
-    greeting.textContent = greetings[Math.floor(Math.random() * greetings.length)];
+      const hour = new Date().getHours();
+
+      return hour < 6
+        ? ['Time to rest, Aqua', 'Aqua, it is time to rest', 'Still awake, Aqua? Time to rest']
+        : hour < 12
+          ? ['Good morning, Aqua', 'Morning, Aqua', 'Rise and shine, Aqua']
+          : hour < 18
+            ? ['Good afternoon, Aqua', 'Afternoon, Aqua', 'Hope your day is going well, Aqua']
+            : ['Good evening, Aqua', 'Evening, Aqua', 'Hope you had a good day, Aqua'];
+
+    };
 
     const fitGreeting = () => {
 
@@ -121,7 +125,23 @@
 
     };
 
-    requestAnimationFrame(fitGreeting);
+    const rotateGreeting = () => {
+
+      const options = getGreetingOptions();
+
+      const availableOptions = options.filter(option => option !== previousGreeting);
+
+      greeting.textContent = (availableOptions.length ? availableOptions : options)[Math.floor(Math.random() * (availableOptions.length || options.length))];
+
+      previousGreeting = greeting.textContent;
+
+      requestAnimationFrame(fitGreeting);
+
+    };
+
+    rotateGreeting();
+
+    window.setInterval(rotateGreeting, 60_000);
 
     new ResizeObserver(fitGreeting).observe(greeting.parentElement);
 
