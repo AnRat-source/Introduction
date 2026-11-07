@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#130d1c">
+  <title>Word Search</title>
+  <link rel="icon" type="image/x-icon" href="../../../../assets/word-games-favicon.ico">
+  <style>
+    :root { --bg:#130d1c; --panel:#21172b; --panel-2:#2c1e38; --ink:#faf5ff; --muted:#c5b5cf; --line:#624b70; --purple:#d69cff; --pink:#ff98d8; --green:#a8e776; }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; color:var(--ink); font:16px/1.4 Inter,ui-sans-serif,system-ui,sans-serif; background:radial-gradient(circle at 12% 5%,#553471 0,transparent 30rem),radial-gradient(circle at 93% 90%,#57284d 0,transparent 31rem),var(--bg); }
+    button,select { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-weight:800; }
+    button:focus-visible,select:focus-visible { outline:3px solid var(--pink); outline-offset:3px; }
+    main { width:min(1160px,calc(100% - 32px)); min-height:100vh; margin:auto; padding:42px 0 44px; }
+    header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:24px; }
+    .eyebrow { margin:0 0 7px; color:var(--purple); font:800 .7rem ui-monospace,monospace; letter-spacing:.13em; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(2.7rem,7vw,5.4rem); line-height:.87; letter-spacing:-.08em; }
+    header p:not(.eyebrow) { max-width:40ch; margin:14px 0 0; color:var(--muted); }
+    .header-actions { display:flex; gap:9px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .action { cursor:pointer; white-space:nowrap; color:#291033; font-size:.71rem; letter-spacing:.05em; border:0; border-radius:10px; background:var(--purple); padding:13px 14px; box-shadow:0 8px 24px rgba(214,156,255,.22); transition:background .15s,transform .15s; }
+    .action:hover { background:#e8bdff; transform:translateY(-1px); }
+    .action.secondary { color:var(--ink); border:1px solid #755a84; background:#3c2a4b; box-shadow:none; }
+    .action.secondary:hover { background:#513a62; }
+    .game { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(270px,.8fr); overflow:hidden; border:1px solid #604b6e; border-radius:25px; background:linear-gradient(135deg,rgba(255,255,255,.07),transparent 34%),var(--panel); box-shadow:0 25px 80px rgba(0,0,0,.32); }
+    .board-panel { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; padding:29px; }
+    .board-head { display:flex; justify-content:space-between; gap:14px; width:min(100%,560px); margin-bottom:17px; color:var(--muted); font:800 .72rem ui-monospace,monospace; letter-spacing:.08em; }
+    .board-head span:last-child { color:var(--pink); text-align:right; }
+    .grid { position:relative; display:grid; width:min(100%,560px); aspect-ratio:1; gap:3px; padding:0; touch-action:none; user-select:none; -webkit-user-select:none; }
+    .cell { min-width:0; min-height:0; padding:0; display:grid; place-items:center; position:relative; border:1px solid #624c70; border-radius:6px; color:var(--ink); background:#392a44; cursor:crosshair; font:900 var(--tile-font-size,1rem)/.84 ui-monospace,monospace; transition:border-color .12s,background .12s; -webkit-tap-highlight-color:transparent; }
+    .cell span { position:relative; z-index:3; pointer-events:none; white-space:nowrap; }
+    .cell:hover { border-color:#b28ec5; background:#4c365d; }
+    .cell.selected { border-color:var(--pink); background:#5a3d68; }
+    .cell.hinted { animation:hint-glow .6s ease-in-out 3; border-color:var(--green); background:#637c43; }
+    @keyframes hint-glow { 50% { box-shadow:0 0 0 4px rgba(168,231,118,.25),0 0 22px rgba(168,231,118,.75); transform:scale(1.12); } }
+    .traces { position:absolute; z-index:2; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+    .board-caption { max-width:52ch; min-height:21px; margin:17px 0 0; color:var(--muted); text-align:center; font-size:.8rem; }
+    .board-caption.success { color:var(--green); }
+    .board-caption.error { color:var(--pink); }
+    .side { display:flex; flex-direction:column; min-width:0; padding:30px 26px; border-left:1px solid #594263; background:rgba(0,0,0,.13); }
+    .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .stat { min-width:0; padding:15px 13px; border:1px solid #5e496b; border-radius:13px; background:rgba(255,255,255,.035); }
+    .stat-label { display:block; margin-bottom:6px; color:var(--muted); font:800 .68rem ui-monospace,monospace; letter-spacing:.1em; }
+    .stat strong { color:var(--purple); font:900 clamp(.85rem,2.1vw,1.85rem)/1 ui-monospace,monospace; white-space:nowrap; }
+    .progress { height:7px; overflow:hidden; margin:17px 0 22px; border-radius:99px; background:#3a2b45; }
+    .progress div { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--purple),var(--pink)); transition:width .3s ease; }
+    .list-head { display:flex; align-items:center; justify-content:space-between; gap:9px; margin-bottom:13px; }
+    .list-head h2 { margin:0; font-size:1.07rem; letter-spacing:-.03em; }
+    .difficulty { padding:8px 9px; max-width:145px; color:var(--ink); border:1px solid #755a84; border-radius:8px; background:var(--panel-2); font-size:.68rem; letter-spacing:.03em; cursor:pointer; }
+    .word-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-content:start; gap:9px; list-style:none; margin:0; padding:0; }
+    .word-item { display:flex; align-items:center; gap:8px; min-width:0; padding:10px 9px; border:1px solid #5b456a; border-radius:8px; background:#2f213b; color:var(--ink); font:800 clamp(.67rem,1.5vw,.84rem)/1.2 ui-monospace,monospace; letter-spacing:.035em; transition:background .2s,border-color .2s,opacity .2s; }
+    .word-item .tick { width:15px; height:15px; display:grid; place-items:center; flex:none; border:1px solid #866798; border-radius:50%; color:transparent; font-size:.7rem; }
+    .word-item .word-label { min-width:0; overflow-wrap:anywhere; }
+    .word-item.found { color:#e8d1f5; border-color:#78588b; background:#45304f; }
+    .word-item.found .tick { color:#281131; border-color:var(--purple); background:var(--purple); }
+    .word-item.found .word-label { text-decoration:line-through; text-decoration-color:var(--pink); text-decoration-thickness:2px; opacity:.7; }
+    .list-scroll-hint { margin:5px 0 0; color:var(--muted); text-align:right; font:800 .62rem ui-monospace,monospace; letter-spacing:.05em; }
+    .list-scroll-hint[hidden] { display:none; }
+    .tip { margin:auto 0 0; padding-top:24px; color:var(--muted); font-size:.76rem; line-height:1.6; }
+    .tip strong { color:var(--pink); }
+    .source { margin:12px 0 0; color:#917d9f; font:700 .63rem ui-monospace,monospace; letter-spacing:.035em; }
+    @media (max-width:810px) { main { width:min(650px,calc(100% - 20px)); padding:16px 0 24px; } header { align-items:center; margin-bottom:15px; } header p:not(.eyebrow) { display:none; } h1 { font-size:clamp(2.2rem,8vw,3.5rem); } .eyebrow { font-size:.6rem; } .action { padding:11px 10px; font-size:.62rem; } .game { grid-template-columns:1fr; border-radius:18px; } .board-panel { padding:14px 11px 19px; } .board-head { margin-bottom:10px; font-size:.61rem; } .board-caption { margin-top:12px; font-size:.72rem; } .side { padding:20px 15px; border-left:0; border-top:1px solid #594263; } .stat { padding:10px 13px; } .progress { margin:13px 0 18px; } .tip { padding-top:14px; } }
+    @media (max-width:810px) {
+      .word-list { grid-template-columns:none; grid-auto-flow:column; grid-template-rows:repeat(4,minmax(0,auto)); grid-auto-columns:minmax(88px,max-content); gap:5px; overflow-x:auto; overflow-y:hidden; padding:0 0 7px; scrollbar-width:thin; scrollbar-color:var(--purple) #35263f; scroll-snap-type:x proximity; overscroll-behavior-x:contain; }
+      .word-list::-webkit-scrollbar { height:6px; }
+      .word-list::-webkit-scrollbar-thumb { border-radius:99px; background:var(--purple); }
+      .word-list::-webkit-scrollbar-track { border-radius:99px; background:#35263f; }
+      .word-item { padding:7px 8px; font-size:.69rem; white-space:nowrap; scroll-snap-align:start; }
+      .word-item .tick { display:none; }
+      .word-item .word-label { overflow-wrap:normal; }
+    }
+    @media (max-width:460px) { .header-actions { gap:6px; } .action { padding:10px 8px; font-size:.56rem; } .eyebrow { display:none; } .grid { gap:2px; } .cell { border-radius:4px; } .stat strong { font-size:clamp(.8rem,4vw,1.1rem); } .word-item { padding:6px; font-size:.68rem; } .side { padding:16px 12px; } }
+    @media (max-width:345px) { h1 { font-size:2rem; } .action { font-size:.49rem; padding:9px 6px; } .grid { gap:1px; } .word-list { grid-auto-columns:minmax(76px,max-content); } .word-item { font-size:.65rem; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><p class="eyebrow">Same word list · infinite rounds</p><h1>Word Search</h1><p>Hunt for hidden words in every direction — forward, backward, vertical, and diagonal.</p></div>
+      <div class="header-actions"><button class="action secondary" id="hint" type="button">HINT ✦</button><button class="action" id="newGame" type="button">NEW PUZZLE ↻</button></div>
+    </header>
+    <section class="game" aria-label="Word Search game">
+      <section class="board-panel" aria-label="Letter grid">
+        <div class="board-head"><span>HIDDEN WORDS</span><span id="gridInfo">12 × 12 · 8 DIRECTIONS</span></div>
+        <div class="grid" id="grid" role="group" aria-label="Swipe across letters or select two endpoints"></div>
+        <p class="board-caption" id="message" role="status" aria-live="polite">Drag across letters or tap the first and last letter.</p>
+      </section>
+      <aside class="side" aria-label="Word bank and progress">
+        <div class="list-head"><h2>Find these words</h2><select id="difficulty" class="difficulty" aria-label="Puzzle difficulty"><option value="easy">EASY · 6x6</option><option value="normal" selected>NORMAL · 10x10</option><option value="hard">HARD · 14x14</option><option value="superhard">SUPER HARD · 20x20</option></select></div>
+        <ul class="word-list" id="wordList"></ul>
+        &nbsp
+        &nbsp
+        <div class="stats"><div class="stat"><span class="stat-label">FOUND</span><strong id="score">0 / 12</strong></div><div class="stat"><span class="stat-label">BONUS</span><strong id="bonusScore">0</strong></div><div class="stat"><span class="stat-label">TIME</span><strong id="timer">00:00</strong></div></div>
+        <div class="progress" aria-hidden="true"><div id="progressFill"></div></div>
+        <p class="list-scroll-hint" id="wordListHint" hidden></p>
+        <p class="tip"><strong>HOW TO PLAY</strong> — Swipe in a straight line across letters, or tap the two endpoints. Words can run in any of the <strong>8 directions</strong>. Swipe either way! Discover extra dictionary words to earn <strong>bonus points</strong>.</p>
+        <p class="source" id="wordSource">Using the bundled word list · connecting…</p>
+      </aside>
+    </section>
+  </main>
+  <script>
+    const WORD_API = 'https://api.anrat.link/words?length=4,5,6,7,8,9,10';
+    const FALLBACK_WORDS = `ACTOR ANGER BRAIN BROWN CLEAN DANCE GONER GRADE GRAND LANCE MAKER PANEL PETAL PLANE PLANT PLATE PLEAT RAKES RANGE SKATE SPARE SPEAK STAKE STARE STEAK TAKER TAKES TAMER TEAMS TEARS TRAIN PLANET GARDEN MARKET BASKET CANDLE ORANGE CARTON STREAM RAINBOW SPEAKER PAINTER LISTEN SILENT TINSEL MASTER SIMPLE PUZZLE LETTER SEARCH HIDDEN WONDER PURPLE FLOWER WINTER SUMMER SPRING AUTUMN FOREST RIVER OCEAN ISLAND CASTLE ROCKET GALAXY PLANETS SATURN SUNSET SUNRISE SHADOW LIGHTNING THUNDER CLOUDS CLOUD MYSTERY CRYSTAL SPARKLE DRAGON PHOENIX PUZZLES JOURNEY ADVENTURE EXPLORE EXPLORE MAGIC BRIDGE CAMERA BUTTON WINDOW SCREEN COMPUTERS COMPUTER KEYBOARD CODING PROGRAM GAMEPLAY VIOLET LAVENDER PINKISH MAGENTA ENERGY CIRCLE SQUARE TRIANGLE DIAMOND MUSIC MELODY RHYTHM GUITAR PIANO DESIGN CREATE FRIEND FAMILY SCHOOL LESSON LEARN STUDY THINK LOGIC MEMORY BUBBLE BUTTER BREAD FRUIT APPLE BANANA CHERRY LEMON ORCHARD GRAPES PEACH MANGO TIGER ZEBRA PANDA RABBIT FOXES HORSE EAGLE OTTER PENGUIN TURTLE DOLPHIN WHALE SHARK SPACE STARS COMET METEOR SOLAR ROBOT LASER NEBULA ORBIT SIGNAL PLANETARY`.split(/\s+/).filter(word=>/^[A-Z]{4,10}$/.test(word));
+    const SETTINGS = { easy:{size:6,count:8,min:4,max:7}, normal:{size:10,count:12,min:4,max:9}, hard:{size:14,count:16,min:5,max:10}, superhard:{size:20,count:20,min:5,max:10} };
+    const DIRECTIONS = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+    const COLORS = ['#d69cff','#ff98d8','#c9b5ff','#f9b1ee','#aeb7ff','#f7a7cc','#c7a4ee','#f4c4ff'];
+    const gridEl=document.querySelector('#grid'), listEl=document.querySelector('#wordList'), listHintEl=document.querySelector('#wordListHint'), messageEl=document.querySelector('#message');
+    const scoreEl=document.querySelector('#score'), bonusEl=document.querySelector('#bonusScore'), timerEl=document.querySelector('#timer'), infoEl=document.querySelector('#gridInfo');
+    const progressEl=document.querySelector('#progressFill'), sourceEl=document.querySelector('#wordSource'), difficultyEl=document.querySelector('#difficulty');
+    let pool=[...new Set(FALLBACK_WORDS)], globalWords=new Set(pool), puzzle=null, found=new Set(), bonusFound=new Set(), selected=[], tapAnchor=null, drag=null;
+    let cellNodes=[], traceSvg=null, startedAt=0, completedAt=null, hintTimeout=null, hasInteracted=false;
+
+    const shuffle=list=>{ const copy=[...list]; for(let i=copy.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [copy[i],copy[j]]=[copy[j],copy[i]]; } return copy; };
+    const sameCell=(a,b)=>a&&b&&a.r===b.r&&a.c===b.c;
+    const cellIndex=(r,c,size)=>r*size+c;
+    const inBounds=(r,c,size)=>r>=0&&r<size&&c>=0&&c<size;
+
+    function tryPlace(board,word,dir,size){
+      const [dr,dc]=dir, options=[];
+      for(let r=0;r<size;r++) for(let c=0;c<size;c++) {
+        const endR=r+dr*(word.length-1), endC=c+dc*(word.length-1);
+        if(!inBounds(endR,endC,size)) continue;
+        let overlaps=0, valid=true;
+        for(let k=0;k<word.length;k++) { const letter=board[r+dr*k][c+dc*k]; if(letter&&letter!==word[k]) {valid=false;break;} if(letter) overlaps++; }
+        if(valid) options.push({r,c,score:overlaps*1.6+Math.random()*3});
+      }
+      if(!options.length) return null;
+      options.sort((a,b)=>b.score-a.score);
+      const start=options[0], path=[];
+      for(let k=0;k<word.length;k++) { const r=start.r+dr*k,c=start.c+dc*k; board[r][c]=word[k]; path.push({r,c}); }
+      return {word,path};
+    }
+
+    function makePuzzle(settings){
+      const eligible=pool.filter(w=>w.length>=settings.min&&w.length<=settings.max);
+      if(eligible.length<settings.count) return null;
+      for(let attempt=0;attempt<60;attempt++) {
+        const board=Array.from({length:settings.size},()=>Array(settings.size).fill(''));
+        const chosen=[], used=new Set(), candidates=shuffle(eligible);
+        const forcedDirections=shuffle(DIRECTIONS);
+        let failed=false;
+        for(let slot=0;slot<settings.count;slot++) {
+          const directions=slot<8 ? [forcedDirections[slot]] : shuffle(DIRECTIONS);
+          let placed=null;
+          // Try new words in a fixed direction before sacrificing one of the 8 orientations.
+          for(const word of candidates) {
+            if(used.has(word)) continue;
+            for(const dir of directions) { placed=tryPlace(board,word,dir,settings.size); if(placed) break; }
+            if(placed) { chosen.push({...placed,color:COLORS[slot%COLORS.length]}); used.add(word); break; }
+          }
+          if(!placed) { failed=true; break; }
+        }
+        if(failed) continue;
+        const filler='EEEEEEEEEEEEAAAAAAAARRRRRRRIIIIIIOOOOOTTTTTNNNNSSSSLLLCCDDUUMMPPGGBBFFHHVVWWYYKJXQZ';
+        for(let r=0;r<settings.size;r++) for(let c=0;c<settings.size;c++) if(!board[r][c]) board[r][c]=filler[Math.floor(Math.random()*filler.length)];
+        return {size:settings.size,board,placed:chosen};
+      }
+      return null;
+    }
+
+    function setMessage(text,tone='') { messageEl.textContent=text; messageEl.className='board-caption'+(tone?' '+tone:''); }
+    function formatTime(seconds){ return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0'); }
+    function tick(){ if(!puzzle) return; const end=completedAt??Date.now(); timerEl.textContent=formatTime(Math.floor((end-startedAt)/1000)); }
+    function updateProgress(){ scoreEl.textContent=found.size+' / '+puzzle.placed.length; bonusEl.textContent=String(bonusFound.size); bonusEl.title=[...bonusFound].sort().join(', ')||'No bonus words yet'; progressEl.style.width=(found.size/puzzle.placed.length*100)+'%';
+      for(const item of listEl.children) item.classList.toggle('found',found.has(item.dataset.word));
+    }
+    function updateListOverflow(){ listHintEl.hidden=listEl.scrollWidth<=listEl.clientWidth+1; }
+    function buildList(){ listEl.replaceChildren(); listEl.scrollLeft=0; for(const entry of [...puzzle.placed].sort((a,b)=>a.word.localeCompare(b.word))) {
+      const item=document.createElement('li'); item.className='word-item'; item.dataset.word=entry.word;
+      const tick=document.createElement('span'); tick.className='tick'; tick.textContent='✓'; tick.setAttribute('aria-hidden','true');
+      const label=document.createElement('span'); label.className='word-label'; label.textContent=entry.word;
+      item.append(tick,label); listEl.append(item);
+    } updateProgress(); requestAnimationFrame(updateListOverflow); }
+    function buildGrid(){ gridEl.replaceChildren(); cellNodes=[]; gridEl.style.gridTemplateColumns=`repeat(${puzzle.size},minmax(0,1fr))`;
+      for(let r=0;r<puzzle.size;r++) for(let c=0;c<puzzle.size;c++) {
+        const button=document.createElement('button'); button.type='button'; button.className='cell'; button.dataset.r=r; button.dataset.c=c;
+        button.setAttribute('aria-label',`Row ${r+1}, column ${c+1}, ${puzzle.board[r][c]}`);
+        const text=document.createElement('span'); text.textContent=puzzle.board[r][c]; button.append(text);
+        gridEl.append(button); cellNodes.push(button);
+      }
+      traceSvg=document.createElementNS('http://www.w3.org/2000/svg','svg'); traceSvg.classList.add('traces'); traceSvg.setAttribute('aria-hidden','true'); gridEl.append(traceSvg); resizeLetters(); drawTraces();
+    }
+    function resizeLetters(){
+      if(!cellNodes.length) return;
+      const tile=cellNodes[0].getBoundingClientRect();
+      // Capital letters fill most of each tile at every difficulty and viewport width.
+      gridEl.style.setProperty('--tile-font-size',Math.max(1,Math.min(tile.width,tile.height)*1.17)+'px');
+    }
+    function cellCenter(position){ const cell=cellNodes[cellIndex(position.r,position.c,puzzle.size)]; return [cell.offsetLeft+cell.offsetWidth/2,cell.offsetTop+cell.offsetHeight/2]; }
+    function drawLine(path,color,opacity){ if(!path.length) return;
+      const [x1,y1]=cellCenter(path[0]), [x2,y2]=cellCenter(path[path.length-1]);
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      for(const [name,value] of Object.entries({x1,y1,x2,y2,stroke:color,'stroke-width':Math.max(8,cellNodes[0].offsetWidth*.76),'stroke-linecap':'round',opacity})) line.setAttribute(name,String(value));
+      traceSvg.append(line);
+    }
+    function drawTraces(){ if(!puzzle||!traceSvg) return; traceSvg.replaceChildren();
+      traceSvg.setAttribute('viewBox',`0 0 ${gridEl.clientWidth} ${gridEl.clientHeight}`);
+      for(const entry of puzzle.placed) if(found.has(entry.word)) drawLine(entry.path,entry.color,.65);
+      if(selected.length) drawLine(selected,'#ff98d8',.78);
+      for(let i=0;i<cellNodes.length;i++) cellNodes[i].classList.toggle('selected',selected.some(p=>cellIndex(p.r,p.c,puzzle.size)===i));
+    }
+    function clearSelection(){ selected=[]; tapAnchor=null; drawTraces(); }
+    function newPuzzle(){
+      const settings=SETTINGS[difficultyEl.value];
+      const next=makePuzzle(settings);
+      if(!next) { setMessage('Could not build a puzzle. Please try again.','error'); return; }
+      clearTimeout(hintTimeout); puzzle=next; found=new Set(); bonusFound=new Set(); selected=[]; tapAnchor=null; drag=null; hasInteracted=false;
+      startedAt=Date.now(); completedAt=null; infoEl.textContent=`${puzzle.size} × ${puzzle.size} · 8 DIRECTIONS`;
+      buildGrid(); buildList(); tick(); setMessage('Drag across letters or tap the first and last letter.');
+    }
+    function pathBetween(start,end){
+      const dr=end.r-start.r,dc=end.c-start.c;
+      if(!dr&&!dc) return [start];
+      const ar=Math.abs(dr),ac=Math.abs(dc),rowDir=Math.sign(dr),colDir=Math.sign(dc);
+      let stepR,stepC,steps;
+      if(ac===0 || ar>ac*1.7) {stepR=rowDir;stepC=0;steps=ar;}
+      else if(ar===0 || ac>ar*1.7) {stepR=0;stepC=colDir;steps=ac;}
+      else {stepR=rowDir;stepC=colDir;steps=Math.round((ar+ac)/2);}
+      const path=[];
+      for(let k=0;k<=steps;k++) {const r=start.r+stepR*k,c=start.c+stepC*k; if(!inBounds(r,c,puzzle.size)) break; path.push({r,c});}
+      return path;
+    }
+    function matchPath(path,other){
+      if(path.length!==other.length) return false;
+      const forward=path.every((p,i)=>sameCell(p,other[i]));
+      return forward||path.every((p,i)=>sameCell(p,other[other.length-1-i]));
+    }
+    function submitSelection(){
+      const entry=puzzle.placed.find(item=>matchPath(selected,item.path));
+      if(entry) {
+        if(found.has(entry.word)) setMessage('You already found '+entry.word+'.');
+        else { found.add(entry.word); setMessage('Nice — '+entry.word+' found!','success'); updateProgress();
+          if(found.size===puzzle.placed.length){completedAt=Date.now();tick();setMessage('Puzzle complete! All '+found.size+' words found in '+timerEl.textContent+'. 🎉','success');}
+        }
+      } else if(selected.length>1) {
+        const letters=selected.map(({r,c})=>puzzle.board[r][c]).join('');
+        const targetWords=new Set(puzzle.placed.map(item=>item.word));
+        const bonusWord=[letters,[...letters].reverse().join('')].find(word=>globalWords.has(word)&&!targetWords.has(word));
+        if(bonusWord) {
+          if(bonusFound.has(bonusWord)) setMessage(bonusWord+' is already in your bonus words.');
+          else {bonusFound.add(bonusWord);updateProgress();setMessage('Bonus word! +1 for '+bonusWord+' ✦','success');}
+        } else setMessage('Not quite — try another line.','error');
+      }
+      clearSelection();
+    }
+    function pointerCell(event){ const rect=gridEl.getBoundingClientRect();
+      return {r:Math.max(0,Math.min(puzzle.size-1,Math.floor((event.clientY-rect.top)/rect.height*puzzle.size))),c:Math.max(0,Math.min(puzzle.size-1,Math.floor((event.clientX-rect.left)/rect.width*puzzle.size)))};
+    }
+    gridEl.addEventListener('pointerdown',event=>{
+      if(!puzzle||completedAt!==null||!event.target.closest('.cell')) return;
+      if(event.pointerType==='mouse'&&event.button!==0) return;
+      const cell=pointerCell(event); drag={id:event.pointerId,origin:cell,x:event.clientX,y:event.clientY,moved:false};
+      hasInteracted=true; selected=[cell]; drawTraces(); gridEl.setPointerCapture(event.pointerId); event.preventDefault();
+    });
+    gridEl.addEventListener('pointermove',event=>{
+      if(!drag||event.pointerId!==drag.id) return;
+      if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)>5) {drag.moved=true;tapAnchor=null;}
+      if(drag.moved) {selected=pathBetween(drag.origin,pointerCell(event));drawTraces();}
+    });
+    gridEl.addEventListener('pointerup',event=>{
+      if(!drag||event.pointerId!==drag.id) return;
+      const end=pointerCell(event);
+      if(drag.moved) { selected=pathBetween(drag.origin,end); submitSelection(); }
+      else if(tapAnchor&&!sameCell(tapAnchor,end)) {selected=pathBetween(tapAnchor,end);submitSelection();}
+      else {tapAnchor=end;selected=[end];drawTraces();setMessage('Now tap the last letter, or swipe to select.');}
+      drag=null;
+    });
+    gridEl.addEventListener('pointercancel',()=>{drag=null;clearSelection();});
+    gridEl.addEventListener('keydown',event=>{
+      if(!['Enter',' '].includes(event.key)||!puzzle||completedAt!==null) return;
+      const el=event.target.closest('.cell'); if(!el) return; event.preventDefault();
+      const end={r:Number(el.dataset.r),c:Number(el.dataset.c)};hasInteracted=true;
+      if(tapAnchor&&!sameCell(tapAnchor,end)){selected=pathBetween(tapAnchor,end);submitSelection();}
+      else {tapAnchor=end;selected=[end];drawTraces();setMessage('Focus the last letter and press Enter.');}
+    });
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&tapAnchor){clearSelection();setMessage('Selection cleared.');}});
+    document.querySelector('#hint').addEventListener('click',()=>{
+      if(!puzzle||completedAt!==null) return;
+      const remaining=puzzle.placed.filter(entry=>!found.has(entry.word));if(!remaining.length) return;
+      hasInteracted=true;clearSelection();clearTimeout(hintTimeout);
+      const entry=remaining[Math.floor(Math.random()*remaining.length)],first=entry.path[0];
+      const cell=cellNodes[cellIndex(first.r,first.c,puzzle.size)];cell.classList.add('hinted');
+      setMessage('Hint: '+entry.word+' starts at the glowing letter.');
+      hintTimeout=setTimeout(()=>cell.classList.remove('hinted'),1900);
+    });
+    document.querySelector('#newGame').addEventListener('click',newPuzzle);
+    difficultyEl.addEventListener('change',newPuzzle);
+    new ResizeObserver(()=>{if(puzzle){resizeLetters();drawTraces();}}).observe(gridEl);
+    new ResizeObserver(updateListOverflow).observe(listEl);
+    setInterval(tick,1000);
+
+    async function loadApiWords(){
+      try {
+        const response=await fetch(WORD_API,{headers:{accept:'application/json'}});
+        if(!response.ok) throw new Error('Word API unavailable');
+        const payload=await response.json();
+        const remote=[];
+        for(const words of Object.values(payload?.lengths||{})) {
+          if(!Array.isArray(words)) continue;
+          for(const item of words) if(typeof item==='string') {const word=item.trim().toUpperCase();if(/^[A-Z]{4,10}$/.test(word)) remote.push(word);}
+        }
+        if(remote.length<16) throw new Error('Not enough API words');
+        pool=[...new Set([...FALLBACK_WORDS,...remote])];
+        globalWords=new Set(pool);
+        sourceEl.textContent='Live word list synced · api.anrat.link';
+        // Keep a round someone has begun; use freshly loaded API words next round.
+        if(!hasInteracted && found.size===0 && !drag) newPuzzle();
+      } catch { sourceEl.textContent='Offline word list ready · API unavailable'; }
+    }
+    newPuzzle();
+    loadApiWords();
+  </script>
+</body>
+</html>
