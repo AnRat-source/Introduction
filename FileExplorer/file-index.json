@@ -60,6 +60,11 @@
               },
               {
                 "type": "file",
+                "name": "layers.html",
+                "path": "FileExplorer/Misc/Games/Word-Games/layers.html"
+              },
+              {
+                "type": "file",
                 "name": "Word-Search.html",
                 "path": "FileExplorer/Misc/Games/Word-Games/Word-Search.html"
               },
