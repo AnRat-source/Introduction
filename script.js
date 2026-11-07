@@ -595,17 +595,20 @@
         folder.setAttribute('aria-controls', folderId);
         folder.innerHTML = `<i class="fa-solid fa-chevron-${isOpen ? 'down' : 'right'} tree-chevron" aria-hidden="true"></i><i class="fa-solid fa-folder tree-folder-icon" aria-hidden="true"></i><span></span>`;
         folder.querySelector('span').textContent = entry.name;
-        if (indexFile || (entry.name === 'Tools' && depth === 0)) {
+        const indexFile = entry.children?.find(child =>
+          child.type === 'file' &&
+          child.name.toLowerCase() === 'index.html'
+        );
+
+        if (indexFile) {
           folder.dataset.hasIndex = 'true';
 
           folder.addEventListener('dblclick', event => {
             event.preventDefault();
             event.stopPropagation();
 
-            const path = indexFile?.path || 'FileExplorer/Tools/';
-
             window.location.assign(
-              new URL(path, window.location.origin).href
+              new URL(indexFile.path, window.location.origin).href
             );
           });
         }
