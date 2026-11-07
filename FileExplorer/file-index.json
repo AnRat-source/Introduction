@@ -25,8 +25,18 @@
         "children": [
           {
             "type": "file",
+            "name": "Magic8Ball.html",
+            "path": "FileExplorer/Misc/Fun/Magic8Ball.html"
+          },
+          {
+            "type": "file",
             "name": "MusicPlayer.html",
             "path": "FileExplorer/Misc/Fun/MusicPlayer.html"
+          },
+          {
+            "type": "file",
+            "name": "sliders.html",
+            "path": "FileExplorer/Misc/Fun/sliders.html"
           }
         ]
       },
@@ -54,11 +64,6 @@
             "type": "file",
             "name": "secret.html",
             "path": "FileExplorer/Misc/Random/secret.html"
-          },
-          {
-            "type": "file",
-            "name": "sliders.html",
-            "path": "FileExplorer/Misc/Random/sliders.html"
           }
         ]
       }
