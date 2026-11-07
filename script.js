@@ -600,7 +600,12 @@
           child.type === 'file' &&
           child.name.toLowerCase() === 'index.html'
         );
-
+        
+        const children = document.createElement('div');
+        children.className = 'tree-children';
+        children.id = folderId;
+        children.hidden = !isOpen;
+        children.append(makeExplorerTree(entry.children || [], depth + 1));
         if (indexFile) {
           folder.dataset.hasIndex = 'true';
 
@@ -612,14 +617,7 @@
               new URL(indexFile.path, window.location.origin).href
             );
           });
-        }
-        
-        const children = document.createElement('div');
-        children.className = 'tree-children';
-        children.id = folderId;
-        children.hidden = !isOpen;
-        children.append(makeExplorerTree(entry.children || [], depth + 1));
-        if (indexFile) {
+
           const folderRow = document.createElement('div');
           folderRow.className = 'tree-folder-row';
           const popout = document.createElement('a');
@@ -636,21 +634,23 @@
         return;
       }
 
-      const [typeClass, iconClass] = getExplorerFileIcon(entry.name);
-      const isShortcut = /\.(?:href|link)$/i.test(entry.name);
-      const file = document.createElement(isShortcut ? 'button' : 'a');
-      file.className = `tree-file ${typeClass}`;
-      if (isShortcut) {
-        file.type = 'button';
-        file.dataset.hrefFile = entry.path;
-      } else {
-        file.href = entry.path;
-        file.target = '_blank';
-        file.rel = 'noopener noreferrer';
+      if (!entry.name.endsWith("index.html")) {
+        const [typeClass, iconClass] = getExplorerFileIcon(entry.name);
+        const isShortcut = /\.(?:href|link)$/i.test(entry.name);
+        const file = document.createElement(isShortcut ? 'button' : 'a');
+        file.className = `tree-file ${typeClass}`;
+        if (isShortcut) {
+          file.type = 'button';
+          file.dataset.hrefFile = entry.path;
+        } else {
+          file.href = entry.path;
+          file.target = '_blank';
+          file.rel = 'noopener noreferrer';
+        }
+        file.innerHTML = `<i class="fa-solid ${iconClass}" aria-hidden="true"></i><span></span>`;
+        file.querySelector('span').textContent = entry.name;
+        fragment.append(file);
       }
-      file.innerHTML = `<i class="fa-solid ${iconClass}" aria-hidden="true"></i><span></span>`;
-      file.querySelector('span').textContent = entry.name;
-      fragment.append(file);
     });
     return fragment;
   }
