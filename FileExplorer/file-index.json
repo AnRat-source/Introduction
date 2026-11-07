@@ -60,6 +60,11 @@
               },
               {
                 "type": "file",
+                "name": "index.html",
+                "path": "FileExplorer/Misc/Games/Word-Games/index.html"
+              },
+              {
+                "type": "file",
                 "name": "layers.html",
                 "path": "FileExplorer/Misc/Games/Word-Games/layers.html"
               },
@@ -130,6 +135,11 @@
             "path": "FileExplorer/Tools/Study/ParSci-Notes.href"
           }
         ]
+      },
+      {
+        "type": "file",
+        "name": "index.html",
+        "path": "FileExplorer/Tools/index.html"
       }
     ]
   },
