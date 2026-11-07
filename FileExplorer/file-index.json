@@ -46,22 +46,37 @@
         "children": [
           {
             "type": "directory",
-            "name": "Word Games",
+            "name": "Word-Games",
             "children": [
               {
                 "type": "file",
+                "name": "Connections.html",
+                "path": "FileExplorer/Misc/Games/Word-Games/Connections.html"
+              },
+              {
+                "type": "file",
+                "name": "Crossword.html",
+                "path": "FileExplorer/Misc/Games/Word-Games/Crossword.html"
+              },
+              {
+                "type": "file",
+                "name": "index.html",
+                "path": "FileExplorer/Misc/Games/Word-Games/index.html"
+              },
+              {
+                "type": "file",
                 "name": "Word-Search.html",
-                "path": "FileExplorer/Misc/Games/Word Games/Word-Search.html"
+                "path": "FileExplorer/Misc/Games/Word-Games/Word-Search.html"
               },
               {
                 "type": "file",
                 "name": "Word-Wheel.html",
-                "path": "FileExplorer/Misc/Games/Word Games/Word-Wheel.html"
+                "path": "FileExplorer/Misc/Games/Word-Games/Word-Wheel.html"
               },
               {
                 "type": "file",
                 "name": "Wordle-Unlimited.html",
-                "path": "FileExplorer/Misc/Games/Word Games/Wordle-Unlimited.html"
+                "path": "FileExplorer/Misc/Games/Word-Games/Wordle-Unlimited.html"
               }
             ]
           },
