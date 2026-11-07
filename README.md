@@ -114,3 +114,9 @@ npx serve .
 ```
 
 Then open the URL printed by the server. The optional local Ollama summary requires Ollama to be running and a model to be loaded.
+
+When visiting the deployed site, Ollama must also allow the site origin. On Windows, set this once and restart Ollama:
+
+```powershell
+[Environment]::SetEnvironmentVariable('OLLAMA_ORIGINS', 'https://anrat.link,https://www.anrat.link', 'User')
+```
