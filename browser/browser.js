@@ -36,6 +36,8 @@
 
   const resultsStatus = document.getElementById('browserResultsStatus');
 
+  const searchSummary = document.getElementById('browserSearchSummary');
+
   const resultsList = document.getElementById('browserResults');
 
   const loadMoreButton = document.getElementById('browserLoadMore');
@@ -246,12 +248,9 @@
     };
 
     const getFollowUpOptions = () => {
-
-      if (browserSettings.promptGreetings.length) return browserSettings.promptGreetings;
-
       const hour = getTimeOfDay();
 
-      return hour < 6
+      const defaults = hour < 6
         ? [
             'Why are you still awake, Aqua?',
             'Ready to call it a night?',
@@ -294,6 +293,8 @@
                 'Was there a moment you want to remember from today?',
                 'What would make this evening feel nice?'
               ];
+
+      return [...defaults, ...browserSettings.promptGreetings];
 
     };
 
@@ -1046,6 +1047,84 @@
 
     resultsList.replaceChildren(card);
 
+    if (searchSummary) searchSummary.hidden = true;
+
+  }
+
+  async function loadSearchSummary(query, results, searchId) {
+
+    if (!searchSummary || !results.length) return;
+
+    searchSummary.hidden = false;
+
+    searchSummary.className = 'browser-search-summary is-loading';
+
+    searchSummary.textContent = 'Creating a quick summary…';
+
+    try {
+
+      const statusResponse = await fetch('http://127.0.0.1:11434/api/ps');
+
+      const statusPayload = await statusResponse.json().catch(() => ({}));
+
+      const model = Array.isArray(statusPayload.models) ? statusPayload.models[0]?.name : '';
+
+      if (!statusResponse.ok || !model) throw new Error('No local Ollama model is running.');
+
+      const sourceText = results.slice(0, 10).map((result, index) => {
+
+        const title = typeof result.title === 'string' ? result.title : '';
+
+        const snippet = typeof result.snippet === 'string' ? result.snippet : '';
+
+        return `${index + 1}. ${title}\n${snippet}`;
+
+      }).join('\n\n');
+
+      const prompt = `Give a concise, factual two-sentence summary for this web search. Use only the supplied results. If they disagree or are incomplete, say so. Do not use markdown headings.\n\nSearch: ${query}\n\nResults:\n${sourceText}`;
+
+      const response = await fetch('http://127.0.0.1:11434/api/chat', {
+
+        method: 'POST',
+
+        headers: { 'content-type': 'application/json' },
+
+        body: JSON.stringify({
+
+          model,
+
+          messages: [{ role: 'user', content: prompt }],
+
+          stream: false,
+
+          options: { temperature: 0.2, num_predict: 120 }
+
+        })
+
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || typeof payload.message?.content !== 'string') throw new Error();
+
+      if (searchId !== activeSearch) return;
+
+      searchSummary.className = 'browser-search-summary';
+
+      searchSummary.textContent = payload.message.content.trim();
+
+    } catch {
+
+      if (searchId === activeSearch) {
+
+        searchSummary.className = 'browser-search-summary is-error';
+
+        searchSummary.hidden = true;
+
+      }
+
+    }
+
   }
 
 
@@ -1082,6 +1161,8 @@
 
     resultsList.replaceChildren();
 
+    if (searchSummary) searchSummary.hidden = true;
+
     loadMoreButton.hidden = true;
 
 
@@ -1109,6 +1190,8 @@
       currentQuery = query;
 
       currentResults = Array.isArray(payload.results) ? payload.results : [];
+
+      void loadSearchSummary(query, currentResults, searchId);
 
       visibleResults = 0;
 
