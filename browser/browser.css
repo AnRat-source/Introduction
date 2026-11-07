@@ -41,6 +41,19 @@
   white-space: nowrap;
 }
 
+@keyframes browser-greeting-enter {
+  from { opacity: 0; transform: translateY(9px) scale(.985); filter: blur(3px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.browser-greeting.is-animating {
+  animation: browser-greeting-enter .48s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browser-greeting.is-animating { animation: none; }
+}
+
 .browser-search > label {
   position: absolute;
   width: 1px;

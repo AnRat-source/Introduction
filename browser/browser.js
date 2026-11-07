@@ -89,17 +89,89 @@
 
     let previousGreeting = '';
 
-    const getGreetingOptions = () => {
+    const getTimeOfDay = () => new Date().getHours();
 
-      const hour = new Date().getHours();
+    const getOpeningGreetings = () => {
+
+      const hour = getTimeOfDay();
 
       return hour < 6
-        ? ['Time to rest, Aqua', 'Aqua, it is time to rest', 'Still awake, Aqua? Time to rest']
+        ? [
+            'Time to rest, Aqua',
+            'It is time to rest, Aqua',
+            'Rest well, Aqua',
+            'Time to wind down, Aqua'
+          ]
         : hour < 12
-          ? ['Good morning, Aqua', 'Morning, Aqua', 'Rise and shine, Aqua']
+          ? [
+              'Good morning, Aqua',
+              'Morning, Aqua',
+              'A very good morning to you, Aqua',
+              'Rise and shine, Aqua'
+            ]
           : hour < 18
-            ? ['Good afternoon, Aqua', 'Afternoon, Aqua', 'Hope your day is going well, Aqua']
-            : ['Good evening, Aqua', 'Evening, Aqua', 'Hope you had a good day, Aqua'];
+            ? [
+                'Good afternoon, Aqua',
+                'Afternoon, Aqua',
+                'Hope you are having a good afternoon, Aqua',
+                'A very good afternoon to you, Aqua'
+              ]
+            : [
+                'Good evening, Aqua',
+                'Evening, Aqua',
+                'Hope you are having a good evening, Aqua',
+                'A very good evening to you, Aqua'
+              ];
+
+    };
+
+    const getFollowUpOptions = () => {
+
+      const hour = getTimeOfDay();
+
+      return hour < 6
+        ? [
+            'Why are you still awake, Aqua?',
+            'Ready to call it a night?',
+            'Need anything before you rest?',
+            'Would a little sleep help?',
+            'How has your night been, Aqua?',
+            'What is keeping you up?',
+            'Is there anything you want to do before bed?',
+            'How are you feeling tonight?'
+          ]
+        : hour < 12
+          ? [
+              'Did you sleep well, Aqua?',
+              'What is on your mind this morning?',
+              'Ready for the day?',
+              'Have you had breakfast yet?',
+              'What would make today a good day?',
+              'What are you looking forward to today?',
+              'How can today be a little better?',
+              'What is first on your list today?'
+            ]
+          : hour < 18
+            ? [
+                'How is your day going, Aqua?',
+                'What have you been up to?',
+                'Need a quick reset?',
+                'What is one thing you want to finish today?',
+                'Has anything made you smile today?',
+                'What is taking up most of your time today?',
+                'How are you feeling right now?',
+                'What would help your afternoon go better?'
+              ]
+            : [
+                'How was your day, Aqua?',
+                'What was the best part of today?',
+                'Did anything interesting happen today?',
+                'How are you feeling this evening?',
+                'What are you looking forward to tomorrow?',
+                'What is on your mind tonight?',
+                'Was there a moment you want to remember from today?',
+                'What would make this evening feel nice?'
+              ];
 
     };
 
@@ -125,9 +197,19 @@
 
     };
 
-    const rotateGreeting = () => {
+    const animateGreeting = () => {
 
-      const options = getGreetingOptions();
+      greeting.classList.remove('is-animating');
+
+      void greeting.offsetWidth;
+
+      greeting.classList.add('is-animating');
+
+    };
+
+    const rotateGreeting = (isOpening = false) => {
+
+      const options = isOpening ? getOpeningGreetings() : getFollowUpOptions();
 
       const availableOptions = options.filter(option => option !== previousGreeting);
 
@@ -137,9 +219,11 @@
 
       requestAnimationFrame(fitGreeting);
 
+      animateGreeting();
+
     };
 
-    rotateGreeting();
+    rotateGreeting(true);
 
     window.setInterval(rotateGreeting, 60_000);
 
