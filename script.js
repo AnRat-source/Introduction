@@ -588,6 +588,7 @@
       if (entry.type === 'directory') {
         const folderId = `explorer-folder-${explorerTreeId++}`;
         const isOpen = depth === 0;
+        const isToolsDirectory = entry.name === 'Tools' && depth === 0;
         const folder = document.createElement('button');
         folder.className = 'tree-folder';
         folder.type = 'button';
@@ -618,14 +619,14 @@
         children.id = folderId;
         children.hidden = !isOpen;
         children.append(makeExplorerTree(entry.children || [], depth + 1));
-        if (isToolsDirectory) {
+        if (indexFile) {
           const folderRow = document.createElement('div');
           folderRow.className = 'tree-folder-row';
           const popout = document.createElement('a');
           popout.className = 'tree-folder-popout';
-          popout.href = 'FileExplorer/Tools/';
-          popout.title = 'Open Tools directory';
-          popout.setAttribute('aria-label', 'Open Tools directory');
+          popout.href = new URL(indexFile.path, window.location.origin).href;
+          popout.title = 'Open '+entry.name;
+          popout.setAttribute('aria-label', 'Open '+entry.name);
           popout.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>';
           folderRow.append(folder, popout);
           fragment.append(folderRow, children);

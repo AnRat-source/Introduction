@@ -1,0 +1,5 @@
+RewriteEngine On
+
+# Redirect index.html to the root domain or folder
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/index\.html [NC]
+RewriteRule ^index\.html$ / [R=301,L]
