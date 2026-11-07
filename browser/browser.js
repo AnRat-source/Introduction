@@ -99,6 +99,32 @@
 
     greeting.textContent = greetings[Math.floor(Math.random() * greetings.length)];
 
+    const fitGreeting = () => {
+
+      const availableWidth = greeting.parentElement?.clientWidth || 0;
+
+      if (!availableWidth) return;
+
+      const maximumSize = Math.min(44, availableWidth / 4);
+
+      let size = maximumSize;
+
+      greeting.style.fontSize = `${size}px`;
+
+      while (greeting.scrollWidth > availableWidth && size > 1) {
+
+        size -= 1;
+
+        greeting.style.fontSize = `${size}px`;
+
+      }
+
+    };
+
+    requestAnimationFrame(fitGreeting);
+
+    new ResizeObserver(fitGreeting).observe(greeting.parentElement);
+
   }
 
 

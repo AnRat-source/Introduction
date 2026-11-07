@@ -38,6 +38,7 @@
   letter-spacing: -.045em;
   text-align: center;
   text-shadow: 0 2px 12px rgba(0, 0, 0, .58);
+  white-space: nowrap;
 }
 
 .browser-search > label {
