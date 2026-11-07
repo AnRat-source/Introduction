@@ -37,4 +37,22 @@
   .button.primary{min-width:125px}
   .word-board{grid-auto-rows:minmax(54px,1fr)}
 }
+/* Reveal animations run once when a word unlocks or a group is solved. */
+.word-tile.revealed,.solved-group{animation:none}
+.word-tile.revealed.animate-in{animation:tile-pop .4s ease}
+.solved-group.animate-in{animation:tile-pop .25s ease}
+.word-tile.revealed.selected{color:#24112d;background:#d9a7f5;border-color:#f6c7ff;box-shadow:0 6px 20px #c77df545}
+.word-tile.selected{z-index:1;outline:3px solid #f8dcff;outline-offset:-2px;background:#e8bcff;border-color:#fff;box-shadow:0 0 0 3px #a855f77d,0 9px 24px #d785ff66;font-weight:800;transform:translateY(-2px)}
+.word-tile.selected::before{content:'✓';position:absolute;top:4px;left:6px;color:#4b205e;font:800 13px var(--display)}
+.word-tile.revealed.selected{outline:3px solid #c8ffb3;background:#c9f4ad;border-color:#f1ffe7;color:#213a24;box-shadow:0 0 0 3px #77d68b79,0 9px 25px #80f2a74d}
+.word-tile.revealed.selected::before{color:#264327}
+.word-tile.revealed.selected::after{color:#407f43}
+.anagram-slot.correct{background:#b8e79e;border-color:#e1ffd2;color:#17321b;box-shadow:0 0 0 2px #81d59b45,0 0 19px #91e5a43b}
+.word-tile.selected:hover{background:#e8bcff;border-color:#fff;transform:translateY(-2px)}
+.word-tile.revealed.selected:hover{background:#c9f4ad;border-color:#f1ffe7}
+.mistakes-number{color:#f5b7d9;font:700 10px var(--mono);white-space:nowrap}
+.hearts .spent{opacity:.25;filter:grayscale(1)}
+@media(max-width:430px){.mistake-label{gap:5px}.mistakes-number{font-size:9px}}
+body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

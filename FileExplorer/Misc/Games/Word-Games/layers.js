@@ -68,7 +68,8 @@
   };
   let puzzles=FALLBACK, dictionary=Object.entries(FALLBACK_CLUES).map(([word,clue])=>({word,clue})), wordCatalogue=new Set(), apiOnline=false;
   let roundOffset=Number(sessionStorage.getItem('anrat.layers.offset')||0)||0;
-  let puzzle=null,locks={},boardOrder=[],state=null,stateKey='',activeModal=null,miniSession={},toastTimer=null,started=false,soundOn=false,hasInteracted=false;
+  let puzzle=null,locks={},boardOrder=[],state=null,stateKey='',activeModal=null,miniSession={},toastTimer=null,started=false,soundOn=true,hasInteracted=false;
+  let justUnlockedType=null,justSolvedGroup=null;
 
   const validPuzzle = p => p&&Array.isArray(p.groups)&&p.groups.length===4&&p.groups.every(g=>typeof g.category==='string'&&Array.isArray(g.words)&&g.words.length===4&&g.words.every(w=>typeof w==='string'&&w.trim()))&&new Set(p.groups.flatMap(g=>g.words.map(clean))).size===16;
   function planLocks(p,seed){
@@ -87,7 +88,44 @@
     }
     return assign(0,new Set())?result:null;
   }
+  /* Bonus rounds are composed from the category catalogue plus fresh word families.
+     Groups from the API keep their human-written meaning, while family groups are
+     drawn from the crossword clue list and checked against the word-list API. */
+  function generatedWordFamilies(rng){
+    const suffixes=['IGHT','OUND','ATCH','ABLE','AKE','EAR','ELL','ONE','ATE','INK','ASH','ORE','OOK','ALL','ANT','AME','EST','ICK','AIN','OON','ARK'];
+    const candidateWords=new Set(dictionary.map(entry=>entry.word).filter(word=>
+      lettersOnly(word)&&word.length>=4&&word.length<=7&&(word.length!==5||!wordCatalogue.size||wordCatalogue.has(word))));
+    return shuffle(suffixes,rng).map(suffix=>{
+      const options=shuffle([...candidateWords].filter(word=>word.endsWith(suffix)),rng);
+      return options.length>=4?{difficulty:4,category:`Words ending in -${suffix.toLowerCase()}`,words:options.slice(0,4)}:null;
+    }).filter(Boolean);
+  }
+  function generateBonusRound(offset){
+    const seed=hash(`${dayKey}:bonus:${offset}`),rng=random(seed);
+    const byLevel=[1,2,3,4].map(difficulty=>shuffle(puzzles.flatMap(p=>p.groups.filter(g=>g.difficulty===difficulty)),rng));
+    if(byLevel.some(groups=>!groups.length))return null;
+    const families=generatedWordFamilies(rng),familyLevel=1+Math.floor(rng()*4);
+    for(let attempt=0;attempt<150;attempt++){
+      const family=families.length?families[(attempt+offset)%families.length]:null;
+      const groups=[],used=new Set();
+      let valid=true;
+      for(let level=1;level<=4;level++){
+        const choices=level===familyLevel&&family?[family]:shuffle(byLevel[level-1],rng);
+        const group=choices.find(candidate=>candidate.words.every(word=>!used.has(clean(word)))&&
+          (!family||level===familyLevel||candidate.words.every(word=>!clean(word).endsWith(family.category.slice('Words ending in -'.length).toUpperCase()))));
+        if(!group){valid=false;break}
+        groups.push({...group,difficulty:level,words:group.words.map(clean)});
+        group.words.forEach(word=>used.add(clean(word)));
+      }
+      if(!valid)continue;
+      const candidate={id:`mix-${dayKey}-${offset}`,title:`Word Mix #${offset}`,groups};
+      const planned=planLocks(candidate,hash(`${seed}:locks`));
+      if(planned)return {candidate,planned};
+    }
+    return null;
+  }
   function findRound(offset){
+    if(offset>0){const generated=generateBonusRound(offset);if(generated)return generated}
     const pool=shuffle(puzzles,random(hash(dayKey+':board')));
     for(let i=0;i<pool.length;i++){const candidate=pool[(i+offset)%pool.length];const planned=planLocks(candidate,hash(dayKey+':'+candidate.id+':'+offset));if(planned)return {candidate,planned}}
     for(const candidate of FALLBACK){const planned=planLocks(candidate,hash(dayKey+':'+candidate.id));if(planned)return {candidate,planned}}
@@ -135,7 +173,7 @@
   }
   function unlock(type){
     if(state.unlocked.includes(type))return;
-    state.unlocked.push(type);save();sound('win');render();
+    state.unlocked.push(type);save();sound('win');justUnlockedType=type;render();
     activeModal=null;closeModal(true);
     toast(`✦ ${locks[type]} unlocked! One more piece of the puzzle.`);
   }
@@ -149,17 +187,19 @@
     $('#groupsValue').innerHTML=state.solved.length+'<span>/4</span>';
     $('#streakValue').innerHTML=getStats().streak+'<span> days</span>';
     $('#solvedCounter').textContent=`${state.solved.length} OF 4 GROUPS`;
+    $('#mistakesCount').textContent=`${state.mistakes} LEFT`;
     $('#hearts').innerHTML=Array.from({length:4},(_,i)=>`<span class="${i>=state.mistakes?'spent':''}">♥</span>`).join('');
     $('#hearts').setAttribute('aria-label',`${state.mistakes} mistakes remaining`);
     $('#challengeList').innerHTML=TYPES.map(type=>{const m=META[type],done=state.unlocked.includes(type);return `<button class="challenge-item ${done?'done':''}" data-type="${type}" data-open="${type}" aria-label="${m.name}, ${done?'solved':'not solved'}"><span class="challenge-icon">${done?'✓':m.symbol}</span><span><span class="challenge-name">${m.name}</span><span class="challenge-status">${done?'UNLOCKED · '+escapeHTML(locks[type]):m.caption.toUpperCase()}</span></span><span class="challenge-arrow">${done?'✓':'↗'}</span></button>`}).join('');
-    const solvedGroups=$('#solvedGroups');solvedGroups.innerHTML=state.solved.map(gi=>{const g=puzzle.groups[gi];return `<div class="solved-group level-${Math.max(1,Math.min(4,Number(g.difficulty)||1))}"><b>${escapeHTML(g.category)}</b><span>${g.words.map(escapeHTML).join(' · ')}</span></div>`}).join('');
+    const solvedGroups=$('#solvedGroups');solvedGroups.innerHTML=state.solved.map(gi=>{const g=puzzle.groups[gi];return `<div class="solved-group level-${Math.max(1,Math.min(4,Number(g.difficulty)||1))} ${justSolvedGroup===gi?'animate-in':''}"><b>${escapeHTML(g.category)}</b><span>${g.words.map(escapeHTML).join(' · ')}</span></div>`}).join('');
     const remaining=boardOrder.filter(t=>!state.solved.includes(t.group));
     $('#wordBoard').innerHTML=remaining.map(t=>{
       const locked=t.lockType&&!state.unlocked.includes(t.lockType);
       if(locked)return `<button type="button" class="word-tile locked" data-lock="${t.lockType}" data-open="${t.lockType}" aria-label="Play ${META[t.lockType].name} to reveal a hidden word"><span class="tile-icon">${META[t.lockType].symbol}</span><span class="tile-type">${META[t.lockType].name.toUpperCase()}</span></button>`;
       const selected=state.selected.includes(t.word);
-      return `<button type="button" class="word-tile ${selected?'selected':''} ${t.lockType?'revealed':''}" data-word="${escapeHTML(t.word)}" aria-pressed="${selected}">${escapeHTML(t.word)}</button>`;
+      return `<button type="button" class="word-tile ${selected?'selected':''} ${t.lockType?'revealed':''} ${justUnlockedType===t.lockType?'animate-in':''}" data-word="${escapeHTML(t.word)}" aria-pressed="${selected}">${escapeHTML(t.word)}</button>`;
     }).join('');
+    justUnlockedType=null;justSolvedGroup=null;
     $('#submitButton').disabled=state.selected.length!==4||!!state.endedAt;
     $('[data-action="shuffle"]').disabled=!!state.endedAt;
     $('[data-action="deselect"]').disabled=state.selected.length===0||!!state.endedAt;
@@ -170,13 +210,26 @@
     tick();
   }
   function tick(){if(!state)return;const elapsed=(state.endedAt||Date.now())-state.startedAt;$('#timeValue').textContent=timeFormat(elapsed)}
+  function updateSelectionUI(){
+    // Preserve existing tiles and solved-category nodes while selecting words.
+    // Replacing their HTML would restart each reveal animation and flash the board.
+    for(const tile of $$('#wordBoard [data-word]')){
+      const selected=state.selected.includes(tile.dataset.word);
+      tile.classList.toggle('selected',selected);
+      tile.setAttribute('aria-pressed',String(selected));
+    }
+    $('#submitButton').disabled=state.selected.length!==4||!!state.endedAt;
+    $('[data-action="deselect"]').disabled=state.selected.length===0||!!state.endedAt;
+    if(state.selected.length===4)setMessage('Four words selected. Ready to submit your group?');
+    else setMessage(state.solved.length?'Keep finding the remaining groups.':'Select four related words, or tap a mystery tile to unlock it.');
+  }
   function toggleWord(word){
     if(state.endedAt)return;
     hasInteracted=true;
     if(state.selected.includes(word))state.selected=state.selected.filter(w=>w!==word);
     else if(state.selected.length<4)state.selected.push(word);
     else{toast('Choose only four words at a time.');return}
-    sound('click');save();render();
+    sound('click');save();updateSelectionUI();
   }
   function submitGroup(){
     if(!state||state.selected.length!==4||state.endedAt)return;
@@ -184,7 +237,7 @@
     const matched=puzzle.groups.findIndex(g=>g.words.every(w=>state.selected.includes(clean(w))));
     if(matched!==-1){
       if(!state.solved.includes(matched))state.solved.push(matched);
-      state.selected=[];save();render();
+      state.selected=[];justSolvedGroup=matched;save();render();
       setMessage('Perfect connection: '+puzzle.groups[matched].category,'good');sound('win');
       if(state.solved.length===4)completeRound(true);
     }else{
@@ -299,7 +352,7 @@
   /* Anagram: four-word grouping's secret word, not a disconnected answer */
   function renderAnagram(){
     const s=miniSession.anagram,target=locks.anagram;
-    const slots=Array.from({length:target.length},(_,i)=>{const index=s.picked[i],item=index===undefined?null:s.order[index];return `<button type="button" class="anagram-slot ${item?'filled':''}" data-anagram-back="${i}" aria-label="${item?'Remove '+item.letter:'Empty letter slot'}">${item?item.letter:'·'}</button>`}).join('');
+    const slots=Array.from({length:target.length},(_,i)=>{const index=s.picked[i],item=index===undefined?null:s.order[index];const correct=item?.letter===target[i];return `<button type="button" class="anagram-slot ${item?'filled':''} ${correct?'correct':''}" data-anagram-back="${i}" aria-label="${item?'Remove '+item.letter+(correct?', correct position':''):'Empty letter slot'}">${item?item.letter:'·'}</button>`}).join('');
     const pool=s.order.map((item,i)=>`<button type="button" class="anagram-letter" data-anagram-pick="${i}" ${s.picked.includes(i)?'disabled':''} aria-label="Add ${item.letter}">${item.letter}</button>`).join('');
     return `<div class="anagram-tray">${slots}</div><p class="anagram-caption">${target.length} LETTERS · ONE HIDDEN WORD</p><div class="anagram-pool">${pool}</div><p class="modal-status ${s.error?'bad':''}">${escapeHTML(s.error||'Tap the letters to spell the secret word.')}</p><div class="mini-controls"><button type="button" class="game-button" data-mini-action="anagram-back">⌫ Back</button><button type="button" class="game-button" data-mini-action="anagram-shuffle">⇄ Shuffle</button><button type="button" class="game-button" data-mini-action="anagram-clear">Clear</button><button type="button" class="game-button primary" data-mini-action="anagram-check">Check word ↗</button></div>`;
   }
@@ -368,6 +421,14 @@
     return `<div class="crossword-selected"><b>${selected.num} ${selected.dir.toUpperCase()}</b> ${escapeHTML(selected.clue)}</div><div class="crossword-layout"><div><div class="crossword-grid" style="grid-template-columns:repeat(${cw.cols},minmax(0,1fr));max-width:${Math.min(370,cw.cols*48)}px">${grid}</div></div><div class="crossword-clues"><section><h3>Across</h3>${clueHTML('across')}</section><section><h3>Down</h3>${clueHTML('down')}</section></div></div><p class="modal-status ${s.error?'bad':''}">${escapeHTML(s.error||'Tap a clue and type its answer. Check the mystery word to unlock it.')}</p><div class="mini-controls"><button type="button" class="game-button" data-mini-action="cross-back">⌫ Back</button><button type="button" class="game-button" data-mini-action="cross-clear">Clear word</button><button type="button" class="game-button primary" data-mini-action="cross-check">Check answer ↗</button></div><div class="mini-keyboard">${keyRows()}</div>`;
   }
   function crossSelect(id,at=0){const s=miniSession.crossword;if(!s)return;s.selected=id;s.cursor=at;s.error='';renderMini()}
+  function crossNextWord(step=1){
+    const s=miniSession.crossword;if(!s)return;
+    const entries=s.grid.entries.filter(entry=>!s.complete.includes(entry.id)).sort((a,b)=>a.num-b.num||(a.dir==='across'?-1:1));
+    if(!entries.length)return;
+    const index=entries.findIndex(entry=>entry.id===s.selected);
+    const next=index<0?entries[0]:entries[(index+step+entries.length)%entries.length];
+    crossSelect(next.id,0);
+  }
   function crossSelectCell(key){
     const s=miniSession.crossword,cw=s.grid;let entry=cw.entries.find(e=>e.id===s.selected&&e.cells.includes(key));
     const matches=cw.entries.filter(e=>e.cells.includes(key));
@@ -525,17 +586,23 @@
     if(action==='stats')openStats();
     if(action==='submit')submitGroup();
     if(action==='shuffle')shuffleBoard();
-    if(action==='deselect'){state.selected=[];save();render()}
+    if(action==='deselect'){state.selected=[];save();updateSelectionUI()}
     if(action==='today'){hasInteracted=true;beginRound(0);toast("You're playing today's puzzle.")}
     if(action==='new'){hasInteracted=true;beginRound(roundOffset+1);toast('Fresh puzzle loaded!')}
     if(action==='share')share();
-    if(action==='sound'){soundOn=!soundOn;event.target.textContent=soundOn?'♫':'♪';event.target.classList.toggle('muted',!soundOn);if(soundOn)sound('click')}
+    if(action==='sound'){soundOn=!soundOn;event.target.textContent=soundOn?'♫':'♪';event.target.classList.toggle('muted',!soundOn);event.target.setAttribute('aria-pressed',String(soundOn));event.target.title=soundOn?'Sound on':'Sound off';if(soundOn)sound('click')}
   });
   $('#overlay').addEventListener('click',event=>{if(event.target===$('#overlay'))closeModal()});
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape'&&activeModal){closeModal();return}
     if(activeModal==='letterlock'&&!event.ctrlKey&&!event.metaKey&&!event.altKey){const letter=event.key.toUpperCase();if(/^[A-Z]$/.test(letter)||letter==='ENTER'||letter==='BACKSPACE'){event.preventDefault();letterlockKey(letter)}return}
-    if(activeModal==='crossword'&&!event.ctrlKey&&!event.metaKey&&!event.altKey){const letter=event.key.toUpperCase();if(/^[A-Z]$/.test(letter)||letter==='BACKSPACE'){event.preventDefault();crossKey(letter)}if(letter==='ENTER'){event.preventDefault();crossCheck()}return}
+    if(activeModal==='crossword'&&!event.ctrlKey&&!event.metaKey&&!event.altKey){
+      if(event.key==='Tab'){event.preventDefault();crossNextWord(event.shiftKey?-1:1);return}
+      const letter=event.key.toUpperCase();
+      if(/^[A-Z]$/.test(letter)||letter==='BACKSPACE'){event.preventDefault();crossKey(letter)}
+      if(letter==='ENTER'){event.preventDefault();crossCheck()}
+      return;
+    }
     if(activeModal==='anagram'&&!event.ctrlKey&&!event.metaKey&&!event.altKey){const letter=event.key.toUpperCase();if(/^[A-Z]$/.test(letter)){const s=miniSession.anagram,index=s.order.findIndex((item,i)=>item.letter===letter&&!s.picked.includes(i));if(index>=0)anagramPick(index)}if(letter==='BACKSPACE')anagramAction('anagram-back');if(letter==='ENTER')anagramAction('anagram-check');return}
     if(!activeModal&&event.key==='Enter'&&state?.selected.length===4){event.preventDefault();submitGroup()}
   });
