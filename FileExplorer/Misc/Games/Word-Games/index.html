@@ -34,11 +34,11 @@
 </head>
 <body>
   <main>
-    <header><strong>▣ TOOLS</strong><span class="path">/FileExplorer/Tools</span></header>
+    <header><strong>▣ Word Games!</strong><span class="path">/FileExplorer/Misc/Games/Word-Games</span></header>
     <div class="content">
-      <h1>Tools directory</h1>
-      <p>Small utilities, diagrams, and study resources from this site.</p>
-      <div id="tools" aria-live="polite"><p class="empty">Loading tools…</p></div>
+      <h1>I LOVE WORD GAMES</h1>
+      <p>NY Times try me.</p>
+      <div id="tools" aria-live="polite"><p class="empty">Loading Games</p></div>
     </div>
   </main>
   <script>
@@ -71,7 +71,13 @@
       }
     };
     function findTools(entries) {
-      return entries.find(entry => entry.type === 'directory' && entry.name === 'Tools')?.children || [];
+      return entries
+        .find(entry => entry.type === 'directory' && entry.name === 'Misc')
+        ?.children
+        ?.find(entry => entry.type === 'directory' && entry.name === 'Games')
+        ?.children
+        ?.find(entry => entry.type === 'directory' && entry.name === 'Word Games')
+        ?.children || [];
     }
 
     async function resolveShortcut(path) {
@@ -119,15 +125,15 @@
       parent.append(item);
     }
 
-    fetch('/Introduction/FileExplorer/file-index.json', { cache: 'no-store' })
+    fetch('../../../file-index.json', { cache: 'no-store' })
       .then(response => response.ok ? response.json() : Promise.reject())
       .then(entries => {
         tools.replaceChildren();
         const toolEntries = findTools(entries);
-        if (!toolEntries.length) tools.innerHTML = '<p class="empty">No tools are available yet.</p>';
+        if (!toolEntries.length) tools.innerHTML = '<p class="empty">No games are available yet.</p>';
         toolEntries.forEach(entry => addEntry(entry, tools));
       })
-      .catch(() => { tools.innerHTML = '<p class="empty">The tool index could not be loaded.</p>'; });
+      .catch(() => { tools.innerHTML = '<p class="empty">The game index could not be loaded.</p>'; });
   </script>
 </body>
 </html>

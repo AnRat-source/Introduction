@@ -102,7 +102,7 @@
       parent.append(item);
     }
 
-    fetch('/Introduction/FileExplorer/file-index.json', { cache: 'no-store' })
+    fetch('../../file-index.json', { cache: 'no-store' })
       .then(response => response.ok ? response.json() : Promise.reject())
       .then(entries => {
         tools.replaceChildren();
