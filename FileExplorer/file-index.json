@@ -45,6 +45,27 @@
         "name": "Games",
         "children": [
           {
+            "type": "directory",
+            "name": "Word Games",
+            "children": [
+              {
+                "type": "file",
+                "name": "Word-Search.html",
+                "path": "FileExplorer/Misc/Games/Word Games/Word-Search.html"
+              },
+              {
+                "type": "file",
+                "name": "Word-Wheel.html",
+                "path": "FileExplorer/Misc/Games/Word Games/Word-Wheel.html"
+              },
+              {
+                "type": "file",
+                "name": "Wordle-Unlimited.html",
+                "path": "FileExplorer/Misc/Games/Word Games/Wordle-Unlimited.html"
+              }
+            ]
+          },
+          {
             "type": "file",
             "name": "Doom.iframe",
             "path": "FileExplorer/Misc/Games/Doom.iframe"
@@ -53,16 +74,6 @@
             "type": "file",
             "name": "Star-Catcher.html",
             "path": "FileExplorer/Misc/Games/Star-Catcher.html"
-          },
-          {
-            "type": "file",
-            "name": "Word-Wheel.html",
-            "path": "FileExplorer/Misc/Games/Word-Wheel.html"
-          },
-          {
-            "type": "file",
-            "name": "Wordle-Unlimited.html",
-            "path": "FileExplorer/Misc/Games/Wordle-Unlimited.html"
           }
         ]
       },
