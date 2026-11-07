@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070812">
+  <title>Magic 8 Ball</title>
+  <style>
+    :root { --ink:#f4f6ff; --muted:#aab0c9; --line:rgba(185,201,255,.18); --blue:#5da8ff; --blue-bright:#b8e7ff; --dark:#070812; }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; color:var(--ink); font:16px/1.45 ui-rounded, "Avenir Next", Inter, system-ui, sans-serif; background:radial-gradient(circle at 50% 15%,#1d2d63 0,transparent 31rem),radial-gradient(circle at 10% 80%,#14113c 0,transparent 35rem),var(--dark); }
+    main { width:min(1080px,calc(100% - 32px)); min-height:100vh; margin:auto; display:grid; grid-template-columns:minmax(290px,.9fr) minmax(340px,1.1fr); gap:clamp(28px,6vw,84px); align-items:center; padding:54px 0; }
+    .intro { user-select:none; }
+    .eyebrow { margin:0 0 12px; color:#a9caff; font:700 .72rem/1 ui-monospace,monospace; letter-spacing:.15em; text-transform:uppercase; }
+    h1 { max-width:10ch; margin:0; font-size:clamp(3.6rem,8vw,6.7rem); line-height:.82; letter-spacing:-.085em; }
+    .intro > p:not(.eyebrow) { max-width:31ch; margin:25px 0 0; color:var(--muted); }
+    .hint { display:flex; align-items:center; gap:9px; margin-top:22px; color:#8189a4; font-size:.78rem; }
+    .hint span { width:9px; height:9px; border-radius:50%; background:var(--blue); box-shadow:0 0 14px var(--blue); }
+    .panel { padding:clamp(22px,4vw,38px); border:1px solid var(--line); border-radius:28px; background:linear-gradient(135deg,rgba(255,255,255,.09),transparent 35%),rgba(11,14,29,.66); box-shadow:0 24px 80px rgba(0,0,0,.37); backdrop-filter:blur(10px); }
+    .modes { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin-bottom:23px; }
+    .mode { min-height:54px; cursor:pointer; color:var(--muted); text-align:left; font:700 .78rem/1.1 ui-monospace,monospace; border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,.19); padding:10px 11px; transition:.18s ease; }
+    .mode span { display:block; margin-top:4px; opacity:.65; font-size:.62rem; letter-spacing:.03em; }
+    .mode:hover,.mode[aria-pressed="true"] { color:#08101e; border-color:var(--blue-bright); background:var(--blue-bright); box-shadow:0 0 25px rgba(93,168,255,.22); }
+    .field-label { display:block; margin:0 0 8px; color:#c9d1ed; font:700 .7rem ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; }
+    .question { width:100%; border:1px solid var(--line); border-radius:13px; color:var(--ink); font:inherit; background:#080b17; padding:15px; outline:none; transition:border-color .18s,box-shadow .18s; }
+    .question::placeholder { color:#727994; }
+    .question:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(93,168,255,.18); }
+    .ball-stage { position:relative; display:grid; place-items:center; min-height:310px; margin:11px 0 19px; }
+    .ball-stage::before { content:""; position:absolute; width:76%; height:18%; bottom:16px; border-radius:50%; background:#000; filter:blur(22px); opacity:.72; transform:scaleX(.78); }
+    .ball { position:relative; z-index:1; display:grid; place-items:center; width:252px; aspect-ratio:1; cursor:pointer; border:0; border-radius:50%; background:radial-gradient(circle at 34% 25%,#66708a 0 2%,#1c202b 10%,#050609 48%,#000 70%); box-shadow:inset -28px -27px 40px rgba(0,0,0,.95),inset 10px 12px 22px rgba(255,255,255,.12),0 25px 30px rgba(0,0,0,.55); transition:transform .2s ease; }
+    .ball:hover { transform:translateY(-3px) scale(1.015); }
+    .ball:focus-visible { outline:3px solid var(--blue-bright); outline-offset:8px; }
+    .eight { position:absolute; top:24px; left:31px; width:69px; aspect-ratio:1; display:grid; place-items:center; color:#050507; font:900 3rem/.9 Georgia,serif; border-radius:50%; background:radial-gradient(circle at 35% 28%,#fff,#cbd0da 70%,#8e96a4); box-shadow:inset -4px -5px 8px #687080,0 3px 8px #000; }
+    .window { position:relative; display:grid; place-items:center; width:116px; aspect-ratio:1.05; clip-path:polygon(50% 3%,96% 91%,4% 91%); background:linear-gradient(#b9edff,#3677ee 32%,#102272 72%,#09103d); filter:drop-shadow(0 0 12px rgba(91,170,255,.62)); padding:27px 21px 16px; }
+    .window::before { content:""; position:absolute; inset:5px 8px 14px; clip-path:inherit; border:1px solid rgba(211,245,255,.5); }
+    #answer { position:relative; z-index:1; width:75px; color:white; text-align:center; font:700 .64rem/1.08 ui-monospace,monospace; letter-spacing:-.05em; text-transform:uppercase; text-shadow:0 1px 2px #001; }
+    .ball.shake { animation:shake .7s cubic-bezier(.36,.07,.19,.97) both; pointer-events:none; }
+    .ball.reveal .window { animation:glow .7s ease-out; }
+    @keyframes shake { 10%,90% { transform:translateX(-3px) rotate(-2deg); } 20%,80% { transform:translateX(6px) rotate(2deg); } 30%,50%,70% { transform:translateX(-8px) rotate(-3deg); } 40%,60% { transform:translateX(8px) rotate(3deg); } }
+    @keyframes glow { 0% { filter:brightness(.2) drop-shadow(0 0 0 transparent); } 45% { filter:brightness(1.7) drop-shadow(0 0 25px var(--blue-bright)); } 100% { filter:drop-shadow(0 0 12px rgba(91,170,255,.62)); } }
+    .ask { width:100%; cursor:pointer; color:#061021; font:800 .82rem/1 ui-monospace,monospace; letter-spacing:.08em; border:0; border-radius:13px; background:var(--blue-bright); padding:16px; box-shadow:0 8px 28px rgba(93,168,255,.27); transition:transform .15s,box-shadow .15s; }
+    .ask:hover { transform:translateY(-2px); box-shadow:0 12px 34px rgba(93,168,255,.42); }
+    .ask:active { transform:translateY(1px); }
+    .ask:focus-visible { outline:3px solid white; outline-offset:3px; }
+    .ask:disabled { cursor:wait; opacity:.7; }
+    @media (max-width:760px) { main { grid-template-columns:1fr; gap:28px; padding:42px 0; } h1 { max-width:none; } .intro > p:not(.eyebrow) { max-width:48ch; } .ball-stage { min-height:278px; } .ball { width:225px; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="intro" aria-labelledby="title">
+      <p class="eyebrow">Questionable guidance, on demand</p>
+      <h1 id="title">Magic 8 Ball</h1>
+      <p>Ask a question, pick a theme, then shake the ball for an answer with precisely zero accountability.</p>
+      <p class="hint"><span></span>Click the ball or use the button to shake.</p>
+    </section>
+    <section class="panel" aria-label="Magic 8 Ball game">
+      <div class="modes" aria-label="Answer themes">
+        <button class="mode" type="button" data-mode="classic" aria-pressed="true">CLASSIC<span>Yes, no, perhaps</span></button>
+        <button class="mode" type="button" data-mode="food" aria-pressed="false">FOOD<span>What should we order?</span></button>
+        <button class="mode" type="button" data-mode="colour" aria-pressed="false">OUTFIT<span>What colour should I wear?</span></button>
+        <button class="mode" type="button" data-mode="plans" aria-pressed="false">PLANS<span>What should I do today?</span></button>
+      </div>
+      <label class="field-label" for="question">Ask the ball</label>
+      <input class="question" id="question" type="text" maxlength="110" placeholder="Will today be lucky?" autocomplete="off">
+      <div class="ball-stage">
+        <button class="ball" id="ball" type="button" aria-label="Shake the Magic 8 Ball"><span class="eight">8</span><span class="window"><output id="answer" aria-live="polite">SHAKE<br>ME</output></span></button>
+      </div>
+      <button class="ask" id="ask" type="button">SHAKE FOR AN ANSWER</button>
+    </section>
+  </main>
+  <script>
+    const answerSets = {
+      classic: ['It is certain.','Without a doubt.','You may rely on it.','Yes, definitely.','Signs point to yes.','Reply hazy, try again.','Ask again later.','Better not tell you now.','Cannot predict now.','Concentrate and ask again.','Do not count on it.','My reply is no.','Outlook not so good.','Very doubtful.','Maybe, but wear a helmet.'],
+      food: ['Order the dumplings.','Pizza. No notes.','Get the spicy noodles.','Tacos have spoken.','A sandwich is destiny.','Breakfast for dinner.','The answer is sushi.','Choose the place with fries.','Try that new spot.','Leftovers, but make them fancy.'],
+      colour: ['Wear blue today.','Black is the move.','Pick your brightest red.','Go with green.','Cream or white. Keep it easy.','Purple will be lucky.','Try a soft yellow.','Denim counts as a colour.','Wear the colour you avoid.','Monochrome. Mysterious.'],
+      plans: ['Take the long walk.','Call that friend.','Make something with your hands.','Go somewhere new.','Rest. Seriously.','Clean one small thing.','Say yes to the invite.','Start the tiny project.','Read for twenty minutes.','Let the day be unplanned.']
+    };
+    const prompts = { classic:'Will today be lucky?', food:'What food should we order?', colour:'What colour should I wear today?', plans:'What should I do today?' };
+    const ball = document.querySelector('#ball');
+    const ask = document.querySelector('#ask');
+    const answer = document.querySelector('#answer');
+    const question = document.querySelector('#question');
+    let mode = 'classic';
+    let shaking = false;
+    const choose = list => list[Math.floor(Math.random() * list.length)];
+    function shakeBall() {
+      if (shaking) return;
+      shaking = true;
+      ball.classList.remove('reveal');
+      ball.classList.add('shake');
+      ask.disabled = true;
+      answer.innerHTML = '…';
+      window.setTimeout(() => {
+        answer.textContent = choose(answerSets[mode]);
+        ball.classList.remove('shake');
+        ball.classList.add('reveal');
+        ask.disabled = false;
+        shaking = false;
+      }, 700);
+    }
+    document.querySelectorAll('.mode').forEach(button => button.addEventListener('click', () => {
+      mode = button.dataset.mode;
+      document.querySelectorAll('.mode').forEach(item => item.setAttribute('aria-pressed', item === button));
+      question.placeholder = prompts[mode];
+      question.value = '';
+      answer.innerHTML = 'SHAKE<br>ME';
+    }));
+    ball.addEventListener('click', shakeBall);
+    ask.addEventListener('click', shakeBall);
+    question.addEventListener('keydown', event => { if (event.key === 'Enter') shakeBall(); });
+  </script>
+</body>
+</html>
