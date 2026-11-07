@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <base href="../">
   <title>AnRat Browser</title>
+  <script>
+    try {
+      const savedSettings = JSON.parse(localStorage.getItem('anrat-browser-settings') || '{}');
+      const mizukiMode = ['day', 'always', 'never'].includes(savedSettings.mizukiMode) ? savedSettings.mizukiMode : 'day';
+      if (mizukiMode === 'never' || (mizukiMode === 'day' && new Date().getHours() < 6)) document.documentElement.classList.add('browser-rest-hours');
+    } catch { /* Use the daytime default when saved settings are unavailable. */ }
+  </script>
   <link rel="icon" type="image/x-icon" href="Images/PFP.ico">
   <link rel="stylesheet" href="style.css">
   <script src="background-time.js" defer></script>
-  <link rel="stylesheet" href="browser/browser.css?v=10">
+  <link rel="stylesheet" href="browser/browser.css?v=13">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body class="browser-page">
@@ -154,6 +161,28 @@
       <textarea id="browserOpeningGreetings" name="openingGreetings" rows="5" placeholder="Leave blank to use the time-based defaults"></textarea>
       <label for="browserPromptGreetings">Minute prompts <span>one per line</span></label>
       <textarea id="browserPromptGreetings" name="promptGreetings" rows="6" placeholder="Leave blank to use the time-based defaults"></textarea>
+      <div class="browser-settings-grid">
+        <label for="browserGreetingInterval">Greeting interval <span>seconds</span></label>
+        <input id="browserGreetingInterval" name="greetingInterval" type="number" min="10" max="3600" step="1">
+        <label for="browserResultsPerBatch">Search results per batch</label>
+        <input id="browserResultsPerBatch" name="resultsPerBatch" type="number" min="1" max="50" step="1">
+        <label for="browserMizukiMode">Mizuki visibility</label>
+        <select id="browserMizukiMode" name="mizukiMode">
+          <option value="day">Daytime only</option>
+          <option value="always">Always</option>
+          <option value="never">Never</option>
+        </select>
+        <label for="browserSearchProvider">Search behavior</label>
+        <select id="browserSearchProvider" name="searchProvider">
+          <option value="custom">Custom search; double Enter for Google</option>
+          <option value="google">Google directly</option>
+        </select>
+      </div>
+      <div class="browser-settings-toggles">
+        <label><input id="browserAnimateGreetings" name="animateGreetings" type="checkbox"> Animate greeting changes</label>
+        <label><input id="browserShowSplash" name="showSplash" type="checkbox"> Show splash text on the home view</label>
+        <label><input id="browserShowConsole" name="showConsole" type="checkbox"> Show command bar on the home view</label>
+      </div>
       <p>Use <code>{name}</code> to insert the display name.</p>
       <div class="browser-settings-actions">
         <button type="button" id="browserSettingsReset">Use defaults</button>
@@ -163,6 +192,6 @@
   </dialog>
 
   <script src="script.js?v=rest-hours"></script>
-  <script src="browser/browser.js?v=12"></script>
+  <script src="browser/browser.js?v=15"></script>
 </body>
 </html>

@@ -1,8 +1,7 @@
 (() => {
 
-  // Keep the browser quiet during the same midnight-to-6 AM rest window
-  // used by its greeting.
-  document.documentElement.classList.toggle('browser-rest-hours', new Date().getHours() < 6);
+  // The inline head script applies the saved Mizuki preference before the page
+  // can render, avoiding a visible flash when it should be hidden.
 
   const greeting = document.getElementById('browserGreeting');
 
@@ -75,9 +74,23 @@
 
   const browserPromptGreetings = document.getElementById('browserPromptGreetings');
 
+  const browserGreetingInterval = document.getElementById('browserGreetingInterval');
+
+  const browserResultsPerBatch = document.getElementById('browserResultsPerBatch');
+
+  const browserAnimateGreetings = document.getElementById('browserAnimateGreetings');
+
+  const browserShowSplash = document.getElementById('browserShowSplash');
+
+  const browserShowConsole = document.getElementById('browserShowConsole');
+
+  const browserMizukiMode = document.getElementById('browserMizukiMode');
+
+  const browserSearchProvider = document.getElementById('browserSearchProvider');
+
   const doubleEnterDelay = 550;
 
-  const resultsPerBatch = 8;
+  let resultsPerBatch = 8;
 
   const savedLinksStorageKey = 'anrat-browser-saved-links';
 
@@ -103,7 +116,7 @@
 
   let bookmarksEditing = false;
 
-  let browserSettings = { name: 'Aqua', openingGreetings: [], promptGreetings: [] };
+  let browserSettings = { name: 'Aqua', openingGreetings: [], promptGreetings: [], greetingInterval: 60, resultsPerBatch: 8, animateGreetings: true, showSplash: true, showConsole: true, mizukiMode: 'day', searchProvider: 'custom' };
 
   let refreshGreeting = () => {};
 
@@ -114,6 +127,14 @@
     return typeof value === 'string'
       ? value.split(/\r?\n/).map(line => line.trim()).filter(Boolean).slice(0, 30)
       : [];
+
+  }
+
+  function boundedNumber(value, fallback, minimum, maximum) {
+
+    const number = Number(value);
+
+    return Number.isFinite(number) ? Math.min(maximum, Math.max(minimum, Math.round(number))) : fallback;
 
   }
 
@@ -128,12 +149,19 @@
       browserSettings = {
         name: typeof saved.name === 'string' && saved.name.trim() ? saved.name.trim().slice(0, 50) : 'Aqua',
         openingGreetings: Array.isArray(saved.openingGreetings) ? saved.openingGreetings.filter(value => typeof value === 'string' && value.trim()).slice(0, 30) : [],
-        promptGreetings: Array.isArray(saved.promptGreetings) ? saved.promptGreetings.filter(value => typeof value === 'string' && value.trim()).slice(0, 30) : []
+        promptGreetings: Array.isArray(saved.promptGreetings) ? saved.promptGreetings.filter(value => typeof value === 'string' && value.trim()).slice(0, 30) : [],
+        greetingInterval: boundedNumber(saved.greetingInterval, 60, 10, 3600),
+        resultsPerBatch: boundedNumber(saved.resultsPerBatch, 8, 1, 50),
+        animateGreetings: saved.animateGreetings !== false,
+        showSplash: saved.showSplash !== false,
+        showConsole: saved.showConsole !== false,
+        mizukiMode: ['day', 'always', 'never'].includes(saved.mizukiMode) ? saved.mizukiMode : 'day',
+        searchProvider: saved.searchProvider === 'google' ? 'google' : 'custom'
       };
 
     } catch {
 
-      browserSettings = { name: 'Aqua', openingGreetings: [], promptGreetings: [] };
+      browserSettings = { name: 'Aqua', openingGreetings: [], promptGreetings: [], greetingInterval: 60, resultsPerBatch: 8, animateGreetings: true, showSplash: true, showConsole: true, mizukiMode: 'day', searchProvider: 'custom' };
 
     }
 
@@ -155,15 +183,29 @@
 
   }
 
+  function applyBrowserSettings() {
+
+    resultsPerBatch = browserSettings.resultsPerBatch;
+
+    document.body.classList.toggle('hide-splash', !browserSettings.showSplash);
+
+    document.body.classList.toggle('hide-console', !browserSettings.showConsole);
+
+  }
+
 
 
   loadBrowserSettings();
+
+  applyBrowserSettings();
 
 
 
   if (greeting) {
 
     let previousGreeting = '';
+
+    let greetingTimer = null;
 
     const getTimeOfDay = () => new Date().getHours();
 
@@ -279,6 +321,8 @@
 
     const animateGreeting = () => {
 
+      if (!browserSettings.animateGreetings) return;
+
       greeting.classList.remove('is-animating');
 
       void greeting.offsetWidth;
@@ -303,11 +347,25 @@
 
     };
 
+    const startGreetingTimer = () => {
+
+      window.clearInterval(greetingTimer);
+
+      greetingTimer = window.setInterval(rotateGreeting, browserSettings.greetingInterval * 1_000);
+
+    };
+
     rotateGreeting(true);
 
-    refreshGreeting = () => rotateGreeting(true);
+    refreshGreeting = () => {
 
-    window.setInterval(rotateGreeting, 60_000);
+      rotateGreeting(true);
+
+      startGreetingTimer();
+
+    };
+
+    startGreetingTimer();
 
     new ResizeObserver(fitGreeting).observe(greeting.parentElement);
 
@@ -1088,6 +1146,18 @@
 
     }
 
+    if (browserSettings.searchProvider === 'google') {
+
+      const googleUrl = new URL('https://www.google.com/search');
+
+      googleUrl.searchParams.set('q', query);
+
+      window.location.assign(googleUrl.href);
+
+      return;
+
+    }
+
 
 
     const submittedAt = Date.now();
@@ -1186,6 +1256,20 @@
 
     browserPromptGreetings.value = browserSettings.promptGreetings.join('\n');
 
+    if (browserGreetingInterval) browserGreetingInterval.value = String(browserSettings.greetingInterval);
+
+    if (browserResultsPerBatch) browserResultsPerBatch.value = String(browserSettings.resultsPerBatch);
+
+    if (browserAnimateGreetings) browserAnimateGreetings.checked = browserSettings.animateGreetings;
+
+    if (browserShowSplash) browserShowSplash.checked = browserSettings.showSplash;
+
+    if (browserShowConsole) browserShowConsole.checked = browserSettings.showConsole;
+
+    if (browserMizukiMode) browserMizukiMode.value = browserSettings.mizukiMode;
+
+    if (browserSearchProvider) browserSearchProvider.value = browserSettings.searchProvider;
+
   }
 
   browserSettingsButton?.addEventListener('click', () => {
@@ -1208,21 +1292,54 @@
 
     if (browserPromptGreetings) browserPromptGreetings.value = '';
 
+    if (browserGreetingInterval) browserGreetingInterval.value = '60';
+
+    if (browserResultsPerBatch) browserResultsPerBatch.value = '8';
+
+    if (browserAnimateGreetings) browserAnimateGreetings.checked = true;
+
+    if (browserShowSplash) browserShowSplash.checked = true;
+
+    if (browserShowConsole) browserShowConsole.checked = true;
+
+    if (browserMizukiMode) browserMizukiMode.value = 'day';
+
+    if (browserSearchProvider) browserSearchProvider.value = 'custom';
+
   });
 
   browserSettingsForm?.addEventListener('submit', event => {
 
     event.preventDefault();
 
+    const previousMizukiMode = browserSettings.mizukiMode;
+
     browserSettings = {
       name: browserName?.value.trim().slice(0, 50) || 'Aqua',
       openingGreetings: greetingLines(browserOpeningGreetings?.value || ''),
-      promptGreetings: greetingLines(browserPromptGreetings?.value || '')
+      promptGreetings: greetingLines(browserPromptGreetings?.value || ''),
+      greetingInterval: boundedNumber(browserGreetingInterval?.value, 60, 10, 3600),
+      resultsPerBatch: boundedNumber(browserResultsPerBatch?.value, 8, 1, 50),
+      animateGreetings: browserAnimateGreetings?.checked !== false,
+      showSplash: browserShowSplash?.checked !== false,
+      showConsole: browserShowConsole?.checked !== false,
+      mizukiMode: ['day', 'always', 'never'].includes(browserMizukiMode?.value) ? browserMizukiMode.value : 'day',
+      searchProvider: browserSearchProvider?.value === 'google' ? 'google' : 'custom'
     };
 
     saveBrowserSettings();
 
+    applyBrowserSettings();
+
     browserSettingsDialog?.close();
+
+    if (previousMizukiMode !== browserSettings.mizukiMode) {
+
+      window.location.reload();
+
+      return;
+
+    }
 
     refreshGreeting();
 
