@@ -7,7 +7,7 @@ const indexPath = resolve(explorerDirectory, 'file-index.json');
 async function readDirectory(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const visibleEntries = entries
-    .filter(entry => entry.name !== 'file-index.json' && !(directory === resolve(explorerDirectory, 'Tools') && entry.name === 'index.html') && !entry.name.startsWith('.'))
+    .filter(entry => entry.name !== 'file-index.json' && !(entry.name === 'index.html') && !entry.name.endsWith(".css") && !entry.name.endsWith(".js") && !entry.name.startsWith('.'))
     .sort((left, right) => {
       if (left.isDirectory() !== right.isDirectory()) return left.isDirectory() ? -1 : 1;
       return left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: 'base' });

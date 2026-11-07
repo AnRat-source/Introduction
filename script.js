@@ -595,16 +595,21 @@
         folder.setAttribute('aria-controls', folderId);
         folder.innerHTML = `<i class="fa-solid fa-chevron-${isOpen ? 'down' : 'right'} tree-chevron" aria-hidden="true"></i><i class="fa-solid fa-folder tree-folder-icon" aria-hidden="true"></i><span></span>`;
         folder.querySelector('span').textContent = entry.name;
-        const isToolsDirectory = entry.name === 'Tools' && depth === 0;
-        if (isToolsDirectory) {
-          folder.dataset.toolsDirectory = 'true';
+        if (indexFile || (entry.name === 'Tools' && depth === 0)) {
+          folder.dataset.hasIndex = 'true';
+
           folder.addEventListener('dblclick', event => {
             event.preventDefault();
             event.stopPropagation();
-            window.location.assign(new URL('FileExplorer/Tools/', window.location.origin).href);
+
+            const path = indexFile?.path || 'FileExplorer/Tools/';
+
+            window.location.assign(
+              new URL(path, window.location.origin).href
+            );
           });
         }
-
+        
         const children = document.createElement('div');
         children.className = 'tree-children';
         children.id = folderId;
