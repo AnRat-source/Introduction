@@ -26,9 +26,14 @@
         transform: none !important;
     }
     .video-wash { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,9,15,.38), rgba(8,9,15,.73)), radial-gradient(circle at 50% 45%, transparent 22%, rgba(8,9,15,.4) 90%); opacity: 0; }
-    .volume-control { position: absolute; z-index: 3; top: clamp(12px, 3cqh, 24px); left: clamp(12px, 3cqw, 28px); width: 40px; height: 40px; display: flex; align-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.4); backdrop-filter: blur(10px); transition: width .2s ease, background .2s ease; }
+    .volume-control { position: absolute; z-index: 3; bottom: clamp(12px, 3cqh, 24px); left: clamp(12px, 3cqw, 28px); width: 40px; height: 40px; display: flex; align-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.4); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transform: translateY(8px); transition: width .2s ease, background .2s ease, opacity .2s ease, transform .2s ease; }
+    .player:hover .volume-control { opacity: 1; pointer-events: auto; transform: translateY(0); }
     .volume-control.expanded, .volume-control:focus-within { width: min(160px, calc(100cqw - 24px)); background: rgba(8,9,15,.66); }
-    #volume-toggle { width: 38px; min-width: 38px; height: 38px; min-height: 38px; padding: 0; display: grid; place-items: center; font-size: 17px; text-shadow: none; }
+    #volume-toggle { width: 38px; min-width: 38px; height: 38px; min-height: 38px; padding: 0; display: grid; place-items: center; text-shadow: none; }
+    .volume-icon { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.4; }
+    .volume-icon .wave, .volume-icon .mute-mark { display: none; }
+    #volume-toggle[data-volume="low"] .wave-low, #volume-toggle[data-volume="high"] .wave { display: inline; }
+    #volume-toggle[data-volume="muted"] .mute-mark { display: inline; }
     #volume-slider { width: 0; min-width: 0; margin: 0; opacity: 0; accent-color: var(--lavender); cursor: pointer; transition: width .2s ease, opacity .15s ease; }
     .volume-control.expanded #volume-slider, .volume-control:focus-within #volume-slider { width: 104px; min-width: 104px; margin-right: 12px; opacity: 1; }
 
@@ -78,7 +83,9 @@
     <div id="youtube-player" aria-hidden="true"></div>
     <div class="video-wash" aria-hidden="true"></div>
     <div class="volume-control" id="volume-control">
-      <button id="volume-toggle" type="button" aria-label="Adjust volume" aria-expanded="false">🔊</button>
+      <button id="volume-toggle" type="button" aria-label="Adjust volume" aria-expanded="false" data-volume="high">
+        <svg class="volume-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h4l5-4v12l-5-4H4z"/><path class="wave wave-low" d="M16 9.5a4 4 0 0 1 0 5"/><path class="wave wave-high" d="M18.5 7a7.5 7.5 0 0 1 0 10"/><path class="mute-mark" d="m16 10 5 5m0-5-5 5"/></svg>
+      </button>
       <input id="volume-slider" type="range" min="0" max="100" value="100" aria-label="Volume">
     </div>
     <p class="now-playing">Now playing</p>
@@ -129,7 +136,10 @@
       let player, ready = false, updateTimer, lastVideoId = '', pipWindow;
       const formatTime = seconds => { if (!Number.isFinite(seconds) || seconds < 0) return '0:00'; return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`; };
       const setPlaybackButton = isPlaying => { playPause.textContent = isPlaying ? '❚❚' : '▶'; playPause.classList.toggle('is-paused', !isPlaying); playPause.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play'); };
-      const setVolumeIcon = value => { volumeToggle.textContent = value === 0 ? '🔇' : value < 50 ? '🔉' : '🔊'; };
+      const setVolumeIcon = value => {
+        volumeToggle.dataset.volume = value === 0 ? 'muted' : value < 50 ? 'low' : 'high';
+        volumeToggle.setAttribute('aria-label', value === 0 ? 'Volume muted' : `Volume ${value}%`);
+      };
       const setThumbnail = source => {
         thumbnail.style.opacity = '.5';
         thumbnail.onload = () => { thumbnail.style.opacity = '1'; };
