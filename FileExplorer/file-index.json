@@ -60,11 +60,6 @@
               },
               {
                 "type": "file",
-                "name": "index.html",
-                "path": "FileExplorer/Misc/Games/Word-Games/index.html"
-              },
-              {
-                "type": "file",
                 "name": "Word-Search.html",
                 "path": "FileExplorer/Misc/Games/Word-Games/Word-Search.html"
               },
