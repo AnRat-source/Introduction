@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tools Directory</title>
+  <style>
+    :root { color-scheme: dark; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; padding: clamp(18px, 5vw, 64px); background: #111722; color: #dfe7f2; }
+    main { width: min(840px, 100%); margin: 0 auto; border: 1px solid #64748b; background: rgba(19, 26, 37, .96); box-shadow: 8px 8px 0 rgba(0, 0, 0, .35); }
+    header { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 10px 14px; border-bottom: 1px solid #64748b; background: #293447; font-size: 12px; }
+    header strong { color: #f5c55b; }
+    .path { margin-left: auto; color: #aebbd0; }
+    .content { padding: 24px; }
+    h1 { margin: 0 0 8px; font-size: clamp(21px, 5vw, 32px); }
+    p { color: #aebbd0; line-height: 1.6; }
+    #tools { display: grid; gap: 10px; margin-top: 24px; }
+    details { border: 1px solid #53647b; background: #182232; }
+    summary { display: flex; align-items: center; gap: 10px; padding: 14px; cursor: pointer; font-weight: 700; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: '›'; color: #f5c55b; font-size: 18px; transition: transform .16s ease; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    .folder-contents { display: grid; gap: 8px; padding: 0 10px 10px; }
+    button { display: flex; width: 100%; align-items: center; gap: 12px; padding: 14px; border: 1px solid #53647b; background: #182232; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    button:hover, button:focus-visible { border-color: #f5c55b; background: #253247; outline: none; }
+    .icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border: 1px solid currentColor; background: rgba(96, 165, 250, .1); color: #60a5fa; font-size: 18px; }
+    .folder-icon { color: #f5c55b; background: rgba(245, 197, 91, .1); }
+    .tool-copy { min-width: 0; }
+    .name { display: block; color: #edf2f8; font-weight: 700; }
+    .description { display: block; margin-top: 3px; color: #9eacbf; font-size: 11px; line-height: 1.35; }
+    .empty { padding: 14px; border: 1px dashed #53647b; color: #aebbd0; }
+  </style>
+</head>
+<body>
+  <main>
+    <header><strong>▣ TOOLS</strong><span class="path">/FileExplorer/Tools</span></header>
+    <div class="content">
+      <h1>Tools directory</h1>
+      <p>Small utilities, diagrams, and study resources from this site.</p>
+      <div id="tools" aria-live="polite"><p class="empty">Loading tools…</p></div>
+    </div>
+  </main>
+  <script>
+    const tools = document.getElementById('tools');
+    const toolDetails = {
+      'FileExplorer/Misc/Games/Word-Games/Crossword.html': {
+        name: 'Crossword',
+        icon: '🧩',
+        description: 'Solve crossword puzzles using clues to fill in intersecting words across and down.'
+      },
+      'FileExplorer/Misc/Games/Word-Games/Wordle-Unlimited.html': {
+        name: 'Wordle',
+        icon: '🟩',
+        description: 'Guess the hidden word in six tries using color-coded hints. Play unlimited puzzles!'
+      },
+      'FileExplorer/Misc/Games/Word-Games/Connections.html': {
+        name: 'Connections',
+        icon: '🔗',
+        description: 'Find hidden relationships between words and group them into four categories.'
+      },
+      'FileExplorer/Misc/Games/Word-Games/Word-Search.html': {
+        name: 'Word Search',
+        icon: '🔎',
+        description: 'Find hidden words in a grid of letters, horizontally, vertically, and diagonally.'
+      },
+      'FileExplorer/Misc/Games/Word-Games/-Word-Wheel.html': {
+        name: 'Word Wheel',
+        icon: '🔤',
+        description: 'Connect letters in a wheel to form words and complete crossword-style puzzles.'
+      }
+    };
+    function findTools(entries) {
+      return entries.find(entry => entry.type === 'directory' && entry.name === 'Tools')?.children || [];
+    }
+
+    async function resolveShortcut(path) {
+      const text = await fetch(`../../${path}`).then(response => response.text());
+      const match = text.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
+      return match && (/^https?:\/\//i.test(match) ? match : `https://${match}`);
+    }
+
+    function openTool(source) {
+      window.location.assign(source);
+    }
+
+    function addEntry(entry, parent) {
+      if (entry.name === 'index.html') return;
+      if (entry.type === 'directory') {
+        const folder = document.createElement('details');
+        folder.open = true;
+        const summary = document.createElement('summary');
+        summary.innerHTML = '<span class="icon folder-icon">▰</span><span></span>';
+        summary.querySelector('span:last-child').textContent = entry.name;
+        const contents = document.createElement('div');
+        contents.className = 'folder-contents';
+        entry.children?.forEach(child => addEntry(child, contents));
+        folder.append(summary, contents);
+        parent.append(folder);
+        return;
+      }
+      const item = document.createElement('button');
+      const details = toolDetails[entry.path] || {
+        name: entry.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
+        icon: '▤', description: 'Open this tool.'
+      };
+      item.innerHTML = '<span class="icon"></span><span class="tool-copy"><span class="name"></span><span class="description"></span></span>';
+      item.querySelector('.icon').textContent = details.icon;
+      item.querySelector('.name').textContent = details.name;
+      item.querySelector('.description').textContent = details.description;
+      item.addEventListener('click', async () => {
+        if (/\.href$/i.test(entry.name)) {
+          const target = await resolveShortcut(entry.path);
+          if (target) openTool(target);
+          return;
+        }
+        openTool(`../../${entry.path}`);
+      });
+      parent.append(item);
+    }
+
+    fetch('/Introduction/FileExplorer/file-index.json', { cache: 'no-store' })
+      .then(response => response.ok ? response.json() : Promise.reject())
+      .then(entries => {
+        tools.replaceChildren();
+        const toolEntries = findTools(entries);
+        if (!toolEntries.length) tools.innerHTML = '<p class="empty">No tools are available yet.</p>';
+        toolEntries.forEach(entry => addEntry(entry, tools));
+      })
+      .catch(() => { tools.innerHTML = '<p class="empty">The tool index could not be loaded.</p>'; });
+  </script>
+</body>
+</html>
