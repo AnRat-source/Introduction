@@ -37,6 +37,16 @@
             "type": "file",
             "name": "sliders.html",
             "path": "FileExplorer/Misc/Fun/sliders.html"
+          },
+          {
+            "type": "file",
+            "name": "WordleUnlimited.html",
+            "path": "FileExplorer/Misc/Fun/WordleUnlimited.html"
+          },
+          {
+            "type": "file",
+            "name": "WordWheel.html",
+            "path": "FileExplorer/Misc/Fun/WordWheel.html"
           }
         ]
       },
@@ -83,6 +93,11 @@
             "path": "FileExplorer/Tools/Diagrams/Blueprint-Maker.html"
           }
         ]
+      },
+      {
+        "type": "directory",
+        "name": "Format",
+        "children": []
       },
       {
         "type": "directory",

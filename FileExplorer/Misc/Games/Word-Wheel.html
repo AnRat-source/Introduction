@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11140f">
+  <title>Word Wheel</title>
+  <style>
+    :root { --bg:#130d1c; --panel:#21172b; --panel-2:#2c1e38; --ink:#faf5ff; --muted:#c5b5cf; --line:#624b70; --lime:#d69cff; --orange:#ff98d8; --cell:clamp(28px,5.5vw,42px); }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; color:var(--ink); font:16px/1.4 Inter,ui-sans-serif,system-ui,sans-serif; background:radial-gradient(circle at 12% 5%,#553471 0,transparent 30rem),radial-gradient(circle at 93% 90%,#57284d 0,transparent 31rem),var(--bg); }
+    main { width:min(1160px,calc(100% - 32px)); min-height:100vh; margin:auto; padding:42px 0 52px; }
+    header { display:flex; align-items:flex-start; justify-content:space-between; gap:22px; margin-bottom:24px; }
+    .eyebrow { margin:0 0 7px; color:var(--lime); font:800 .7rem ui-monospace,monospace; letter-spacing:.13em; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(2.7rem,7vw,5.4rem); line-height:.87; letter-spacing:-.08em; }
+    header p:not(.eyebrow) { max-width:35ch; margin:14px 0 0; color:var(--muted); }
+    button { font:800 .76rem/1 ui-monospace,monospace; letter-spacing:.06em; }
+    .new-game { cursor:pointer; white-space:nowrap; color:#10160c; border:0; border-radius:10px; background:var(--lime); padding:13px 15px; box-shadow:0 8px 22px rgba(204,255,99,.22); }
+    .new-game:hover { background:#e0ff98; transform:translateY(-1px); }
+    .game { display:grid; grid-template-columns:minmax(300px,.9fr) minmax(380px,1.1fr); overflow:hidden; border:1px solid #604b6e; border-radius:25px; background:linear-gradient(135deg,rgba(255,255,255,.07),transparent 34%),var(--panel); box-shadow:0 25px 80px rgba(0,0,0,.32); }
+    .side { display:flex; flex-direction:column; min-height:630px; padding:28px; border-right:1px solid #594263; background:rgba(0,0,0,.13); }
+    .stats { display:flex; justify-content:space-between; align-items:center; color:var(--muted); font:700 .7rem ui-monospace,monospace; letter-spacing:.07em; }
+    .stats strong { color:var(--lime); font-size:1rem; }
+    .wheel-wrap { position:relative; width:min(100%,370px); aspect-ratio:1; margin:auto; border:1px solid #664d75; border-radius:50%; background:radial-gradient(circle,#3a2a49 0 20%,#201827 63%,#110d16 100%); box-shadow:inset 0 0 60px #08050b,0 17px 34px rgba(0,0,0,.26); touch-action:none; }
+    .wheel-wrap::before { content:""; position:absolute; inset:18%; border:1px dashed #806393; border-radius:50%; opacity:.55; }
+    .wheel-lines { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+    .wheel-lines polyline { fill:none; stroke:var(--lime); stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round; opacity:.9; filter:drop-shadow(0 0 1.5px var(--lime)); }
+    .letter { position:absolute; z-index:1; width:clamp(48px,16vw,60px); aspect-ratio:1; cursor:pointer; color:var(--ink); font:900 clamp(1.15rem,3vw,1.65rem)/1 ui-monospace,monospace; border:1px solid #755a84; border-radius:50%; background:linear-gradient(145deg,#4a3658,#291f32); box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 5px 8px rgba(0,0,0,.26); transform:translate(-50%,-50%); transition:transform .12s,background .12s,box-shadow .12s; }
+    .letter:hover,.letter.selected { color:#2a1235; border-color:var(--lime); background:var(--lime); box-shadow:0 0 0 4px rgba(214,156,255,.15),0 0 20px rgba(214,156,255,.3); transform:translate(-50%,-50%) scale(1.09); }
+    .letter:focus-visible,.new-game:focus-visible,.action:focus-visible { outline:3px solid var(--orange); outline-offset:3px; }
+    .word { min-height:50px; color:var(--lime); text-align:center; font:900 clamp(1.45rem,5vw,2.35rem)/1 ui-monospace,monospace; letter-spacing:.15em; text-transform:uppercase; padding:8px; }
+    .message { min-height:24px; margin:2px 0 16px; color:var(--muted); text-align:center; font-size:.78rem; }
+    .message.bad { color:var(--orange); }
+    .board { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:630px; padding:30px; }
+    .board-head { display:flex; align-items:center; justify-content:space-between; width:min(100%,520px); margin-bottom:20px; color:var(--muted); font:800 .71rem ui-monospace,monospace; letter-spacing:.1em; }
+    .board-head span:last-child { color:var(--orange); }
+    .crossword { display:grid; width:fit-content; max-width:100%; gap:3px; }
+    .cell { width:var(--grid-cell,var(--cell)); height:var(--grid-cell,var(--cell)); display:grid; place-items:center; color:transparent; font:900 clamp(8px,calc(var(--grid-cell,var(--cell)) * .52),21px)/1 ui-monospace,monospace; border-radius:7px; background:transparent; transition:background .2s,color .2s,transform .2s; }
+    .cell.used { border:1px solid #624c70; background:#392a44; }
+    .cell.found { color:#2a1235; border-color:var(--lime); background:var(--lime); box-shadow:0 0 14px rgba(214,156,255,.26); transform:scale(1.03); }
+    .complete { margin-top:21px; color:#b9c8ad; font-size:.83rem; text-align:center; }
+    .complete strong { color:var(--lime); }
+    @media (max-width:800px) { :root { --cell:clamp(20px,6.5vw,34px); } main { width:min(1160px,calc(100% - 16px)); min-height:100svh; padding:12px 0; display:flex; flex-direction:column; } header { flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; } .eyebrow,header p:not(.eyebrow) { display:none; } h1 { font-size:clamp(1.85rem,8vw,2.7rem); } .new-game { width:auto; margin:0; padding:11px 9px; font-size:.63rem; } .game { flex:1 1 auto; min-height:0; grid-template-columns:1fr; grid-template-rows:minmax(0,1.15fr) minmax(0,.85fr); border-radius:17px; } .side { order:2; min-height:0; padding:5px; border-top:1px solid #594263; border-right:0; border-bottom:0; } .stats { display:flex; padding:0 5px; font-size:.5rem; } .stats strong { font-size:.63rem; } .wheel-wrap { width:min(41vw,185px); margin:auto; } .letter { width:clamp(34px,10vw,44px); font-size:clamp(.88rem,3.7vw,1.15rem); } .word { min-height:23px; font-size:clamp(.75rem,3.8vw,1.05rem); padding:2px 0; } .message { min-height:16px; margin:0; padding:0 2px; font-size:.52rem; line-height:1.15; } .board { order:1; min-height:0; padding:10px 3px; overflow:hidden; align-items:center; } .board-head { width:100%; margin-bottom:10px; padding:0 5px; font-size:.58rem; letter-spacing:.05em; } .crossword { gap:2px; } .cell { border-radius:4px; } .complete { margin:10px 4px 0; font-size:.62rem; line-height:1.2; } }
+    @media (max-width:800px) { .wheel-wrap { width:min(41vw,185px,calc(36svh - 50px)); } }
+    @media (max-width:380px) { :root { --cell:clamp(16px,5.3vw,20px); } .new-game { padding:9px 7px; font-size:.57rem; } .letter { width:clamp(34px,10vw,38px); } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><p class="eyebrow">Freshly built every round</p><h1>Word Wheel</h1><p>Connect letters from the wheel to uncover every word in the auto-generated crossword.</p></div>
+      <button class="new-game" id="newGame" type="button">NEW PUZZLE ↻</button>
+    </header>
+    <section class="game" aria-label="Word Wheel game">
+      <section class="side" aria-label="Letter wheel">
+        <div class="stats"><span>BOARD <strong id="score">0 / 0</strong></span><span>LEFT <strong id="remainingScore">0</strong></span></div>
+        <div class="wheel-wrap" id="wheel" aria-label="Drag between letters to make a word"></div>
+        <output class="word" id="currentWord" aria-live="polite">—</output>
+        <p class="message" id="message">Drag across letters, then release to submit.</p>
+      </section>
+      <section class="board" aria-label="Crossword">
+        <div class="board-head"><span>AUTO CROSSWORD</span><span id="letterCount">6 LETTERS</span></div>
+        <div class="crossword" id="crossword" role="grid" aria-label="Hidden word crossword"></div>
+        <p class="complete" id="complete">Find the words hidden in the grid.</p>
+      </section>
+    </section>
+  </main>
+  <script>
+    const WORD_API = 'https://api.anrat.link/words?length=3,4,5,6,7';
+    // This bundled catalogue keeps the game playable before the Worker responds.
+    let catalogue = [
+      { letters:'PLANET', words:['PLANET','PANEL','PLANE','PLANT','PLATE','PETAL','PLEAT','LEAN','LEAP','LANE','LATE','NEAT','PEAT'] },
+      { letters:'SILENT', words:['SILENT','LISTEN','ENLIST','TINSEL','INLETS','LINES','TILES','LENS','NEST','SENT','TIES','TILE'] },
+      { letters:'GARDEN', words:['GARDEN','DANGER','RANGED','RANGE','ANGER','GRADE','GRAND','DEAR','NEAR','DARN','READ'] },
+      { letters:'MARKET', words:['MARKET','MAKER','TAKER','TEAM','MEAT','TAKE','TEAR','RATE','RAKE','MATE','MARK'] },
+      { letters:'BASKET', words:['BASKET','STEAK','STAKE','SKATE','TAKES','SEAT','EAST','BEST','BASE','BAKE','TAKE'] },
+      { letters:'CANDLE', words:['CANDLE','LANCED','CLEAN','DANCE','LANCE','LEAN','LAND','DEAL','LACE','DALE','CLAN'] },
+      { letters:'ORANGE', words:['ORANGE','ORGAN','RANGE','ANGER','GONER','GONE','EARN','NEAR','ROAN','RAGE','GEAR'] },
+      { letters:'CARTON', words:['CARTON','ACTOR','COAT','TACO','CORN','TORN','CART','ROAN','TARN','RANT','OAT'] },
+      { letters:'STREAM', words:['STREAM','MASTER','TAMERS','STARE','TEARS','TEAMS','MEATS','SEAT','EARS','MATE','RATE'] },
+      { letters:'RAINBOW', words:['RAINBOW','BRAIN','BROWN','RAIN','BORN','BOW','ROW','RIB','BAR','WIN','WON'] },
+      { letters:'SPEAKER', words:['SPEAKER','SPEAK','SPARE','PEARS','PARES','RAKES','RAKE','PEAK','EARS','SEAR','PARK'] },
+      { letters:'PAINTER', words:['PAINTER','PERTAIN','PAINTER','REPAINT','TRAIN','PAINT','PANT','PAIR','PINE','RAIN','NEAT'] }
+    ];
+    const wheel = document.querySelector('#wheel');
+    const board = document.querySelector('.board');
+    const crossword = document.querySelector('#crossword');
+    const currentWord = document.querySelector('#currentWord');
+    const message = document.querySelector('#message');
+    const score = document.querySelector('#score');
+    const complete = document.querySelector('#complete');
+    const letterCount = document.querySelector('#letterCount');
+    const remainingScore = document.querySelector('#remainingScore');
+    let puzzle, selected = [], found = new Set(), activePointer = false;
+    let selectionLine, pointerPosition = null;
+    const shuffle = list => {
+      const result = [...list];
+      for(let i=result.length-1;i>0;i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [result[i],result[j]] = [result[j],result[i]];
+      }
+      return result;
+    };
+    const choice = list => list[Math.floor(Math.random() * list.length)];
+    const key = (x,y) => x+','+y;
+    const MIN_PUZZLE_WORDS = 6, MAX_PUZZLE_WORDS = 16, MAX_GRID_SIDE = 24;
+    const layoutCache = new Map();
+
+    function putWord(cells, item) {
+      const result = new Map(cells);
+      const dx = item.dir==='across'?1:0, dy = item.dir==='down'?1:0;
+      [...item.word].forEach((letter,i) => {
+        const position = key(item.x+i*dx,item.y+i*dy);
+        const previous = result.get(position);
+        result.set(position,{
+          letter,
+          across: Boolean(previous?.across || item.dir==='across'),
+          down: Boolean(previous?.down || item.dir==='down')
+        });
+      });
+      return result;
+    }
+    function placementOptions(word, cells) {
+      const positions = [...cells.keys()].map(position => position.split(',').map(Number));
+      const minX=Math.min(...positions.map(p=>p[0])), maxX=Math.max(...positions.map(p=>p[0]));
+      const minY=Math.min(...positions.map(p=>p[1])), maxY=Math.max(...positions.map(p=>p[1]));
+      const options=[], seen=new Set();
+      for(const [position,existing] of cells) {
+        const [cx,cy] = position.split(',').map(Number);
+        for(let i=0;i<word.length;i++) {
+          if(word[i]!==existing.letter) continue;
+          for(const dir of ['across','down']) {
+            if(existing[dir]) continue; // A crossing must be perpendicular.
+            const dx=dir==='across'?1:0,dy=dir==='down'?1:0;
+            const x=cx-i*dx,y=cy-i*dy,endX=x+(word.length-1)*dx,endY=y+(word.length-1)*dy;
+            const id=dir+':'+key(x,y);
+            if(seen.has(id)) continue;
+            seen.add(id);
+            const width=Math.max(maxX,endX)-Math.min(minX,x)+1;
+            const height=Math.max(maxY,endY)-Math.min(minY,y)+1;
+            if(width>MAX_GRID_SIDE || height>MAX_GRID_SIDE) continue;
+            // End caps and side-adjacent cells must remain blank: no stray words.
+            if(cells.has(key(x-dx,y-dy)) || cells.has(key(endX+dx,endY+dy))) continue;
+            let valid=true,crossings=0;
+            for(let n=0;n<word.length;n++) {
+              const px=x+n*dx,py=y+n*dy,cell=cells.get(key(px,py));
+              if(cell) {
+                if(cell.letter!==word[n] || cell[dir]) { valid=false; break; }
+                crossings++;
+              } else if(dir==='across' ? cells.has(key(px,py-1)) || cells.has(key(px,py+1)) : cells.has(key(px-1,py)) || cells.has(key(px+1,py))) {
+                valid=false; break;
+              }
+            }
+            if(valid && crossings) options.push({word,x,y,dir,crossings,area:width*height});
+          }
+        }
+      }
+      return shuffle(options).sort((a,b)=>b.crossings-a.crossings || a.area-b.area).slice(0,12);
+    }
+    function hasOnlyIntendedWords(placed,cells) {
+      const expected = new Set(placed.map(({word,x,y,dir})=>dir+':'+key(x,y)+':'+word));
+      const actual = new Set();
+      for(const position of cells.keys()) {
+        const [x,y]=position.split(',').map(Number);
+        for(const [dir,dx,dy] of [['across',1,0],['down',0,1]]) {
+          if(cells.has(key(x-dx,y-dy))) continue;
+          let text='';
+          for(let i=0;cells.has(key(x+i*dx,y+i*dy));i++) text+=cells.get(key(x+i*dx,y+i*dy)).letter;
+          if(text.length>=2) actual.add(dir+':'+key(x,y)+':'+text);
+        }
+      }
+      return actual.size===expected.size && [...actual].every(run=>expected.has(run));
+    }
+    function makeLayout(words) {
+      const unique = [...new Set(words)].sort((a,b)=>b.length-a.length);
+      if(unique.length<MIN_PUZZLE_WORDS || unique.length>MAX_PUZZLE_WORDS) return null;
+      for(let attempt=0;attempt<6;attempt++) {
+        const first = unique[0];
+        const rest = shuffle(unique.slice(1));
+        if(attempt%3===0) rest.sort((a,b)=>b.length-a.length);
+        else if(attempt%3===1) rest.sort((a,b)=>a.length-b.length);
+        const anchor = {word:first,x:0,y:0,dir:'across'};
+        let searched=0;
+        function extend(index,placed,cells) {
+          if(index===rest.length) return hasOnlyIntendedWords(placed,cells) ? {placed,cells} : null;
+          if(++searched>1000) return null;
+          for(const option of placementOptions(rest[index],cells)) {
+            const {word,x,y,dir}=option;
+            const item={word,x,y,dir};
+            const result=extend(index+1,[...placed,item],putWord(cells,item));
+            if(result) return result;
+          }
+          return null;
+        }
+        const result=extend(0,[anchor],putWord(new Map(),anchor));
+        if(result) return result;
+      }
+      return null; // Never return a partially filled or invalid crossword.
+    }
+    function renderBoard() {
+      const positions = [...puzzle.cells.keys()].map(value => value.split(',').map(Number));
+      const xs=positions.map(([x])=>x), ys=positions.map(([,y])=>y); const minX=Math.min(...xs)-1,maxX=Math.max(...xs)+1,minY=Math.min(...ys)-1,maxY=Math.max(...ys)+1;
+      const columns=maxX-minX+1, rows=maxY-minY+1; const isMobile=matchMedia('(max-width:800px)').matches; const availableWidth=Math.max(120,board.clientWidth-12); const availableHeight=Math.max(120,board.clientHeight-(isMobile?66:112)); const maxCell=isMobile?34:42; const cellSize=Math.max(8,Math.min(maxCell,Math.floor(availableWidth/columns),Math.floor(availableHeight/rows)));
+      crossword.innerHTML=''; crossword.style.setProperty('--grid-cell',cellSize+'px'); crossword.style.gridTemplateColumns=`repeat(${columns},var(--grid-cell))`;
+      for(let y=minY;y<=maxY;y++) for(let x=minX;x<=maxX;x++) { const char=puzzle.cells.get(key(x,y))?.letter; const cell=document.createElement('div'); cell.className=char?'cell used':'cell spacer'; cell.setAttribute('role','gridcell'); if(char) { cell.textContent=char; const revealed=puzzle.placed.some(item => found.has(item.word) && [...item.word].some((_,i)=>item.x+(item.dir==='across'?i:0)===x && item.y+(item.dir==='down'?i:0)===y)); if(revealed) cell.classList.add('found'); } crossword.append(cell); }
+    }
+    function updateSelection() {
+      const letters=selected.map(index=>puzzle.letters[index]);
+      currentWord.value=letters.join('') || '—';
+      wheel.querySelectorAll('.letter').forEach((node,index)=>node.classList.toggle('selected',selected.includes(index)));
+      const points=selected.map(index=>{
+        const angle=(-90+index*360/puzzle.letters.length)*Math.PI/180;
+        return (50+39*Math.cos(angle))+','+(50+39*Math.sin(angle));
+      });
+      if(activePointer && pointerPosition && points.length) points.push(pointerPosition.x+','+pointerPosition.y);
+      if(selectionLine) selectionLine.setAttribute('points',points.join(' '));
+    }
+    function clearSelection() { selected=[]; updateSelection(); }
+    function addLetter(index) {
+      const prior=selected.indexOf(index);
+      if(prior>=0 && prior===selected.length-1) return;
+      if(prior>=0) selected=selected.slice(0,prior+1); // Swiping backward erases the path.
+      else selected.push(index);
+      updateSelection();
+    }
+    function renderWheel() {
+      wheel.innerHTML='';
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('class','wheel-lines'); svg.setAttribute('viewBox','0 0 100 100');
+      svg.setAttribute('preserveAspectRatio','none');
+      selectionLine=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      svg.append(selectionLine); wheel.append(svg);
+      puzzle.letters.forEach((letter,index) => { const button=document.createElement('button'); const angle=(-90+index*360/puzzle.letters.length)*Math.PI/180; button.type='button'; button.className='letter'; button.textContent=letter; button.dataset.index=index; button.style.left=(50+39*Math.cos(angle))+'%'; button.style.top=(50+39*Math.sin(angle))+'%'; button.setAttribute('aria-label','Letter '+letter); wheel.append(button); });
+      updateSelection();
+    }
+    function newPuzzle() {
+      const sources=shuffle(catalogue.filter(entry=>entry.words.length>=MIN_PUZZLE_WORDS && entry.words.length<=MAX_PUZZLE_WORDS));
+      // Keep random variety and avoid repeating the same wheel when possible.
+      sources.sort((a,b)=>Number(a.letters===puzzle?.sourceLetters)-Number(b.letters===puzzle?.sourceLetters));
+      let source,layout,attempts=0;
+      for(const candidate of sources) {
+        const id=candidate.letters+'|'+candidate.words.join(',');
+        let result=layoutCache.get(id);
+        if(result===undefined) {
+          if(++attempts>12) continue;
+          result=makeLayout(candidate.words);
+          layoutCache.set(id,result);
+        }
+        if(result) { source=candidate; layout=result; break; }
+      }
+      if(!layout) {
+        message.textContent='Could not fit every word. Please try a new puzzle.';
+        message.classList.add('bad');
+        return;
+      }
+      puzzle={ sourceLetters:source.letters,letters:shuffle(source.letters.split('')),validWords:new Set(source.words),...layout };
+      found=new Set(); clearSelection(); renderWheel(); renderBoard();
+      score.textContent='0 / '+puzzle.placed.length; remainingScore.textContent=puzzle.placed.length;
+      letterCount.textContent=puzzle.letters.length+' LETTERS';
+      complete.textContent='Every valid word is hidden in the grid.';
+      message.textContent='Drag across letters, then release to submit.'; message.classList.remove('bad');
+    }
+    function checkWord() {
+      const word=selected.map(index=>puzzle.letters[index]).join('');
+      if(word.length<3) { message.textContent='Choose at least three letters.'; message.classList.add('bad'); clearSelection(); return; }
+      const reversed=[...word].reverse().join('');
+      const target=puzzle.placed.find(item=>item.word===word) || puzzle.placed.find(item=>item.word===reversed);
+      if(!target) { message.textContent='That word is not in this puzzle.'; message.classList.add('bad'); clearSelection(); return; }
+      if(found.has(target.word)) { message.textContent='Already found that one.'; message.classList.add('bad'); clearSelection(); return; }
+      found.add(target.word); message.textContent='Nice — '+target.word+' found!'; message.classList.remove('bad'); clearSelection(); renderBoard(); score.textContent=found.size+' / '+puzzle.placed.length; remainingScore.textContent=puzzle.placed.length-found.size;
+      if(found.size===puzzle.placed.length) { complete.innerHTML='<strong>Board cleared!</strong> Generate another random crossword.'; }
+    }
+    // Find all API words that can be made from the wheel, including repeated letters.
+    function wordsForWheel(letters, index) {
+      const chars = [...letters].sort();
+      const signatures = new Set();
+      for(let mask=1;mask<(1<<chars.length);mask++) {
+        let subset = '';
+        for(let i=0;i<chars.length;i++) if(mask & (1<<i)) subset += chars[i];
+        if(subset.length>=3) signatures.add(subset);
+      }
+      const matches = new Set();
+      for(const signature of signatures) {
+        for(const word of index.get(signature) || []) matches.add(word);
+      }
+      return [...matches];
+    }
+    async function loadApiWords() {
+      try {
+        const response = await fetch(WORD_API, { headers:{ accept:'application/json' } });
+        if (!response.ok) throw new Error('Word API unavailable.');
+        const payload = await response.json();
+        const index = new Map();
+        const allWords = new Set();
+        for(const words of Object.values(payload?.lengths || {})) {
+          if(!Array.isArray(words)) continue;
+          for(const raw of words) {
+            if(typeof raw !== 'string') continue;
+            const word = raw.trim().toUpperCase();
+            if(!/^[A-Z]{3,7}$/.test(word) || allWords.has(word)) continue;
+            allWords.add(word);
+            const signature = [...word].sort().join('');
+            if(!index.has(signature)) index.set(signature,[]);
+            index.get(signature).push(word);
+          }
+        }
+        if(!allWords.size) return;
+
+        // Expand bundled puzzles without removing their offline words.
+        const expanded = catalogue.map(entry => ({
+          letters:entry.letters,
+          words:[...new Set([...entry.words,...wordsForWheel(entry.letters,index)])]
+        })).filter(entry=>entry.words.length>=MIN_PUZZLE_WORDS && entry.words.length<=MAX_PUZZLE_WORDS);
+        const usedWheels = new Set(expanded.map(entry => [...entry.letters].sort().join('')));
+        // Add a broad, randomized selection of new six/seven-letter wheels.
+        // Keeping a cap avoids building thousands of crosswords on slower devices.
+        const MAX_CATALOGUE_SIZE = 512;
+        for(const letters of shuffle([...allWords].filter(word => word.length===6 || word.length===7))) {
+          if(expanded.length>=MAX_CATALOGUE_SIZE) break;
+          const signature = [...letters].sort().join('');
+          if(usedWheels.has(signature)) continue;
+          const words = wordsForWheel(letters,index);
+          if(words.length<MIN_PUZZLE_WORDS || words.length>MAX_PUZZLE_WORDS) continue;
+          expanded.push({ letters, words });
+          usedWheels.add(signature);
+        }
+        if(expanded.length) {
+          catalogue = expanded; // Every playable wheel keeps its entire API word set.
+          // Refresh the untouched starter round; don't interrupt an active game.
+          if(!puzzle || (found.size===0 && selected.length===0 && !activePointer)) newPuzzle();
+        }
+      } catch {
+        // The bundled catalogue remains available when the API is offline.
+      }
+    }
+    function trackPointer(event) {
+      const rect=wheel.getBoundingClientRect();
+      pointerPosition={x:(event.clientX-rect.left)/rect.width*100,y:(event.clientY-rect.top)/rect.height*100};
+    }
+    wheel.addEventListener('pointerdown',event=>{ const target=event.target.closest('.letter'); if(!target || !puzzle) return; clearSelection(); activePointer=true; trackPointer(event); wheel.setPointerCapture(event.pointerId); addLetter(+target.dataset.index); event.preventDefault(); });
+    wheel.addEventListener('pointermove',event=>{ if(!activePointer) return; trackPointer(event); const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('.letter'); if(target) addLetter(+target.dataset.index); updateSelection(); });
+    wheel.addEventListener('pointerup',()=>{ if(!activePointer) return; activePointer=false; pointerPosition=null; checkWord(); });
+    wheel.addEventListener('pointercancel',()=>{ activePointer=false; pointerPosition=null; clearSelection(); });
+    document.querySelector('#newGame').addEventListener('click',newPuzzle);
+    addEventListener('resize',()=>{ if(puzzle) renderBoard(); });
+    // The bundled catalogue is enough to render a playable board immediately.
+    // The API can replace the untouched starter round with a complete word set.
+    newPuzzle();
+    loadApiWords();
+  </script>
+</body>
+</html>

@@ -87,6 +87,8 @@ The [`FileExplorer/Tools/index.html`](FileExplorer/Tools/index.html) page is a s
 - [`FileExplorer/Misc/Fun/Magic8Ball.html`](FileExplorer/Misc/Fun/Magic8Ball.html): themed Magic 8 Ball experience.
 - [`FileExplorer/Misc/Fun/MusicPlayer.html`](FileExplorer/Misc/Fun/MusicPlayer.html): music-player experiment.
 - [`FileExplorer/Misc/Fun/sliders.html`](FileExplorer/Misc/Fun/sliders.html): slider interaction experiment.
+- [`FileExplorer/Misc/Fun/WordWheel.html`](FileExplorer/Misc/Fun/WordWheel.html): randomized letter-wheel crossword game.
+- [`FileExplorer/Misc/Fun/WordleUnlimited.html`](FileExplorer/Misc/Fun/WordleUnlimited.html): unlimited Wordle-style game using the shared word list.
 - [`FileExplorer/Misc/Games/Star-Catcher.html`](FileExplorer/Misc/Games/Star-Catcher.html): browser game.
 - [`FileExplorer/Tools/Diagrams/Blueprint-Maker.html`](FileExplorer/Tools/Diagrams/Blueprint-Maker.html): diagram/layout utility.
 
@@ -94,7 +96,7 @@ The [`FileExplorer/Tools/index.html`](FileExplorer/Tools/index.html) page is a s
 
 - **Font Awesome** supplies interface icons.
 - **GitHub Discussions + Giscus** power the blog and general board.
-- **LangSearch** supplies the custom result list through the companion API service at `api.anrat.link`.
+- **LangSearch** supplies the custom result list through the companion API service at `api.anrat.link`; the same service provides the alphabetized, length-grouped word list used by Word Wheel.
 - **Local Ollama** is optional and used only by the browser page for summaries. It is accessed directly on the visitor's own machine, not through the static website.
 
 ## Updating the explorer index
