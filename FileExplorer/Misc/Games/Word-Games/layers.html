@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#100d19">
+  <meta name="description" content="Four mini-puzzles. Four secret words. One final Connections board. Play AnRat Layers, a daily word challenge.">
+  <title>AnRat Layers — A daily word challenge</title>
+  <link rel="icon" type="image/svg" href="../../../../assets/layers-favicon.svg">
+  <link rel="stylesheet" href="./layers.css">
+  <script src="./layers.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+  <div class="shell">
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="AnRat Layers home">
+        <span class="brand-mark"><span></span><span></span><span></span><span></span></span>
+        <span class="brand-word">anrat<span class="brand-separator">/</span><b>layers</b></span>
+      </a>
+      <nav class="top-nav" aria-label="Main navigation">
+        <span class="status-pill"><span class="pulse"></span><span id="apiStatus">Preparing puzzle</span></span>
+        <button type="button" class="nav-button" data-action="how">How to play</button>
+        <button type="button" class="nav-button" data-action="stats">Stats</button>
+        <button type="button" class="icon-button muted" data-action="sound" aria-label="Toggle sound" title="Toggle sound">♪</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow"><span class="tiny-star">✦</span> YOUR DAILY BRAIN WORKOUT <span class="intro-line"></span> <span id="dateLabel">TODAY</span></p>
+          <h1>Think in <em>layers.</em></h1>
+          <p class="intro-copy">Four little puzzles unlock four hidden words. Find the connections to bring the whole board together.</p>
+        </div>
+        <div class="intro-side"><span class="intro-side-icon">✳</span><span>ONE BOARD.<br>FIVE CHALLENGES.<br>INFINITE AHA MOMENTS.</span></div>
+      </section>
+
+      <div class="workspace">
+        <aside class="challenge-panel" aria-label="Mini-games">
+          <div class="panel-eyebrow">01 — THE UNLOCKS</div>
+          <h2>Crack the <span>four.</span></h2>
+          <p class="panel-description">Each mini-game reveals a missing tile on the final board.</p>
+          <div id="challengeList" class="challenge-list"></div>
+          <div class="mini-progress"><div class="mini-progress-head"><span>WORDS REVEALED</span><b id="unlockedCount">0 / 4</b></div><div class="progress-track"><span id="unlockBar"></span></div></div>
+          <p class="tiny-footnote">Solve the puzzles in any order. Your progress is saved on this device.</p>
+        </aside>
+
+        <section class="board-card" aria-label="Final connections board">
+          <div class="board-topline"><span><span class="live-dot"></span> THE FINAL BOARD</span><span id="puzzleTag">PUZZLE #—</span></div>
+          <div class="board-heading"><div><h2 id="puzzleTitle">Connecting the dots</h2><p id="boardSubhead">Find the four hidden connections.</p></div><span class="board-decor" aria-hidden="true">✧</span></div>
+          <div class="board-content">
+            <div id="solvedGroups" class="solved-groups" aria-live="polite"></div>
+            <div id="wordBoard" class="word-board" aria-label="Word tiles"></div>
+          </div>
+          <p id="boardMessage" class="board-message" role="status" aria-live="polite">Solve a mini-game to reveal a hidden word, or try finding a group.</p>
+          <div class="board-actions"><button type="button" class="button secondary" data-action="shuffle">⇄ <span>Shuffle</span></button><button type="button" class="button secondary" data-action="deselect">✕ <span>Deselect</span></button><button type="button" class="button primary" id="submitButton" data-action="submit">Submit group <span>↗</span></button></div>
+          <div class="board-footer"><div class="mistake-label"><span>MISTAKES REMAINING</span><span id="hearts" class="hearts" aria-label="Four mistakes remaining"></span></div><span id="solvedCounter">0 OF 4 GROUPS</span></div>
+        </section>
+
+        <aside class="insight-panel" aria-label="Game status">
+          <div class="panel-eyebrow">02 — YOUR PROGRESS</div>
+          <div class="status-card"><div class="status-icon">⌁</div><span>TIME PLAYED</span><strong id="timeValue">00:00</strong><small>Take your time. Great ideas need a moment.</small></div>
+          <div class="stats-pair"><div><span>GROUPS</span><b id="groupsValue">0<span>/4</span></b></div><div><span>STREAK</span><b id="streakValue">0<span> days</span></b></div></div>
+          <div class="guide-card"><span class="guide-star">✳</span><h3>A little nudge</h3><p>Look for four words with something unexpected in common. Some words fit more than one idea.</p><button type="button" data-action="how">HOW IT WORKS <span>↗</span></button></div>
+          <button type="button" class="new-puzzle" data-action="new">PLAY ANOTHER PUZZLE <span>↗</span></button>
+          <button type="button" class="today-link" data-action="today">↩ Back to today's puzzle</button>
+        </aside>
+      </div>
+
+      <footer class="site-footer"><span>ANRAT GAMES <span class="dot-sep">✦</span> MADE FOR CURIOUS MINDS</span><span>POWERED BY <a href="https://api.anrat.link/words" target="_blank" rel="noopener noreferrer">API.ANRAT.LINK</a> <span class="dot-sep">·</span> INSPIRED BY LAYERS</span></footer>
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" type="button" data-action="close" aria-label="Close dialog">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
