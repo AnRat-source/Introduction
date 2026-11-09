@@ -138,6 +138,11 @@
         "children": [
           {
             "type": "file",
+            "name": "fibonacci-infinite.html",
+            "path": "FileExplorer/Misc/Random/fibonacci-infinite.html"
+          },
+          {
+            "type": "file",
             "name": "secret.html",
             "path": "FileExplorer/Misc/Random/secret.html"
           }
