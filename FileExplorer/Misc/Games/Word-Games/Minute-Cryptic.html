@@ -16,12 +16,14 @@
     .mode-bar{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}.btn{border:1px solid #785c89;background:#3c2a4b;color:var(--text);border-radius:11px;padding:12px 16px;font:800 .76rem ui-monospace,"Cascadia Code",monospace;letter-spacing:.04em;transition:background .15s,transform .15s}.btn:hover:not(:disabled){background:#553869;transform:translateY(-1px)}.btn.primary{color:#25102e;background:var(--purple);border-color:var(--purple)}.btn.primary:hover:not(:disabled){background:#ebc2ff}.btn.active{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink);color:#ffcbeb}.btn.danger{border-color:#97566c;color:#ffb4c4;background:#432534}.btn.small{padding:9px 12px;font-size:.69rem}
     .status{min-height:29px;color:var(--muted);font-size:12px;margin:0 0 13px}.status strong{color:var(--purple)}.status.error{color:var(--red)}.status.success{color:var(--green)}
     .game{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(288px,.85fr);gap:16px;align-items:start}.window{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:linear-gradient(140deg,#ffffff08,transparent 45%),var(--panel);box-shadow:0 23px 55px #0004}.window-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:9px 16px;border-bottom:1px solid var(--line);background:#30213d;color:#d5bde4;font:800 .67rem ui-monospace,monospace;letter-spacing:.08em}.window-dots{display:flex;gap:6px}.window-dots span{width:8px;height:8px;border:1px solid #a783bb;border-radius:50%}.board{padding:clamp(18px,3vw,36px)}.board-labels{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font:800 .7rem ui-monospace,monospace;letter-spacing:.08em}.pill{display:inline-flex;align-items:center;border:1px solid #826393;border-radius:100px;padding:5px 10px;color:#e6bfff;background:#392647;white-space:nowrap}.pills{display:flex;flex-wrap:wrap;gap:7px;margin:17px 0 0}
-    .clue-label{margin:34px 0 8px;color:var(--pink);font:900 .71rem ui-monospace,monospace;letter-spacing:.13em}.clue{font-size:clamp(1.7rem,3.55vw,2.85rem);line-height:1.25;letter-spacing:-.032em;margin:0;min-height:110px;overflow-wrap:anywhere}.number-hint{color:var(--purple);margin:12px 0 25px;font:800 .75rem ui-monospace,monospace}.answer-form{display:flex;gap:9px;align-items:stretch}.answer-form input{flex:1;width:100%;padding:15px 16px;color:var(--text);background:#130e1c;border:1px solid #8e6a9e;border-radius:11px;font:800 clamp(1rem,2.4vw,1.38rem) ui-monospace,"Cascadia Code",monospace;letter-spacing:.1em;text-transform:uppercase}.answer-form input::placeholder{color:#856f94;letter-spacing:.01em;font-size:.91rem}.answer-form .btn{padding-inline:20px}.feedback{min-height:26px;margin:12px 0 0;color:var(--muted);font-size:13px}.feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}
+    .clue-label{margin:34px 0 8px;color:var(--pink);font:900 .71rem ui-monospace,monospace;letter-spacing:.13em}.clue{font-size:clamp(1.7rem,3.55vw,2.85rem);line-height:1.25;letter-spacing:-.032em;margin:0;min-height:110px;overflow-wrap:anywhere}.number-hint{color:var(--purple);margin:12px 0 18px;font:800 .75rem ui-monospace,monospace}
+    .answer-form{display:flex;flex-direction:column;align-items:center;gap:16px}.answer-grid{width:100%;min-height:66px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;padding:9px 0}.word-block{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:5px;max-width:100%}.letter-cell{width:var(--cell-size,52px);height:calc(var(--cell-size,52px)*1.14);min-width:25px;min-height:32px;border:2px solid #9375a3;border-radius:7px;background:#170f21;color:#faf5ff;text-align:center;font:900 clamp(16px,3.2vw,29px) ui-monospace,"Cascadia Code",Consolas,monospace;text-transform:uppercase;caret-color:var(--pink);padding:0;box-shadow:inset 0 -3px 0 #372445;transition:border-color .12s,background .12s,transform .12s}.letter-cell:hover:not(:disabled){border-color:#d9aaff}.letter-cell:focus{outline:none;border-color:var(--pink);background:#56305d;box-shadow:0 0 0 3px #ff98d833;transform:translateY(-2px)}.letter-cell:disabled{opacity:1;background:#2e2539;border-color:#80628c}.letter-cell.correct{border-color:var(--green);background:#284030;color:#eaffdf}.letter-cell.incorrect{border-color:#a26a80}.answer-form .btn{min-width:165px}.grid-help{color:var(--muted);text-align:center;font-size:11px;margin:0 0 4px}.feedback{min-height:26px;margin:12px 0 0;color:var(--muted);font-size:13px}.feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}
+    .keyboard{display:grid;gap:5px;justify-content:center;margin:22px auto 4px;max-width:620px}.keyboard-row{display:flex;justify-content:center;gap:4px;max-width:100%}.key{width:clamp(25px,4.2vw,43px);height:clamp(38px,5vw,51px);padding:0 2px;border:1px solid #7e608f;border-bottom-width:3px;border-radius:7px;background:#382744;color:var(--text);font:900 clamp(11px,1.7vw,15px) ui-monospace,"Cascadia Code",monospace;touch-action:manipulation}.key:hover:not(:disabled){background:#5c3d70;border-color:var(--pink)}.key:active:not(:disabled){transform:translateY(2px);border-bottom-width:1px}.key.wide{width:clamp(39px,6.7vw,65px);font-size:11px;background:#56365e}.key:disabled{opacity:.4;cursor:default}
     .extras{display:flex;flex-wrap:wrap;gap:8px;margin:21px 0 0}.hint-box,.reveal{border:1px solid #6f547e;border-radius:12px;padding:15px 17px;background:#2c2039;margin-top:18px}.hint-box h3,.reveal h3{font:900 .75rem ui-monospace,monospace;letter-spacing:.1em;color:var(--purple);margin:0 0 8px}.hint-box ol{margin:0;padding-left:20px;color:#edddf6}.hint-box li+li{margin-top:6px}.reveal{border-color:#68985a;background:#213128}.reveal h3{color:var(--green)}.reveal .solution{font:900 clamp(1.6rem,4vw,2.35rem) ui-monospace,monospace;letter-spacing:.1em;color:var(--green);overflow-wrap:anywhere;margin:0 0 8px}.reveal p{margin:6px 0;color:#e2eedf}.reveal p strong{color:#caffc3}
     .panel-section{padding:19px;border-bottom:1px solid #5b4668}.panel-section:last-child{border-bottom:0}.panel-section h2{font:900 .84rem ui-monospace,monospace;letter-spacing:.04em;margin:0 0 14px}.time{font:900 clamp(2.3rem,5vw,3.2rem)/1.1 ui-monospace,monospace;letter-spacing:-.05em;color:var(--pink);font-variant-numeric:tabular-nums}.time-note{margin:6px 0 0;font-size:12px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{border:1px solid #665274;border-radius:9px;background:#2b2038;padding:10px 8px;min-width:0}.stat small{display:block;color:var(--muted);font:800 .58rem ui-monospace,monospace;letter-spacing:.02em}.stat strong{display:block;margin-top:6px;font:900 1.36rem ui-monospace,monospace;color:var(--purple)}
     .browse-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.field label{display:block;margin-bottom:6px;color:var(--muted);font:800 .64rem ui-monospace,monospace}.field select,.field input{width:100%;border:1px solid #856893;border-radius:8px;padding:10px;background:#170f21;color:var(--text);font:700 .8rem ui-monospace,monospace}.id-row{display:flex;gap:8px;margin-top:10px}.id-row input{width:100%;min-width:0;border:1px solid #856893;border-radius:8px;padding:10px;background:#170f21;color:var(--text)}.list-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:16px 0 8px;font:800 .68rem ui-monospace,monospace;color:var(--muted)}.puzzle-list{display:grid;gap:6px;max-height:270px;overflow:auto;scrollbar-color:#77558b transparent}.puzzle-item{display:flex;align-items:center;gap:8px;min-width:0;width:100%;padding:10px 12px;border:1px solid #675172;border-radius:8px;background:#281c34;color:var(--text);text-align:left}.puzzle-item:hover{background:#3c2a4a}.puzzle-item.current{border-color:var(--pink);background:#513257}.puzzle-item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.puzzle-item small{font:700 .65rem ui-monospace,monospace;color:var(--purple)}.puzzle-item .done{color:var(--green)}.help{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.help strong{color:var(--purple)}.footer{padding:17px 2px;color:#a28ab3;font:700 .67rem ui-monospace,monospace;letter-spacing:.07em;text-align:center}.footer a{color:var(--pink)}
     @media(max-width:800px){.game{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}.side .panel-section:nth-child(odd){border-right:1px solid var(--line)}}
-    @media(max-width:530px){.shell{width:calc(100% - 20px);padding-top:19px}.masthead{align-items:flex-start}.home{padding:8px 9px;font-size:.66rem}h1{font-size:clamp(2.35rem,10vw,3.4rem)}.intro{font-size:13px}.mode-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.mode-bar .btn{padding:11px 6px;font-size:.66rem}.board{padding:19px 15px 24px}.clue{min-height:90px;font-size:clamp(1.65rem,6.8vw,2.5rem)}.clue-label{margin-top:27px}.answer-form{flex-wrap:wrap}.answer-form input{min-width:0}.answer-form .btn{padding-inline:12px}.side{display:block}.side .panel-section:nth-child(odd){border-right:0}.panel-section{padding:17px}}
+    @media(max-width:530px){.shell{width:calc(100% - 20px);padding-top:19px}.masthead{align-items:flex-start}.home{padding:8px 9px;font-size:.66rem}h1{font-size:clamp(2.35rem,10vw,3.4rem)}.intro{font-size:13px}.mode-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.mode-bar .btn{padding:11px 6px;font-size:.66rem}.board{padding:19px 15px 24px}.clue{min-height:90px;font-size:clamp(1.65rem,6.8vw,2.5rem)}.clue-label{margin-top:27px}.answer-form .btn{padding-inline:12px}.key{width:clamp(23px,7.25vw,33px);height:43px;font-size:12px}.key.wide{width:clamp(37px,11vw,46px);font-size:10px}.keyboard-row{gap:3px}.side{display:block}.side .panel-section:nth-child(odd){border-right:0}.panel-section{padding:17px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
   </style>
 </head>
@@ -47,11 +49,13 @@
         <h2 class="clue" id="clue">Loading your mystery…</h2>
         <p class="number-hint" id="enumeration">ANSWER LENGTH: —</p>
         <form id="answerForm" class="answer-form" autocomplete="off">
-          <input id="answerInput" type="text" enterkeyhint="done" spellcheck="false" autocomplete="off" autocapitalize="characters" aria-label="Your answer" placeholder="TYPE YOUR ANSWER" disabled required>
-          <button id="checkBtn" class="btn primary" type="submit" disabled>CHECK ↵</button>
+          <div id="answerGrid" class="answer-grid" role="group" aria-label="Answer letter grid"></div>
+          <button id="checkBtn" class="btn primary" type="submit" disabled>CHECK ANSWER ↵</button>
         </form>
+        <p class="grid-help">Tap a square and type, or use the keyboard below. ← → moves between letters.</p>
         <p id="feedback" class="feedback" role="status" aria-live="polite">Think about both the definition and the hidden wordplay.</p>
         <div class="extras"><button id="hintBtn" class="btn small" type="button" disabled>✧ REVEAL HINT</button><button id="skipBtn" class="btn small danger" type="button" disabled>GIVE UP</button><button id="shareBtn" class="btn small" type="button" disabled>SHARE ↗</button></div>
+        <div id="keyboard" class="keyboard" aria-label="On-screen letter keyboard"></div>
         <section id="hintBox" class="hint-box" hidden aria-label="Revealed hints"><h3>CLUES WITHIN THE CLUE</h3><ol id="hints"></ol></section>
         <section id="reveal" class="reveal" hidden aria-label="Solution"><h3 id="resultTitle">ANSWER REVEALED</h3><p class="solution" id="solution"></p><p id="explanation"></p></section>
       </div>
@@ -77,7 +81,7 @@
   const STATS_KEY = 'anrat.wordgames.stats.v1';
   const SESSION_PREFIX = 'anrat.minutecryptic.puzzle.v1.';
   const $ = id => document.getElementById(id);
-  const ui = Object.fromEntries(['status','dailyBtn','randomBtn','browseBtn','puzzleNumber','modeLabel','difficultyBadge','typeBadge','clue','enumeration','answerForm','answerInput','checkBtn','feedback','hintBtn','skipBtn','shareBtn','hintBox','hints','reveal','resultTitle','solution','explanation','timer','timeNote','playedStat','winsStat','streakStat','difficultyFilter','typeFilter','idForm','idInput','listCount','sourceTag','puzzleList'].map(id => [id, $(id)]));
+  const ui = Object.fromEntries(['status','dailyBtn','randomBtn','browseBtn','puzzleNumber','modeLabel','difficultyBadge','typeBadge','clue','enumeration','answerForm','answerGrid','keyboard','checkBtn','feedback','hintBtn','skipBtn','shareBtn','hintBox','hints','reveal','resultTitle','solution','explanation','timer','timeNote','playedStat','winsStat','streakStat','difficultyFilter','typeFilter','idForm','idInput','listCount','sourceTag','puzzleList'].map(id => [id, $(id)]));
   const DEMOS = [
     {id:'demo-1',clue:'Silent, rearranged, means to pay attention (6)',answer:'LISTEN',difficulty:1,type:'anagram',explanation:'LISTEN is an anagram of SILENT. “Rearranged” is the anagram indicator.'},
     {id:'demo-2',clue:'A French capital hiding in comparison (5)',answer:'PARIS',difficulty:1,type:'hidden',explanation:'comPARISon contains PARIS, a capital city.'},
@@ -179,6 +183,112 @@
   }
   function saveProgress(){if(active&&progress)storeJSON(sessionKey(active),progress);}
   const isFinished = () => !!progress && progress.status !== 'playing';
+  let focusedCellIndex = 0;
+  const letterInputs = () => [...ui.answerGrid.querySelectorAll('.letter-cell')];
+  const gridValue = () => letterInputs().map(cell => cell.value).join('');
+  function gridLengths() {
+    if (!active) return [];
+    const total = compact(active.answer).length;
+    const clueEnding = active.clue.match(/\((\d+(?:[,\s-]+\d+)*)\)\s*$/);
+    const enumerated = active.enumeration || (clueEnding ? clueEnding[1] : '');
+    const numbers = (String(enumerated).match(/\d+/g) || []).map(Number);
+    if (numbers.length && numbers.reduce((a,b)=>a+b,0) === total) return numbers;
+    const fromAnswer = active.answer.split(/[\s-]+/).filter(Boolean).map(part=>compact(part).length).filter(Boolean);
+    return fromAnswer.reduce((a,b)=>a+b,0) === total ? fromAnswer : [total];
+  }
+  function focusCell(index) {
+    const cells = letterInputs();
+    if (!cells.length || isFinished()) return;
+    focusedCellIndex = Math.min(cells.length-1,Math.max(0,index));
+    cells[focusedCellIndex].focus({preventScroll:true});
+    cells[focusedCellIndex].select();
+  }
+  function saveDraft() {
+    if (!active || !progress || isFinished()) return;
+    progress.draft = letterInputs().map(cell=>compact(cell.value).slice(0,1));
+    saveProgress();
+  }
+  function writeLetters(start, text) {
+    if (isFinished()) return;
+    const cells=letterInputs(), letters=compact(text);
+    if (!cells.length || !letters) return;
+    for(let i=0;i<letters.length&&start+i<cells.length;i++) {
+      cells[start+i].value=letters[i];
+      cells[start+i].classList.remove('incorrect');
+    }
+    saveDraft();focusCell(Math.min(cells.length-1,start+letters.length));
+  }
+  function eraseCell(index) {
+    const cells=letterInputs();if(isFinished()||!cells.length)return;
+    let target=Math.min(cells.length-1,Math.max(0,index));
+    if(!cells[target].value&&target>0)target--;
+    cells[target].value='';cells[target].classList.remove('incorrect');
+    saveDraft();focusCell(target);
+  }
+  function resizeGrid() {
+    if (!active) return;
+    const longest=Math.max(1,...gridLengths());
+    const available=ui.answerGrid.clientWidth||Math.min(640,window.innerWidth-70);
+    const size=Math.max(25,Math.min(58,Math.floor((available-10-(longest-1)*5)/longest)));
+    ui.answerGrid.style.setProperty('--cell-size',size+'px');
+  }
+  function renderGrid() {
+    ui.answerGrid.replaceChildren();if(!active)return;
+    const finished=isFinished(), draft=Array.isArray(progress.draft)?progress.draft:[];
+    const answerLetters=compact(active.answer), groups=gridLengths();
+    let index=0;
+    for(const length of groups) {
+      const word=document.createElement('div');word.className='word-block';
+      for(let i=0;i<length;i++,index++) {
+        const at=index,cell=document.createElement('input');
+        cell.type='text';cell.maxLength=1;cell.inputMode='text';cell.autocomplete='off';cell.spellcheck=false;
+        cell.className='letter-cell';cell.dataset.index=at;
+        cell.setAttribute('autocapitalize','characters');
+        cell.setAttribute('aria-label','Letter '+(at+1)+' of '+answerLetters.length);
+        cell.value=finished&&(progress.status==='lost'||!draft.length)?answerLetters[at]:(draft[at]||'');
+        cell.disabled=finished;
+        if(finished)cell.classList.add(progress.status==='won'?'correct':'incorrect');
+        cell.addEventListener('focus',()=>{focusedCellIndex=at;});
+        cell.addEventListener('click',()=>cell.select());
+        cell.addEventListener('keydown',event=>{
+          if(event.key==='ArrowLeft'){event.preventDefault();focusCell(at-1);}
+          else if(event.key==='ArrowRight'||event.key===' '){event.preventDefault();focusCell(at+1);}
+          else if(event.key==='Backspace'){event.preventDefault();eraseCell(at);}
+          else if(event.key==='Delete'){event.preventDefault();cell.value='';saveDraft();}
+        });
+        cell.addEventListener('input',()=>{
+          const typed=cell.value;
+          if(typed)writeLetters(at,typed);
+          else saveDraft();
+        });
+        cell.addEventListener('paste',event=>{
+          event.preventDefault();writeLetters(at,event.clipboardData?.getData('text')||'');
+        });
+        word.append(cell);
+      }
+      ui.answerGrid.append(word);
+    }
+    resizeGrid();
+    ui.keyboard.querySelectorAll('.key').forEach(key=>{key.disabled=finished;});
+  }
+  function renderKeyboard() {
+    ui.keyboard.replaceChildren();
+    for(const keys of ['QWERTYUIOP','ASDFGHJKL','↵ZXCVBNM⌫']) {
+      const row=document.createElement('div');row.className='keyboard-row';
+      for(const letter of keys) {
+        const key=document.createElement('button');key.type='button';key.className='key'+('↵⌫'.includes(letter)?' wide':'');
+        key.textContent=letter;key.setAttribute('aria-label',letter==='⌫'?'Backspace':letter==='↵'?'Check answer':letter);
+        key.addEventListener('click',()=>{
+          if(!active||isFinished())return;
+          if(letter==='⌫')eraseCell(focusedCellIndex);
+          else if(letter==='↵')ui.answerForm.requestSubmit();
+          else writeLetters(focusedCellIndex,letter);
+        });
+        row.append(key);
+      }
+      ui.keyboard.append(row);
+    }
+  }
   function formatTime(ms){const seconds=Math.max(0,Math.floor(ms/1000));return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');}
   function elapsed(){return !progress ? 0 : (progress.endedAt||Date.now())-progress.startedAt;}
   function updateTimer(){ui.timer.textContent=formatTime(elapsed());if(!progress)return;ui.timeNote.textContent=isFinished()?(progress.status==='won' ? (elapsed()<60000?'Solved in under one minute ✦':'Solved! Great work.') : 'The answer has been revealed.'):'One minute is the goal, not the limit.';}
@@ -218,8 +328,8 @@
     ui.clue.textContent=active.clue;
     const len=active.enumeration||active.answer.split(/[\s-]+/).map(part=>compact(part).length).join(',');
     ui.enumeration.textContent=/\(\d+(?:[,\s-]+\d+)*\)\s*$/.test(active.clue)?'': 'ANSWER LENGTH: ('+len+')';
-    ui.answerInput.disabled=isFinished();ui.checkBtn.disabled=isFinished();ui.skipBtn.disabled=isFinished();ui.shareBtn.disabled=!isFinished();
-    ui.answerInput.value='';ui.answerInput.placeholder=isFinished()?'ROUND COMPLETE':'TYPE YOUR ANSWER';
+    ui.checkBtn.disabled=isFinished();ui.skipBtn.disabled=isFinished();ui.shareBtn.disabled=!isFinished();
+    focusedCellIndex=0;renderGrid();
     if(isFinished())setFeedback(progress.status==='won'?'Correct! Brilliant deduction.':'You can review the solution below.',progress.status==='won'?'good':'bad');
     else if(progress.guesses.length)setFeedback(progress.guesses.length+' previous attempt'+(progress.guesses.length===1?'':'s')+'. Try another answer.','bad');
     else setFeedback('Think about both the definition and the hidden wordplay.');
@@ -302,12 +412,14 @@
   }
   ui.answerForm.addEventListener('submit',e=>{
     e.preventDefault();if(!active||isFinished())return;
-    const guess=ui.answerInput.value.trim();if(!compact(guess)){setFeedback('Type an answer first.','bad');return;}
+    const guess=gridValue().trim();
+    if(compact(guess).length!==compact(active.answer).length){setFeedback('Fill in every square before checking.','bad');focusCell(letterInputs().findIndex(cell=>!cell.value));return;}
     progress.guesses.push(guess);saveProgress();
     if(compact(guess)===compact(active.answer)){endGame(true);return;}
-    setFeedback('Not quite. Look for a second meaning or wordplay trick.','bad');ui.answerInput.select();
+    setFeedback('Not quite. Look for a second meaning or wordplay trick.','bad');
+    letterInputs().forEach(cell=>cell.classList.add('incorrect'));focusCell(0);
   });
-  ui.hintBtn.addEventListener('click',()=>{if(!active||isFinished()||progress.revealed>=allHints().length)return;progress.revealed++;saveProgress();renderHints();ui.answerInput.focus();});
+  ui.hintBtn.addEventListener('click',()=>{if(!active||isFinished()||progress.revealed>=allHints().length)return;progress.revealed++;saveProgress();renderHints();focusCell(focusedCellIndex);});
   ui.skipBtn.addEventListener('click',()=>{if(active&&!isFinished()&&window.confirm('Reveal the answer? This puzzle will count as a loss.'))endGame(false);});
   ui.shareBtn.addEventListener('click',async()=>{
     if(!active||!isFinished())return;
@@ -319,7 +431,8 @@
   ui.typeFilter.addEventListener('change',()=>{activeList=[];loadBrowse();});
   ui.idForm.addEventListener('submit',e=>{e.preventDefault();loadById(ui.idInput.value);});
   window.addEventListener('storage',e=>{if(e.key===STATS_KEY)renderStats();if(active&&e.key===sessionKey(active)){progress=readProgress(active);renderPuzzle();}});
-  setInterval(updateTimer,1000);renderStats();
+  window.addEventListener('resize',resizeGrid);
+  renderKeyboard();setInterval(updateTimer,1000);renderStats();
   async function start(){
     // Load the entire 83-puzzle collection for browsing, then use the single-puzzle API routes.
     try{const puzzles=await request();usingDemo=false;setCatalog(puzzles);showStatus(puzzles.length+' puzzles loaded from api.anrat.link.','success');}
