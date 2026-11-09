@@ -25,6 +25,11 @@
         "children": [
           {
             "type": "file",
+            "name": "GHOSTLINE-v2.html",
+            "path": "FileExplorer/Misc/Fun/GHOSTLINE-v2.html"
+          },
+          {
+            "type": "file",
             "name": "Magic8Ball.html",
             "path": "FileExplorer/Misc/Fun/Magic8Ball.html"
           },
