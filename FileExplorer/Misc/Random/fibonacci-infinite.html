@@ -1,45 +1,19 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Infinite Fibonacci</title>
 <style>
-:root{color-scheme:dark;font-family:ui-monospace,'Cascadia Code',Consolas,monospace}*{box-sizing:border-box}body{margin:0;background:#0c1019;color:#e8e8f5}header{position:sticky;top:0;z-index:2;background:#151a29ed;border-bottom:1px solid #45405e;padding:15px clamp(16px,4vw,48px);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}h1{font-size:clamp(18px,3vw,26px);margin:0;color:#d7a6ff}small{color:#a9a9c2}main{max-width:1200px;margin:auto;padding:24px clamp(14px,4vw,48px)}#numbers{display:grid;gap:8px}.number{display:grid;grid-template-columns:minmax(72px,100px) minmax(0,1fr);gap:12px;padding:12px 16px;background:#161b2b;border:1px solid #33334b;border-radius:9px;align-items:start}.index{color:#c28eff;white-space:nowrap}.value{overflow-wrap:anywhere;line-height:1.65;user-select:text}#sentinel{padding:35px;text-align:center;color:#9c92b6}.hint{margin:0 0 20px;color:#a9a9c2}button{background:#322344;border:1px solid #8651a8;color:#eee0ff;padding:8px 12px;border-radius:7px;cursor:pointer}button:hover{background:#513069}@media(max-width:480px){.number{grid-template-columns:1fr;gap:3px;padding:10px 12px}.index{font-size:12px}}
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0e101a;color:#e9dff5;font-family:'Cascadia Code',Consolas,monospace}header{position:sticky;top:0;background:#171827ed;backdrop-filter:blur(12px);border-bottom:1px solid #54356d;padding:12px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center;z-index:2}h1{font-size:16px;margin:0;color:#dfabff}#count{font-size:12px;color:#b5a5c4}main{padding:22px;max-width:1300px;margin:auto}#numbers{font-size:15px;line-height:1.9;overflow-wrap:anywhere;white-space:normal}#sentinel{height:80px}button{background:#3b254f;color:#f1dcff;border:1px solid #8056a0;padding:7px 10px;border-radius:6px;cursor:pointer}button:hover{background:#54326d}
 </style>
 </head>
-<body>
-<header><div><h1>∞ Fibonacci Sequence</h1><small>0, 1, 1, 2, 3, 5, 8, 13…</small></div><div><small id="count">0 numbers loaded</small> <button id="top" type="button">↑ Top</button></div></header>
-<main><p class="hint">Scroll down to generate more numbers automatically. Values use BigInt for exact integer precision.</p><div id="numbers" aria-label="Fibonacci numbers"></div><div id="sentinel" role="status">Loading more numbers…</div></main>
+<body><header><h1>∞ Fibonacci Sequence</h1><div id="count">0 numbers</div><button id="top">↑ Top</button></header><main><div id="numbers" aria-label="Fibonacci numbers separated by commas"></div><div id="sentinel"></div></main>
 <script>
-(()=>{
-'use strict';
-const list=document.getElementById('numbers'),sentinel=document.getElementById('sentinel'),count=document.getElementById('count');
-let a=0n,b=1n,index=0,busy=false;
-const BATCH=50;
-function appendBatch(){
- if(busy)return;
- busy=true;
- // Let the browser paint between batches.
- requestAnimationFrame(()=>{
-  const fragment=document.createDocumentFragment();
-  for(let i=0;i<BATCH;i++){
-   const item=document.createElement('div');item.className='number';
-   const label=document.createElement('span');label.className='index';label.textContent='F('+index+')';
-   const value=document.createElement('span');value.className='value';value.textContent=a.toString();
-   item.append(label,value);fragment.append(item);
-   [a,b]=[b,a+b];index++;
-  }
-  list.append(fragment);count.textContent=index.toLocaleString()+' numbers loaded';busy=false;
-  // Fill even very tall screens without waiting for a scroll event.
-  if(document.documentElement.scrollHeight<=window.innerHeight+250)appendBatch();
- });
-}
-const observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting))appendBatch()},{rootMargin:'1000px 0px'});
-observer.observe(sentinel);
-appendBatch();
-document.getElementById('top').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
-})();
-</script>
-</body>
-</html>
+const numbers=document.getElementById('numbers'), count=document.getElementById('count'), sentinel=document.getElementById('sentinel');
+let a=1n,b=1n,total=0,busy=false;
+function appendBatch(size=80){if(busy)return;busy=true;let parts=[];for(let i=0;i<size;i++){parts.push(a.toString());[a,b]=[b,a+b];total++}numbers.append(document.createTextNode((total>size?', ':'')+parts.join(', ')));count.textContent=total.toLocaleString()+' numbers';busy=false;}
+function fillViewport(){let rounds=0;while(document.documentElement.scrollHeight<=innerHeight+250&&rounds++<30)appendBatch(80)}
+const observer=new IntersectionObserver(entries=>{if(entries[0].isIntersecting){appendBatch(80);}}, {rootMargin:'700px'});
+appendBatch();fillViewport();observer.observe(sentinel);
+addEventListener('resize',fillViewport);document.getElementById('top').onclick=()=>scrollTo({top:0,behavior:'smooth'});
+</script></body></html>
