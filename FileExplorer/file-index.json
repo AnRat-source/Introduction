@@ -151,33 +151,6 @@
     "children": [
       {
         "type": "directory",
-        "name": "AI",
-        "children": [
-          {
-            "type": "file",
-            "name": "Nano-LLM.html",
-            "path": "FileExplorer/Tools/AI/Nano-LLM.html"
-          }
-        ]
-      },
-      {
-        "type": "directory",
-        "name": "Calculate",
-        "children": [
-          {
-            "type": "file",
-            "name": "OmniConvert.html",
-            "path": "FileExplorer/Tools/Calculate/OmniConvert.html"
-          },
-          {
-            "type": "file",
-            "name": "Surface-Measure.html",
-            "path": "FileExplorer/Tools/Calculate/Surface-Measure.html"
-          }
-        ]
-      },
-      {
-        "type": "directory",
         "name": "Diagrams",
         "children": [
           {
@@ -200,6 +173,27 @@
             "type": "file",
             "name": "ParSci-Notes.href",
             "path": "FileExplorer/Tools/Study/ParSci-Notes.href"
+          }
+        ]
+      },
+      {
+        "type": "directory",
+        "name": "Utilities",
+        "children": [
+          {
+            "type": "file",
+            "name": "Nano-LLM.html",
+            "path": "FileExplorer/Tools/Utilities/Nano-LLM.html"
+          },
+          {
+            "type": "file",
+            "name": "OmniConvert.html",
+            "path": "FileExplorer/Tools/Utilities/OmniConvert.html"
+          },
+          {
+            "type": "file",
+            "name": "Surface-Measure.html",
+            "path": "FileExplorer/Tools/Utilities/Surface-Measure.html"
           }
         ]
       },
