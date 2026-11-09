@@ -121,6 +121,17 @@
     "children": [
       {
         "type": "directory",
+        "name": "Calculate",
+        "children": [
+          {
+            "type": "file",
+            "name": "Surface-Measure.html",
+            "path": "FileExplorer/Tools/Calculate/Surface-Measure.html"
+          }
+        ]
+      },
+      {
+        "type": "directory",
         "name": "Diagrams",
         "children": [
           {
