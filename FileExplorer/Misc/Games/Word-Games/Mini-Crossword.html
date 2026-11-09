@@ -94,6 +94,64 @@
     let pool = null, puzzle = null, values = {}, hints = new Set(), selected = null, cursor = 0, wrong = null;
     let started = 0, stopped = 0, finished = false, mode = 'random', nonce = 0, working = false;
     let stats = safeGet(STORE+'.stats') || { played:0,wins:0,streak:0,best:0,lastWin:'' };
+    const SHARED_KEY = 'anrat.wordgames.stats.v1';
+    const SHARED_ID = 'minicrossword';
+    const emptyShared = () => ({ played:0,wins:0,losses:0,streak:0,bestStreak:0,lastWinDay:null,totalSeconds:0 });
+    const sharedNumber = v => Math.max(0,Number.isFinite(Number(v)) ? Math.floor(Number(v)) : 0);
+    function normalizeShared(raw) {
+      const s=emptyShared();
+      if(raw && typeof raw==='object'){
+        for(const k of ['played','wins','streak','bestStreak','totalSeconds'])s[k]=sharedNumber(raw[k]);
+        s.lastWinDay=/^\d{4}-\d{2}-\d{2}$/.test(raw.lastWinDay||'')?raw.lastWinDay:null;
+      }
+      s.wins=Math.min(s.wins,s.played);s.losses=s.played-s.wins;s.bestStreak=Math.max(s.bestStreak,s.streak);
+      return s;
+    }
+    function dayGap(a,b){
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(b||''))return Infinity;
+      return Math.round((Date.parse(a+'T12:00:00')-Date.parse(b+'T12:00:00'))/86400000);
+    }
+    function readShared(){
+      const value=safeGet(SHARED_KEY);
+      return value && typeof value==='object' && value.games && typeof value.games==='object'
+        ? value : {games:{},overall:emptyShared()};
+    }
+    function notifyShared(){window.dispatchEvent(new CustomEvent('wordgames:stats-changed',{detail:{id:SHARED_ID}}));}
+    function shareResult(won,seconds){
+      const data=readShared(),day=dateKey();
+      data.games[SHARED_ID]=normalizeShared(data.games[SHARED_ID]);
+      data.overall=normalizeShared(data.overall);
+      for(const s of [data.games[SHARED_ID],data.overall]){
+        s.played++;
+        if(won){
+          s.wins++;
+          if(s.lastWinDay!==day){s.streak=dayGap(day,s.lastWinDay)===1?s.streak+1:1;s.lastWinDay=day;}
+          s.bestStreak=Math.max(s.bestStreak,s.streak);
+        }
+        s.losses=s.played-s.wins;s.totalSeconds+=sharedNumber(seconds);
+      }
+      safeSet(SHARED_KEY,data);notifyShared();
+    }
+    function migratePreviousMiniStats(){
+      const marker=STORE+'.shared-migrated.v1';
+      if(safeGet(marker))return;
+      if(sharedNumber(stats.played)>0){
+        const data=readShared(),existing=normalizeShared(data.games[SHARED_ID]);
+        // Earlier standalone versions kept Mini stats separately. Import only once.
+        if(!existing.played){
+          const mini=normalizeShared({played:stats.played,wins:stats.wins,streak:stats.streak,bestStreak:stats.best,lastWinDay:stats.lastWin});
+          const total=normalizeShared(data.overall);
+          data.games[SHARED_ID]=mini;total.played+=mini.played;total.wins+=mini.wins;total.losses=total.played-total.wins;
+          total.bestStreak=Math.max(total.bestStreak,mini.bestStreak);
+          if(mini.lastWinDay && (!total.lastWinDay || mini.lastWinDay>=total.lastWinDay)){
+            if(!total.lastWinDay || mini.lastWinDay>total.lastWinDay)total.lastWinDay=mini.lastWinDay;
+            total.streak=Math.max(total.streak,mini.streak);
+          }
+          data.overall=total;safeSet(SHARED_KEY,data);notifyShared();
+        }
+      }
+      safeSet(marker,true);
+    }
 
     function makeEntries(dictionary, seed) {
       const rand = randomOf(seed);
@@ -174,7 +232,9 @@
         }
         stats.best=Math.max(Number(stats.best)||0,stats.streak);
       }
-      safeSet(STORE+'.stats',stats); renderStats();
+      safeSet(STORE+'.stats',stats);
+      shareResult(won,Math.max(0,((stopped||Date.now())-started)/1000));
+      renderStats();
     }
     function renderStats() {
       const prev=new Date(today+'T12:00:00'); prev.setDate(prev.getDate()-1);
@@ -363,7 +423,7 @@
       else if(event.key==='Enter' && !['BUTTON','A'].includes(event.target.tagName)){event.preventDefault();check();}
       else if(event.key===' ' && event.target===document.body){event.preventDefault();pickCell(selected.cells[cursor]);}
     });
-    buildKeyboard();renderStats();setInterval(timer,1000);
+    migratePreviousMiniStats();buildKeyboard();renderStats();setInterval(timer,1000);
     // Load the last game immediately; synchronize API clues in the background.
     begin('random').then(sync);
   })();

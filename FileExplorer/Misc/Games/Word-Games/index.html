@@ -68,7 +68,7 @@
   <script src="./game-stats.js"></script>
   <script>
     const tools = document.getElementById('tools');
-    const gameIds = { 'Crossword.html': 'crossword', 'Wordle-Unlimited.html': 'wordle', 'Connections.html': 'connections', 'Word-Search.html': 'wordsearch', 'Word-Wheel.html': 'wordwheel', 'layers.html': 'layers', 'Minute-Cryptic.html': 'minutecryptic' };
+    const gameIds = { 'Crossword.html': 'crossword', 'Mini-Crossword.html': 'minicrossword', 'Wordle-Unlimited.html': 'wordle', 'Connections.html': 'connections', 'Word-Search.html': 'wordsearch', 'Word-Wheel.html': 'wordwheel', 'layers.html': 'layers' };
     function refreshTotals() {
       const total = GameStats.read('overall');
       document.getElementById('totalPlayed').textContent = total.played.toLocaleString();
@@ -92,6 +92,11 @@
         name: 'Crossword',
         icon: '🧩',
         description: 'Solve crossword puzzles using clues to fill in intersecting words across and down.'
+      },
+      'FileExplorer/Misc/Games/Word-Games/Mini-Crossword.html': {
+        name: 'Mini Crossword',
+        icon: '▦',
+        description: 'Solve a fresh 5×5 crossword in minutes, or tackle the daily mini.'
       },
       'FileExplorer/Misc/Games/Word-Games/Wordle-Unlimited.html': {
         name: 'Wordle',
@@ -117,11 +122,6 @@
         name: 'Layers',
         icon: '✳',
         description: 'Beat four secret mini-challenges to reveal a final Connections puzzle.'
-      },
-      'FileExplorer/Misc/Games/Word-Games/Minute-Cryptic.html': {
-        name: 'Minute Cryptic',
-        icon: '🕵️',
-        description: 'Crack one cryptic clue at a time. Play the daily puzzle, try random clues, or browse by difficulty and type.'
       }
     };
     function findTools(entries) {
@@ -185,8 +185,10 @@
     function showEntries(entries) {
       tools.replaceChildren();
       const list = entries.length ? [...entries] : [...localEntries];
-      // Include bundled games even if a previously generated file-index.json omits them.
-      for (const entry of localEntries) if (!list.some(item => item.name === entry.name)) list.push(entry);
+      // These games live next to the index even if the site's file index is stale.
+      for (const name of ['Mini-Crossword.html', 'layers.html']) {
+        if (!list.some(entry => entry.name === name)) list.push(localEntries.find(entry => entry.name === name));
+      }
       list.forEach(entry => addEntry(entry, tools));
       if (!tools.children.length) localEntries.forEach(entry => addEntry(entry, tools));
       refreshTotals();
