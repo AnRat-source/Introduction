@@ -29,8 +29,8 @@
   <main class="shell">
     <header class="top"><div><p class="eyebrow">ANRAT / WORD GAMES</p><h1>Mini Crossword<span style="color:var(--pink)">.</span></h1><p class="sub">Five by five. Ten clues. A little brain workout.</p></div><div class="top-actions"><button id="daily" class="btn" type="button">DAILY</button><button id="new" class="btn primary" type="button">NEW ↻</button></div></header>
     <section class="game" aria-label="Mini crossword game">
-      <div class="left"><div class="meta"><span>5 × 5 · MINI</span><span id="modeBadge">LOADING…</span></div><div class="grid-frame"><div id="grid" class="grid" role="group" aria-label="Five by five crossword"></div></div><div class="focus-clue"><strong id="focusNumber">—</strong><span id="focusText">Getting your puzzle ready…</span></div><div class="tools"><button id="previous" class="btn" type="button">← PREV</button><button id="check" class="btn" type="button">CHECK ✓</button><button id="hint" class="btn" type="button">HINT ✦</button><button id="next" class="btn" type="button">NEXT →</button></div><div id="keyboard" class="keyboard" aria-label="On-screen keyboard"></div><p id="notice" role="status" aria-live="polite">Fetching clues…</p></div>
-      <aside class="right"><div class="stats"><div class="stat"><small>WORDS</small><strong id="solved">0 / 10</strong></div><div class="stat"><small>TIME</small><strong id="timer">00:00</strong></div><div class="stat"><small>HINTS</small><strong id="hints">0</strong></div></div><div class="progress"><div id="progress"></div></div><div class="clue-columns"><section class="clue-group"><h2>ACROSS →</h2><div id="across" class="clue-list"></div></section><section class="clue-group"><h2>DOWN ↓</h2><div id="down" class="clue-list"></div></section></div><div class="history" aria-label="Saved results"><div class="record"><small>PLAYED</small><strong id="played">0</strong></div><div class="record"><small>WINS</small><strong id="wins">0</strong></div><div class="record"><small>STREAK</small><strong id="streak">0</strong></div><div class="record"><small>BEST</small><strong id="best">0</strong></div></div><p class="hint-text">Tap a square twice to switch direction, or tap an Across/Down clue. Type on your keyboard or use the on-screen keys. Tab jumps to the next clue. Your puzzle and stats are saved on this device.</p><p class="source" id="source">Connecting to api.anrat.link/crossword…</p></aside>
+      <div class="left"><div class="meta"><span>5 × 5 · MINI</span><span id="modeBadge">LOADING…</span></div><div class="grid-frame"><div id="grid" class="grid" role="group" aria-label="Five by five crossword"></div></div><div class="focus-clue"><strong id="focusNumber">—</strong><span id="focusText">Getting your puzzle ready…</span></div><div class="tools"><button id="previous" class="btn" type="button">← PREV</button><button id="check" class="btn" type="button">CHECK BOARD ✓</button><button id="hint" class="btn" type="button">HINT ✦</button><button id="next" class="btn" type="button">NEXT →</button></div><div id="keyboard" class="keyboard" aria-label="On-screen keyboard"></div><p id="notice" role="status" aria-live="polite">Fetching clues…</p></div>
+      <aside class="right"><div class="stats"><div class="stat"><small>FILLED</small><strong id="solved">0 / 10</strong></div><div class="stat"><small>TIME</small><strong id="timer">00:00</strong></div><div class="stat"><small>HINTS</small><strong id="hints">0</strong></div></div><div class="progress"><div id="progress"></div></div><div class="clue-columns"><section class="clue-group"><h2>ACROSS →</h2><div id="across" class="clue-list"></div></section><section class="clue-group"><h2>DOWN ↓</h2><div id="down" class="clue-list"></div></section></div><div class="history" aria-label="Saved results"><div class="record"><small>PLAYED</small><strong id="played">0</strong></div><div class="record"><small>WINS</small><strong id="wins">0</strong></div><div class="record"><small>STREAK</small><strong id="streak">0</strong></div><div class="record"><small>BEST</small><strong id="best">0</strong></div></div><p class="hint-text">Arrow keys move around the entire board, including between clues. Tap a square twice to switch direction, or press Tab for the next clue. Check Board shows correct and incorrect letters; typing, deleting, or using a hint clears the feedback. Progress and stats save on this device.</p><p class="source" id="source">Connecting to api.anrat.link/crossword…</p></aside>
     </section>
   </main>
   <script>
@@ -91,7 +91,7 @@
     const safeGet = (key) => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
     const safeSet = (key, value) => { try { localStorage.setItem(key,JSON.stringify(value)); } catch { /* Private mode can block storage. */ } };
     const today = dateKey();
-    let pool = null, puzzle = null, values = {}, hints = new Set(), selected = null, cursor = 0, wrong = null;
+    let pool = null, puzzle = null, values = {}, hints = new Set(), selected = null, cursor = 0, checkedBoard = false;
     let started = 0, stopped = 0, finished = false, mode = 'random', nonce = 0, working = false;
     let stats = safeGet(STORE+'.stats') || { played:0,wins:0,streak:0,best:0,lastWin:'' };
     const SHARED_KEY = 'anrat.wordgames.stats.v1';
@@ -214,12 +214,18 @@
       values = Object.fromEntries(Object.entries(saved.values || {}).filter(([k,v]) => /^\d{1,2}$/.test(k) && /^[A-Z]$/.test(v)));
       hints = new Set(Array.isArray(saved.hints)?saved.hints.filter(i=>Number.isInteger(i)&&i>=0&&i<25):[]);
       started = Number(saved.started) || Date.now(); stopped = Number(saved.stopped)||0; finished=!!saved.finished; nonce=Number(saved.nonce)||0;
+      checkedBoard=finished;
       return true;
     }
 
     function announce(text,kind='') { $('notice').textContent=text; $('notice').className=kind; }
     function corrected(word) { return word.cells.every((idx,i)=>values[idx]===word.word[i]); }
     function correctCount() { return puzzle?.filter(corrected).length || 0; }
+    function filledCount() { return puzzle?.filter(w=>w.cells.every(i=>Boolean(values[i]))).length || 0; }
+    function expectedLetter(idx) {
+      const word=puzzle.find(w=>w.cells.includes(idx));
+      return word?.word[word.cells.indexOf(idx)] || '';
+    }
     function record(won) {
       stats.played = (Number(stats.played)||0)+1;
       if (won) {
@@ -246,7 +252,7 @@
     function currentList() { return [...puzzle].sort((a,b)=>a.number-b.number||(a.dir==='across'?-1:1)); }
     function pick(word,index=0) {
       if (!word) return;
-      selected=word;cursor=Math.max(0,Math.min(word.cells.length-1,index)); wrong=null;
+      selected=word;cursor=Math.max(0,Math.min(word.cells.length-1,index));
       $('focusNumber').textContent=word.number+(word.dir==='across'?' ACROSS':' DOWN');
       $('focusText').textContent=word.clue+' ('+word.word.length+')';
       paint();
@@ -263,6 +269,19 @@
       const list=currentList();
       const idx=list.findIndex(w=>w.id===selected?.id);
       pick(list[(idx+delta+list.length)%list.length]);
+    }
+    function moveOnBoard(key) {
+      if(!selected)return;
+      const delta={ArrowRight:1,ArrowLeft:-1,ArrowDown:5,ArrowUp:-5}[key];
+      const direction=key==='ArrowLeft'||key==='ArrowRight'?'across':'down';
+      let idx=selected.cells[cursor];
+      // Wrap at the board edge, skipping black squares rather than stopping at the end of a clue.
+      for(let step=0;step<25;step++){
+        idx=(idx+delta+25)%25;
+        if(SHAPE[Math.floor(idx/5)][idx%5]==='#')continue;
+        const word=puzzle.find(w=>w.dir===direction&&w.cells.includes(idx)) || puzzle.find(w=>w.cells.includes(idx));
+        if(word){pick(word,word.cells.indexOf(idx));return;}
+      }
     }
     function renderBoard() {
       const grid=$('grid');grid.replaceChildren();
@@ -292,16 +311,16 @@
         el.classList.toggle('selected',!!selected?.cells.includes(idx));
         el.classList.toggle('cursor',cursorCell);
         el.classList.toggle('hinted',hints.has(idx));
-        el.classList.toggle('wrong',wrong===selected?.id && selected.cells.includes(idx));
-        el.classList.toggle('verified',puzzle.some(w=>w.cells.includes(idx)&&corrected(w)));
+        el.classList.toggle('wrong',checkedBoard && !!values[idx] && values[idx]!==expectedLetter(idx));
+        el.classList.toggle('verified',checkedBoard && !!values[idx] && values[idx]===expectedLetter(idx));
         el.setAttribute('aria-label',`${starts.get(idx)||''} ${values[idx]||'Blank'}, row ${Math.floor(idx/5)+1}, column ${idx%5+1}`);
       }
       for(const el of document.querySelectorAll('.clue')) {
         const word=puzzle.find(w=>w.id===el.dataset.id);
         el.classList.toggle('active',selected?.id===word.id);
-        el.classList.toggle('done',corrected(word));
+        el.classList.toggle('done',checkedBoard && corrected(word));
       }
-      const n=correctCount();$('solved').textContent=n+' / '+puzzle.length;$('progress').style.width=(n/puzzle.length*100)+'%';
+      const n=filledCount();$('solved').textContent=n+' / '+puzzle.length;$('progress').style.width=(n/puzzle.length*100)+'%';
       $('hints').textContent=hints.size;
       $('daily').classList.toggle('active',mode==='daily');
       $('modeBadge').textContent=mode==='daily'?'DAILY · '+today:'UNLIMITED · RANDOM';
@@ -325,10 +344,10 @@
         if(!hints.has(selected.cells[test])) { pos=test;break; }
       }
       const idx=selected.cells[pos]; if(hints.has(idx))return;
-      values[idx]=ch.toUpperCase();wrong=null;
+      values[idx]=ch.toUpperCase();checkedBoard=false;
       const advance=selected.cells.findIndex((cell,i)=>i>pos&&!hints.has(cell));
       cursor=advance<0?pos:advance;save();paint();
-      if(!finishIfSolved())announce('Keep going — '+correctCount()+' of '+puzzle.length+' words filled correctly.');
+      announce('Letter entered. Press Check Board when you want to check your answers.');
     }
     function erase() {
       if(!selected||finished)return;
@@ -336,21 +355,21 @@
       if(!values[selected.cells[pos]] || hints.has(selected.cells[pos])) pos--;
       while(pos>=0 && hints.has(selected.cells[pos]))pos--;
       if(pos<0)return;
-      delete values[selected.cells[pos]];cursor=pos;wrong=null;save();paint();announce('Letter removed.');
+      delete values[selected.cells[pos]];cursor=pos;checkedBoard=false;save();paint();announce('Letter removed.');
     }
     function check() {
-      if(!selected||finished)return;
-      const complete=selected.cells.every(i=>values[i]);
-      if(!complete){announce('Fill the entire selected word first.','bad');return;}
-      if(corrected(selected)){announce('Correct! '+selected.word+' ✓','good');if(!finishIfSolved())paint();}
-      else{wrong=selected.id;paint();announce('Not quite — take another look.','bad');}
+      if(!puzzle||finished)return;
+      if(!Object.keys(values).length){announce('Enter some letters before checking the board.');return;}
+      checkedBoard=true;paint();
+      if(finishIfSolved())return;
+      announce(correctCount()+' of '+puzzle.length+' words correct. Editing any letter hides this check.',correctCount()?'good':'bad');
     }
     function reveal() {
       if(!selected||finished)return;
       const pos=selected.cells.findIndex((idx,i)=>values[idx]!==selected.word[i]);
       if(pos<0){announce('This word is already right.','good');return;}
-      const idx=selected.cells[pos]; values[idx]=selected.word[pos];hints.add(idx);cursor=pos;wrong=null;save();paint();
-      if(!finishIfSolved())announce('Revealed one letter.','good');
+      const idx=selected.cells[pos]; values[idx]=selected.word[pos];hints.add(idx);cursor=pos;checkedBoard=false;save();paint();
+      announce('Revealed one letter. Check Board when you are ready.','good');
     }
     function buildKeyboard() {
       for(const row of ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM']) {
@@ -361,7 +380,7 @@
       }
     }
     function install(entries,existing=false) {
-      puzzle=entries;selected=null;cursor=0;wrong=null;
+      puzzle=entries;selected=null;cursor=0;checkedBoard=existing&&finished;
       if(!existing){values={};hints=new Set();started=Date.now();stopped=0;finished=false;}
       renderBoard();renderClues();pick(puzzle[0]);paint();timer();save();
       announce(finished?'You finished this mini! Press NEW for another.':mode==='daily'?'Today’s mini is ready. Good luck!':'Tap a clue or cell, then start typing.',finished?'good':'');
@@ -418,8 +437,7 @@
       if(/^[a-z]$/i.test(event.key)){event.preventDefault();letter(event.key);}
       else if(event.key==='Backspace'||event.key==='Delete'){event.preventDefault();erase();}
       else if(event.key==='Tab'){event.preventDefault();cycle(event.shiftKey?-1:1);}
-      else if(event.key==='ArrowLeft'||event.key==='ArrowUp'){event.preventDefault();cursor=Math.max(0,cursor-1);paint();}
-      else if(event.key==='ArrowRight'||event.key==='ArrowDown'){event.preventDefault();cursor=Math.min(selected.cells.length-1,cursor+1);paint();}
+      else if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();moveOnBoard(event.key);}
       else if(event.key==='Enter' && !['BUTTON','A'].includes(event.target.tagName)){event.preventDefault();check();}
       else if(event.key===' ' && event.target===document.body){event.preventDefault();pickCell(selected.cells[cursor]);}
     });
