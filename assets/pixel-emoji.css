@@ -1,0 +1,48 @@
+.pixel-emoji {
+  position: relative;
+  display: inline-block;
+  min-width: 1.12em;
+  height: 1.12em;
+  margin: 0 0.045em;
+  vertical-align: -0.17em;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  user-select: text;
+}
+
+.pixel-emoji > canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+/* Keep the Unicode character in the document for selection and clipboard copy,
+   while the canvas above it provides the cosmetic pixel-art treatment. */
+.pixel-emoji-source {
+  position: relative;
+  z-index: 0;
+  display: inline-block;
+  opacity: 0;
+  color: transparent;
+  font-size: 1em;
+  line-height: 1.12em;
+  white-space: nowrap;
+  user-select: text;
+}
+
+/* Canvas pixels do not receive the browser's native text-selection paint, so
+   mirror it above the cosmetic layer when the source character is selected. */
+.pixel-emoji.pixel-emoji-selected::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  border-radius: 2px;
+  background: rgba(70, 133, 242, 0.52);
+  pointer-events: none;
+}

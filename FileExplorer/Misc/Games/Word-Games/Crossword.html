@@ -25,7 +25,7 @@
     <header><div><p class="eyebrow">Interlocking words · original clues</p><h1>Crossword</h1><p>Solve an endlessly generated crossword with fresh definitions from the word API.</p></div><div class="header-actions"><button class="action" id="newGame" type="button">NEW PUZZLE ↻</button></div></header>
     <section class="game" aria-label="Crossword game">
       <section class="board-panel"><div class="board-head"><span>FILL THE GRID</span><span id="gridInfo">GENERATING…</span></div><div class="grid-wrap"><div class="crossword" id="crossword" role="group" aria-label="Crossword grid"></div></div><div class="current-clue"><span id="clueNumber" class="clue-number">—</span><span id="clueText" class="clue-text">Choose a square or a clue to begin.</span></div><div class="toolbar"><button class="action secondary" id="clearWord" type="button">CLEAR WORD</button><button class="action secondary" id="hint" type="button">HINT ✦</button><button class="action" id="check" type="button">CHECK WORD ✓</button></div><div class="keyboard" id="keyboard" aria-label="On-screen keyboard"></div><p id="message" class="message" role="status" aria-live="polite">Select a clue, then type its answer.</p></section>
-      <aside class="side"><div class="stats"><div class="stat"><span class="stat-label">SOLVED</span><strong id="score">0 / 0</strong></div><div class="stat"><span class="stat-label">HINTS</span><strong id="hints">0</strong></div><div class="stat"><span class="stat-label">TIME</span><strong id="timer">00:00</strong></div></div><div class="progress"><div id="progress"></div></div><div class="clues"><section class="clue-group"><h2>ACROSS →</h2><div id="across" class="clue-list"></div></section><section class="clue-group"><h2>DOWN ↓</h2><div id="down" class="clue-list"></div></section></div><p class="guide"><strong>HOW TO PLAY</strong> — Tap a cell or clue to select an answer. Tap an intersecting cell twice to change direction. Type with your keyboard or the keys on-screen. Check each completed word; use Hint to reveal a letter.</p><p id="source" class="source">Bundled clue dictionary · connecting…</p></aside>
+      <aside class="side"><div class="stats"><div class="stat"><span class="stat-label">SOLVED</span><strong id="score">0 / 0</strong></div><div class="stat"><span class="stat-label">HINTS</span><strong id="hints">0</strong></div><div class="stat"><span class="stat-label">TIME</span><strong id="timer">00:00</strong></div></div><div class="progress"><div id="progress"></div></div><div class="clues"><section class="clue-group"><h2>ACROSS →</h2><div id="across" class="clue-list"></div></section><section class="clue-group"><h2>DOWN ↓</h2><div id="down" class="clue-list"></div></section></div><p class="guide"><strong>HOW TO PLAY</strong> — Tap a cell or clue to select an answer. Tap an intersecting cell twice to change direction, or use arrow keys to move anywhere across the grid and follow crossing words. Type with your keyboard or the keys on-screen. Check each completed word; use Hint to reveal a letter.</p><p id="source" class="source">Bundled clue dictionary · connecting…</p></aside>
     </section>
   </main>
   <script src="./game-stats.js"></script>
@@ -40,15 +40,71 @@
     function createBoard(){return Array.from({length:SIZE},()=>Array.from({length:SIZE},()=>null))}
     function tryPosition(board,word,r,c,dir,requireCross){const dr=dir==='down'?1:0,dc=dir==='across'?1:0,length=word.length;const lastR=r+dr*(length-1),lastC=c+dc*(length-1);if(r<0||c<0||lastR>=SIZE||lastC>=SIZE)return -1;const before=board[r-dr]?.[c-dc],after=board[lastR+dr]?.[lastC+dc];if(before||after)return -1;let crosses=0;for(let i=0;i<length;i++){const y=r+dr*i,x=c+dc*i,existing=board[y][x];if(existing){if(existing.letter!==word[i]||existing[dir])return -1;crosses++}else if(dir==='across'){if(board[y-1]?.[x]||board[y+1]?.[x])return -1}else if(board[y]?.[x-1]||board[y]?.[x+1])return -1}return(requireCross&&!crosses)?-1:crosses}
     function place(board,words,entry,r,c,dir){const p={word:entry.word,clue:entry.clue,r,c,dir,id:dir[0]+'-'+words.length};for(let i=0;i<p.word.length;i++){const y=r+(dir==='down'?i:0),x=c+(dir==='across'?i:0);if(!board[y][x])board[y][x]={letter:p.word[i],across:false,down:false};board[y][x][dir]=p.id}words.push(p)}
-    function buildAttempt(){const board=createBoard(),words=[];const sample=shuffle(dictionary).slice(0,Math.min(dictionary.length,200));const initial=sample.find(e=>e.word.length>=5)||sample[0];if(!initial)return null;place(board,words,initial,7,Math.floor((SIZE-initial.word.length)/2),'across');const sorted=shuffle(sample.filter(e=>e!==initial));for(const entry of sorted){if(words.length>=TARGET)break;if(words.some(p=>p.word===entry.word))continue;let best=null;for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){if(!board[r][c])continue;for(let i=0;i<entry.word.length;i++){if(entry.word[i]!==board[r][c].letter)continue;for(const dir of ['across','down']){if(board[r][c][dir])continue;const rr=r-(dir==='down'?i:0),cc=c-(dir==='across'?i:0),crosses=tryPosition(board,entry.word,rr,cc,dir,true);if(crosses<0)continue;const expand=Math.abs(rr-7)+Math.abs(cc-7);const rating=crosses*25-expand+Math.random()*7;if(!best||rating>best.rating)best={r:rr,c:cc,dir,rating}}}}if(best)place(board,words,entry,best.r,best.c,best.dir)}
+    function buildAttempt(){
+      const board=createBoard(),words=[];
+      const sample=shuffle(dictionary).slice(0,Math.min(dictionary.length,200));
+      const initial=sample.find(e=>e.word.length>=5)||sample[0];
+      if(!initial)return null;
+      place(board,words,initial,7,Math.floor((SIZE-initial.word.length)/2),'across');
+      const pending=sample.filter(e=>e!==initial);
+      // Choose the next word by its best available crossings, not by dictionary order.
+      // Every additional word must intersect the existing crossword at least once.
+      while(words.length<TARGET&&pending.length){
+        const anchors=[];
+        for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(board[r][c])anchors.push({r,c,cell:board[r][c]});
+        let best=null;
+        for(const entry of pending){
+          for(const anchor of anchors){
+            for(let i=0;i<entry.word.length;i++){
+              if(entry.word[i]!==anchor.cell.letter)continue;
+              for(const dir of ['across','down']){
+                if(anchor.cell[dir])continue;
+                const r=anchor.r-(dir==='down'?i:0),c=anchor.c-(dir==='across'?i:0);
+                const crosses=tryPosition(board,entry.word,r,c,dir,true);
+                if(crosses<0)continue;
+                const spread=Math.abs(r-7)+Math.abs(c-7);
+                const rating=crosses*100-spread*2+entry.word.length*.4+Math.random()*6;
+                if(!best||rating>best.rating)best={entry,r,c,dir,rating};
+              }
+            }
+          }
+        }
+        if(!best)break;
+        place(board,words,best.entry,best.r,best.c,best.dir);
+        pending.splice(pending.indexOf(best.entry),1);
+      }
       if(words.length<4)return null;let r0=SIZE,c0=SIZE,r1=0,c1=0;for(const p of words){r0=Math.min(r0,p.r);c0=Math.min(c0,p.c);r1=Math.max(r1,p.r+(p.dir==='down'?p.word.length-1:0));c1=Math.max(c1,p.c+(p.dir==='across'?p.word.length-1:0))}const cropped=board.slice(r0,r1+1).map(row=>row.slice(c0,c1+1));for(const p of words){p.r-=r0;p.c-=c0;p.cells=Array.from({length:p.word.length},(_,i)=>key(p.r+(p.dir==='down'?i:0),p.c+(p.dir==='across'?i:0)))}const order=[...words].sort((a,b)=>a.r-b.r||a.c-b.c);const startNumbers=new Map();let n=0;for(const p of order){const start=key(p.r,p.c);if(!startNumbers.has(start))startNumbers.set(start,++n);p.number=startNumbers.get(start)}return{board:cropped,words,startNumbers,rows:cropped.length,cols:cropped[0].length,score:words.length*100-(cropped.length*cropped[0].length)}}
     function newGame(){let result=null;for(let i=0;i<5;i++){const attempt=buildAttempt();if(attempt&&(!result||attempt.score>result.score))result=attempt;if(result?.words.length>=TARGET&&i>=2)break}if(!result){setMessage('Not enough clues to build a crossword.','bad');return}if(puzzle&&endedAt===null&&(filled.size||hintCount||solved.size)) GameStats.record('crossword',false,(Date.now()-startedAt)/1000);puzzle=result;selected=null;cursor=0;filled=new Map();revealed=new Set();solved=new Set();hintCount=0;wrongId=null;startedAt=Date.now();endedAt=null;ui.info.textContent=puzzle.rows+' × '+puzzle.cols+' · '+puzzle.words.length+' CLUES';renderBoard();renderClues();selectWord(puzzle.words[0],0);setMessage('Select a clue and type its answer.');renderStatus()}
     function renderBoard(){ui.grid.replaceChildren();ui.grid.style.setProperty('--columns',puzzle.cols);ui.grid.style.setProperty('--rows',puzzle.rows);for(let r=0;r<puzzle.rows;r++)for(let c=0;c<puzzle.cols;c++){const cell=puzzle.board[r][c],el=document.createElement(cell?'button':'div');el.className=cell?'cell':'cell empty';if(cell){el.type='button';el.dataset.key=key(r,c);const num=puzzle.startNumbers.get(key(r,c));if(num){const small=document.createElement('span');small.className='number';small.textContent=num;el.append(small)}const letter=document.createElement('span');letter.className='letter';el.append(letter);el.addEventListener('click',()=>selectCell(r,c))}ui.grid.append(el)}resizeBoard();paintBoard()}
     function resizeBoard(){if(!puzzle)return;const viewport=window.visualViewport?.height||window.innerHeight;const mobileWidth=Math.max(110,(viewport-300)*puzzle.cols/puzzle.rows);ui.grid.style.setProperty('--mobile-max-width',mobileWidth+'px');const size=ui.grid.getBoundingClientRect().width/puzzle.cols;ui.grid.style.setProperty('--tile-letter',Math.max(9,Math.floor(size*.57))+'px')}
     function renderClues(){ui.across.replaceChildren();ui.down.replaceChildren();for(const p of [...puzzle.words].sort((a,b)=>a.number-b.number)){const button=document.createElement('button');button.className='clue-button';button.type='button';button.dataset.id=p.id;const num=document.createElement('span');num.textContent=p.number+'. ';button.append(num,document.createTextNode(p.clue+' ('+p.word.length+')'));button.addEventListener('click',()=>selectWord(p,0));(p.dir==='across'?ui.across:ui.down).append(button)}}
     const isLocked=k=>revealed.has(k)||puzzle.words.some(p=>solved.has(p.id)&&p.cells.includes(k));
-    function selectCell(r,c){const k=key(r,c),cell=puzzle.board[r][c];if(!cell)return;const words=puzzle.words.filter(p=>p.cells.includes(k));const current=words.find(p=>p.id===selected?.id);let next;if(current&&words.length>1&&selected?.cells[cursor]===k)next=words.find(p=>p!==current);else next=current||words[0];selectWord(next,next.cells.indexOf(k))}
+    function selectCell(r,c){const k=key(r,c),cell=puzzle.board[r][c];if(!cell)return;const words=puzzle.words.filter(p=>p.cells.includes(k));const current=words.find(p=>p.id===selected?.id);let next;if(current&&words.length>1&&selected?.cells[cursor]===k)next=words.find(p=>p!==current);else next=(current&&!solved.has(current.id)?current:null)||words.find(p=>!solved.has(p.id))||current||words[0];selectWord(next,next.cells.indexOf(k))}
     function selectWord(word,position=0){if(!word)return;selected=word;cursor=Math.max(0,Math.min(word.cells.length-1,position));ui.clueNum.textContent=word.number+(word.dir==='across'?' ACROSS':' DOWN');ui.clue.textContent=word.clue+' ('+word.word.length+')';paintBoard();paintClues()}
+    function moveCursor(arrow){
+      if(!selected||!puzzle)return;
+      const steps={ArrowLeft:[0,-1,'across'],ArrowRight:[0,1,'across'],ArrowUp:[-1,0,'down'],ArrowDown:[1,0,'down']};
+      const [dr,dc,dir]=steps[arrow];
+      const [r,c]=selected.cells[cursor].split(',').map(Number);
+      const here=key(r,c),crossing=puzzle.words.find(p=>p.dir===dir&&p.cells.includes(here));
+      // If the arrow points into an intersecting answer but we're at its end,
+      // switch to that crossing instead of jumping to a distant word.
+      if(crossing&&crossing.id!==selected.id&&!crossing.cells.includes(key(r+dr,c+dc))){
+        selectWord(crossing,crossing.cells.indexOf(here));
+        return;
+      }
+      // Use real grid coordinates. Skip blocked squares, never constrain movement
+      // to the highlighted clue, and prefer the clue in the arrow's direction.
+      for(let row=r+dr,col=c+dc;row>=0&&row<puzzle.rows&&col>=0&&col<puzzle.cols;row+=dr,col+=dc){
+        if(!puzzle.board[row][col])continue;
+        const k=key(row,col),words=puzzle.words.filter(p=>p.cells.includes(k));
+        const next=words.find(p=>p.dir===dir)||words.find(p=>p.id===selected.id)||words.find(p=>!solved.has(p.id))||words[0];
+        if(next)selectWord(next,next.cells.indexOf(k));
+        return;
+      }
+      // At an edge, a crossing square can still switch clue direction.
+      if(crossing&&crossing.id!==selected.id)selectWord(crossing,crossing.cells.indexOf(here));
+    }
     function paintClues(){for(const btn of document.querySelectorAll('.clue-button')){btn.classList.toggle('active',btn.dataset.id===selected?.id);btn.classList.toggle('solved',solved.has(btn.dataset.id))}}
     function paintBoard(){if(!puzzle)return;for(const el of ui.grid.querySelectorAll('.cell:not(.empty)')){const k=el.dataset.key;el.querySelector('.letter').textContent=filled.get(k)||'';el.classList.toggle('in-word',!!selected?.cells.includes(k));el.classList.toggle('cursor',selected?.cells[cursor]===k);el.classList.toggle('correct',isLocked(k));el.classList.toggle('revealed',revealed.has(k));el.classList.toggle('wrong',wrongId===selected?.id&&selected?.cells.includes(k));el.setAttribute('aria-label',(filled.get(k)||'Blank')+' '+k)}}
     function nextEditable(start,step){for(let i=start;i>=0&&i<selected.cells.length;i+=step){if(!isLocked(selected.cells[i]))return i}return -1}
@@ -61,7 +117,7 @@
     function renderStatus(){if(!puzzle)return;ui.score.textContent=solved.size+' / '+puzzle.words.length;ui.hints.textContent=hintCount;ui.progress.style.width=(solved.size/puzzle.words.length*100)+'%';updateTimer()}
     function updateTimer(){if(!startedAt)return;const s=Math.floor(((endedAt??Date.now())-startedAt)/1000);ui.time.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
     function keyboard(){const rows=['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];for(const letters of rows){const row=document.createElement('div');row.className='key-row';for(const ch of letters){const btn=document.createElement('button');btn.type='button';btn.className='key';btn.textContent=ch;btn.setAttribute('aria-label','Enter '+ch);btn.addEventListener('click',()=>typeLetter(ch));row.append(btn)}if(letters==='ZXCVBNM'){const back=document.createElement('button');back.className='key wide';back.type='button';back.textContent='⌫';back.setAttribute('aria-label','Backspace');back.addEventListener('click',backspace);row.append(back)}$('#keyboard').append(row)}}
-    document.addEventListener('keydown',e=>{if(!selected||endedAt!==null||e.altKey||e.ctrlKey||e.metaKey||e.target.matches('input,textarea,select'))return;if(/^[a-z]$/i.test(e.key)){e.preventDefault();typeLetter(e.key)}else if(e.key==='Backspace'||e.key==='Delete'){e.preventDefault();backspace()}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();cursor=Math.max(0,cursor-1);paintBoard()}else if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();cursor=Math.min(selected.cells.length-1,cursor+1);paintBoard()}else if(e.key==='Enter'&&e.target.tagName!=='BUTTON'){e.preventDefault();checkWord()}});
+    document.addEventListener('keydown',e=>{if(!selected||endedAt!==null||e.altKey||e.ctrlKey||e.metaKey||e.target.matches('input,textarea,select'))return;if(/^[a-z]$/i.test(e.key)){e.preventDefault();typeLetter(e.key)}else if(e.key==='Backspace'||e.key==='Delete'){e.preventDefault();backspace()}else if(e.key.startsWith('Arrow')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();moveCursor(e.key)}else if(e.key==='Enter'&&e.target.tagName!=='BUTTON'){e.preventDefault();checkWord()}});
     $('#newGame').addEventListener('click',newGame);$('#hint').addEventListener('click',hint);$('#check').addEventListener('click',()=>checkWord());$('#clearWord').addEventListener('click',clearWord);window.addEventListener('resize',resizeBoard);if('ResizeObserver'in window)new ResizeObserver(resizeBoard).observe(ui.grid);keyboard();setInterval(updateTimer,1000);newGame();
     async function sync(){try{const response=await fetch(API,{headers:{accept:'application/json'}});if(!response.ok)throw Error('HTTP '+response.status);const data=await response.json();const remote=Object.values(data.lengths||{}).flatMap(obj=>Object.entries(obj||{}).map(([word,clue])=>({word:word.toUpperCase(),clue}))).filter(e=>/^[A-Z]{3,7}$/.test(e.word)&&typeof e.clue==='string'&&e.clue.trim());if(remote.length<30)throw Error('Not enough clues');dictionary=remote;ui.source.textContent=remote.length+' live clues synced · api.anrat.link';if(!filled.size&&solved.size===0&&hintCount===0)newGame()}catch(e){ui.source.textContent='Offline clue dictionary active · API unavailable';console.warn('Crossword API:',e)}}
     sync();

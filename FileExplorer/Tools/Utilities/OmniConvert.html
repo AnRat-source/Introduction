@@ -234,7 +234,7 @@
           <div class="setting"><div class="twocol"><div class="input-wrap"><label for="maxWidth">Output width (px)</label><input id="maxWidth" type="number" min="0" max="8192" value="0" placeholder="Original"></div><div class="input-wrap"><label for="maxHeight">Maximum height (px)</label><input id="maxHeight" type="number" min="0" max="8192" value="0" placeholder="Original"></div></div><div class="help">0 = keep original dimensions. Animated outputs default to a max width of 480 px.</div></div>
           <div class="full"><hr class="setting-divider"><div class="sec-title">Animation & video</div></div>
           <div class="setting"><div class="labelrow"><label for="fps">Animation frame rate</label><output id="fpsOut">10 FPS</output></div><input id="fps" class="range" type="range" min="2" max="30" step="1" value="10"></div>
-          <div class="setting"><div class="twocol"><div class="input-wrap"><label for="startTime">Start (seconds)</label><input id="startTime" type="number" min="0" max="99999" step="0.1" value="0"></div><div class="input-wrap"><label for="clipLength">Clip length (seconds)</label><input id="clipLength" type="number" min="0.2" max="120" step="0.5" value="12"></div></div><div class="help">For video conversions. First 12 seconds by default; increase for longer clips.</div></div>
+          <div class="setting"><div class="twocol"><div class="input-wrap"><label for="startTime">Start (seconds)</label><input id="startTime" type="number" min="0" max="99999" step="0.1" value="0"></div><div class="input-wrap"><label for="clipLength">Clip length (seconds)</label><input id="clipLength" type="number" min="0" max="120" step="0.5" value="0"></div></div><div class="help">0 = full video (up to 120 sec). Long clips are sampled across the whole duration, up to 450 frames.</div></div>
           <div class="full"><div class="toggle-row"><label for="dither">Dither GIF color gradients</label><span class="switch"><input id="dither" type="checkbox" checked><span></span></span></div><div class="toggle-row"><label for="loop">Loop animated output forever</label><span class="switch"><input id="loop" type="checkbox" checked><span></span></span></div></div>
           <div class="full"><hr class="setting-divider"><div class="sec-title">Appearance</div></div>
           <div class="setting"><div class="twocol"><div class="input-wrap"><label for="background">Transparency fill / JPG</label><input id="background" type="color" value="#ffffff"></div><div class="input-wrap"><label for="wavDepth">WAV precision</label><select id="wavDepth"><option value="16">16-bit PCM</option><option value="32">32-bit float</option></select></div></div></div>
@@ -277,7 +277,7 @@
   function errMessage(e){return e?.message||String(e)}
   function log(s,cls=''){const div=document.createElement('div');div.textContent=`[${new Date().toLocaleTimeString()}] ${s}`;div.className=cls;$('log').prepend(div);while($('log').children.length>35)$('log').lastChild.remove()}
   function toast(text,bad=false){const d=document.createElement('div');d.className='toast'+(bad?' bad':'');d.textContent=text;$('toasts').append(d);setTimeout(()=>d.remove(),5500)}
-  function readSettings(){return{quality:Number($('quality').value)/100,width:Math.max(0,Math.min(8192,Number($('maxWidth').value)||0)),height:Math.max(0,Math.min(8192,Number($('maxHeight').value)||0)),fps:Number($('fps').value),start:Math.max(0,Number($('startTime').value)||0),clip:Math.max(.2,Math.min(120,Number($('clipLength').value)||12)),dither:$('dither').checked,loop:$('loop').checked,background:$('background').value,wavDepth:Number($('wavDepth').value)}}
+  function readSettings(){const clipValue=Number($('clipLength').value);return{quality:Number($('quality').value)/100,width:Math.max(0,Math.min(8192,Number($('maxWidth').value)||0)),height:Math.max(0,Math.min(8192,Number($('maxHeight').value)||0)),fps:Number($('fps').value),start:Math.max(0,Number($('startTime').value)||0),clip:clipValue>0?Math.max(.2,Math.min(120,clipValue)):120,dither:$('dither').checked,loop:$('loop').checked,background:$('background').value,wavDepth:Number($('wavDepth').value)}}
   function changePreset(p){preset=p;document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset===p));const settings={small:{quality:58,fps:8,width:320},balanced:{quality:82,fps:10,width:0},best:{quality:95,fps:20,width:0}}[p];$('quality').value=settings.quality;$('fps').value=settings.fps;$('maxWidth').value=settings.width;renderRangeValues()}
   function renderRangeValues(){$('qualityOut').textContent=$('quality').value+'%';$('fpsOut').textContent=$('fps').value+' FPS'}
   async function addFiles(files){let added=0;for(const f of files){if(!f||!f.size)continue;const kind=classify(f);if(kind==='unknown'){toast(`${f.name}: unsupported file type`,true);continue}const rec={id:crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`,file:f,kind,format:extension(f).toUpperCase()||f.type.split('/')[1]?.toUpperCase()||'FILE',url:URL.createObjectURL(f),out:null,outURL:null,status:'ready',error:'',meta:null,output:kind==='image'?'webp':kind==='video'?'gif':'wav',progress:0};records.push(rec);added++;inspectMetadata(rec)}if(added){if(!selected||!records.some(r=>r.id===selected))selected=records[0].id;render();log(`Added ${added} file${added===1?'':'s'}`);toast(`${added} file${added===1?'':'s'} ready to convert`)}else if(files.length)log('No compatible files added')}
@@ -286,7 +286,7 @@
   function render(){renderQueue();renderSelected();$('fileCount').textContent=`${records.length} FILE${records.length===1?'':'S'}`;$('convertAll').disabled=!records.length;$('convertAll').textContent=running?'■ Cancel current job':'⇄ Convert entire queue';const outputs=records.filter(r=>r.out);$('downloadAll').disabled=!outputs.length||running;}
   function renderQueue(){const q=$('queue');if(!records.length){q.innerHTML='<div class="qempty"><div class="big">▧</div><b>Nothing in the queue yet</b><span>Add files above to get started</span></div>';return}q.innerHTML=records.map(r=>{const status=r.status==='done'?'<span class="ok">✓ DONE</span>':r.status==='working'?`<span class="busy">${Math.round(r.progress)}%</span>`:r.status==='error'?'<span class="bad">ERROR</span>':'READY';return`<div class="file-row ${r.id===selected?'active':''}" data-id="${r.id}" role="button" tabindex="0"><div class="file-icon ${r.kind}">${escapeHTML(r.format.slice(0,4))}</div><div style="min-width:0"><div class="fname" title="${escapeHTML(r.file.name)}">${escapeHTML(r.file.name)}</div><div class="fsub"><span>${formatBytes(r.file.size)}</span><span>→ ${r.output.toUpperCase()}</span>${r.meta?.duration?`<span>${fmtTime(r.meta.duration)}</span>`:''}</div></div><div class="file-stat">${status}</div><div class="file-actions"><button class="file-action" data-convert="${r.id}" title="Convert only ${escapeHTML(r.file.name)}" ${running?'disabled':''}>⇄ Convert</button><button class="file-action ${r.out?'ready':''}" data-download="${r.id}" title="Download ${escapeHTML(r.file.name)}" ${!r.out||running?'disabled':''}>↓</button></div><button class="remove" title="Remove ${escapeHTML(r.file.name)}" data-remove="${r.id}" aria-label="Remove file">×</button></div>`}).join('')}
   function renderSelected(){const r=getSelected();$('saveSelected').disabled=!r?.out||running;$('previewType').textContent=r?(r.kind+' · '+r.output).toUpperCase():'NO SELECTION';$('selectedName').textContent=r?r.file.name:'Choose a file from the queue';$('selectedHelp').textContent=r?(r.out?`Converted · ${formatBytes(r.file.size)} → ${formatBytes(r.out.size)}. Ready to download.`:`${formatBytes(r.file.size)} · ${r.kind.toUpperCase()} · Only this file will be processed.`):'Select a file on the left, pick an output, then convert just that file.';$('selectedFormatTop').disabled=!r||running;$('selectedFormatTop').innerHTML=r?outputFor[r.kind].map(o=>`<option value="${o}" ${o===r.output?'selected':''}>${escapeHTML(formatNames[o])}</option>`).join(''):'<option value="">Select a file first</option>';$('convertSelected').disabled=!r||running;$('downloadSelected').disabled=!r?.out||running;$('downloadSelected').textContent=r?.out?`↓ Download ${r.output.toUpperCase()} · ${formatBytes(r.out.size)}`:'↓ Download this file';if(!r){$('inspector').innerHTML=['Filename','Format','Size','Resolution','Output'].map(k=>`<div class="info-pair"><span>${k}</span><strong>—</strong></div>`).join('');$('previewStage').innerHTML='<div class="preview-placeholder"><div>◫</div>Select a file to preview it here</div>';$('previewStats').textContent='—';return}const meta=r.meta||{};const values=[['Filename',r.file.name],['Source format',r.format],['File size',formatBytes(r.file.size)],['Dimensions',meta.width&&meta.height?`${meta.width} × ${meta.height}`:'—'],['Duration',meta.duration?fmtTime(meta.duration):meta.animated?`${meta.frames} frames`:'—'],['Target format',formatNames[r.output]],['Output size',r.out?formatBytes(r.out.size):'Not converted'],['Status',r.status==='error'?r.error:r.status]];$('inspector').innerHTML=values.map(([k,v])=>`<div class="info-pair"><span>${escapeHTML(k)}</span><strong title="${escapeHTML(v)}">${escapeHTML(v)}</strong></div>`).join('');$('previewStats').textContent=r.out?`${formatBytes(r.file.size)} → ${formatBytes(r.out.size)}`:r.meta?.width?`${r.meta.width} × ${r.meta.height}`:formatBytes(r.file.size);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));renderPreview(r)}
-  function renderPreview(r){const showOutput=view==='converted'&&!!r.out;const url=showOutput?r.outURL:r.url;const format=showOutput?r.output:extension(r.file);let kind=showOutput?(format==='webm'?'video':format==='wav'?'audio':format==='zip'?'zip':'image'):r.kind;let inner='';if(kind==='image')inner=`<img src="${escapeHTML(url)}" alt="Preview of ${escapeHTML(r.file.name)}">`;else if(kind==='video')inner=`<video controls playsinline preload="metadata" src="${escapeHTML(url)}"></video>`;else if(kind==='audio')inner=`<audio controls preload="metadata" src="${escapeHTML(url)}"></audio>`;else inner='<div class="preview-placeholder"><div>▤</div>ZIP archive ready to download</div>';$('previewStage').innerHTML=`<span class="preview-chip">${showOutput?'OUTPUT · '+r.output.toUpperCase():'SOURCE · '+r.format}</span>`+inner;if(view==='converted'&&!r.out)$('previewStage').innerHTML='<div class="preview-placeholder"><div>◫</div>Convert this file to preview the result</div>'}
+  function renderPreview(r){if(running&&$('previewStage').dataset.liveCapture==='true')return;const showOutput=view==='converted'&&!!r.out;const url=showOutput?r.outURL:r.url;const format=showOutput?r.output:extension(r.file);let kind=showOutput?(format==='webm'?'video':format==='wav'?'audio':format==='zip'?'zip':'image'):r.kind;let inner='';if(kind==='image')inner=`<img src="${escapeHTML(url)}" alt="Preview of ${escapeHTML(r.file.name)}">`;else if(kind==='video')inner=`<video controls playsinline preload="metadata" src="${escapeHTML(url)}"></video>`;else if(kind==='audio')inner=`<audio controls preload="metadata" src="${escapeHTML(url)}"></audio>`;else inner='<div class="preview-placeholder"><div>▤</div>ZIP archive ready to download</div>';$('previewStage').innerHTML=`<span class="preview-chip">${showOutput?'OUTPUT · '+r.output.toUpperCase():'SOURCE · '+r.format}</span>`+inner;if(view==='converted'&&!r.out)$('previewStage').innerHTML='<div class="preview-placeholder"><div>◫</div>Convert this file to preview the result</div>'}
   function selectRec(id){selected=id;view='original';render()}
   function removeRec(id){if(running){toast('Cancel conversion before removing files',true);return}const idx=records.findIndex(r=>r.id===id);if(idx<0)return;const [r]=records.splice(idx,1);URL.revokeObjectURL(r.url);if(r.outURL)URL.revokeObjectURL(r.outURL);if(selected===id){selected=records[0]?.id||null;view='original'}render()}
   async function loadImage(url){const img=new Image();img.src=url;await new Promise((resolve,reject)=>{if(img.complete&&img.naturalWidth)return resolve();img.onload=resolve;img.onerror=()=>reject(new Error('The browser could not decode this image.'))});return img}
@@ -300,35 +300,171 @@
   async function icoFromCanvas(c){const ico=document.createElement('canvas');ico.width=Math.min(256,c.width);ico.height=Math.min(256,c.height);ico.getContext('2d').drawImage(c,0,0,ico.width,ico.height);const png=new Uint8Array(await(await canvasBlob(ico,'image/png',1)).arrayBuffer()),header=new Uint8Array(22),v=new DataView(header.buffer);v.setUint16(2,1,true);v.setUint16(4,1,true);header[6]=ico.width===256?0:ico.width;header[7]=ico.height===256?0:ico.height;v.setUint16(10,1,true);v.setUint16(12,32,true);v.setUint32(14,png.length,true);v.setUint32(18,22,true);return new Blob([header,png],{type:'image/x-icon'})}
   function gifPalette(){const a=new Uint8Array(768);for(let i=0;i<256;i++){a[i*3]=Math.round(((i>>5)&7)*255/7);a[i*3+1]=Math.round(((i>>2)&7)*255/7);a[i*3+2]=Math.round((i&3)*255/3)}return a}
   const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
-  function indexedPixels(image,w,h,dither){const src=image.data,idx=new Uint8Array(w*h);let transparent=false;for(let i=0;i<idx.length;i++){const o=i*4,alpha=src[o+3];if(alpha<128){idx[i]=0;transparent=true;continue}const step=dither?(BAYER[(Math.floor(i/w)%4)*4+(i%w)]-7.5)*2.5:0;const r=Math.max(0,Math.min(255,src[o]+step)),g=Math.max(0,Math.min(255,src[o+1]+step)),b=Math.max(0,Math.min(255,src[o+2]+step));idx[i]=Math.max(1,((r>>5)<<5)|((g>>5)<<2)|(b>>6))}return{pixels:idx,transparent}}
+  function indexedPixels(image,w,h,dither){const src=image.data,idx=new Uint8Array(w*h);let transparent=false;for(let i=0;i<idx.length;i++){const o=i*4,alpha=src[o+3];if(alpha<128){idx[i]=255;transparent=true;continue}const step=dither?(BAYER[(Math.floor(i/w)%4)*4+((i%w)%4)]-7.5)*2.5:0;const r=Math.max(0,Math.min(255,src[o]+step)),g=Math.max(0,Math.min(255,src[o+1]+step)),b=Math.max(0,Math.min(255,src[o+2]+step));idx[i]=((r>>5)<<5)|((g>>5)<<2)|(b>>6)}if(transparent){for(let i=0;i<idx.length;i++)if(src[i*4+3]>=128&&idx[i]===255)idx[i]=254}return{pixels:idx,transparent}}
+  // Build a palette from the actual frame instead of forcing all GIFs into the
+  // same 3-3-2 RGB grid, which destroys detail in dim video/game footage.
+  function adaptiveIndexedPixels(image,w,h,dither,quality){
+    const src=image.data,n=w*h,counts=new Uint32Array(32768),sumR=new Uint32Array(32768),sumG=new Uint32Array(32768),sumB=new Uint32Array(32768);
+    let transparent=false;
+    for(let i=0;i<n;i++){
+      const p=i*4;if(src[p+3]<128){transparent=true;continue}
+      const r=src[p],g=src[p+1],b=src[p+2],key=((r>>3)<<10)|((g>>3)<<5)|(b>>3);
+      counts[key]++;sumR[key]+=r;sumG[key]+=g;sumB[key]+=b;
+    }
+    const colors=[];
+    for(let i=0;i<32768;i++)if(counts[i])colors.push({count:counts[i],r:sumR[i]/counts[i],g:sumG[i]/counts[i],b:sumB[i]/counts[i]});
+    const pixels=new Uint8Array(n),palette=new Uint8Array(768);
+    if(!colors.length){pixels.fill(255);return{pixels,transparent:true,palette}}
+    const maxColors=Math.min(transparent?255:256,Math.max(32,Math.round(48+Math.max(0,Math.min(1,quality))*208)));
+    function makeBox(items){
+      let minR=255,minG=255,minB=255,maxR=0,maxG=0,maxB=0,weight=0;
+      for(const item of items){minR=Math.min(minR,item.r);maxR=Math.max(maxR,item.r);minG=Math.min(minG,item.g);maxG=Math.max(maxG,item.g);minB=Math.min(minB,item.b);maxB=Math.max(maxB,item.b);weight+=item.count}
+      const ranges=[(maxR-minR)*.85,maxG-minG,(maxB-minB)*.7],axis=ranges.indexOf(Math.max(...ranges));
+      return{items,weight,axis,score:items.length>1?Math.max(...ranges)*Math.sqrt(weight):0};
+    }
+    const boxes=[makeBox(colors)];
+    while(boxes.length<maxColors){
+      let best=-1,score=0;
+      for(let i=0;i<boxes.length;i++)if(boxes[i].score>score){best=i;score=boxes[i].score}
+      if(best<0)break;
+      const box=boxes.splice(best,1)[0],axis=['r','g','b'][box.axis];
+      box.items.sort((a,b)=>a[axis]-b[axis]);
+      let running=0,split=1;
+      for(let i=0;i<box.items.length-1;i++){running+=box.items[i].count;if(running>=box.weight/2){split=i+1;break}}
+      boxes.push(makeBox(box.items.slice(0,split)),makeBox(box.items.slice(split)));
+    }
+    for(let i=0;i<boxes.length;i++){
+      let r=0,g=0,b=0;
+      for(const color of boxes[i].items){r+=color.r*color.count;g+=color.g*color.count;b+=color.b*color.count}
+      palette[i*3]=Math.round(r/boxes[i].weight);palette[i*3+1]=Math.round(g/boxes[i].weight);palette[i*3+2]=Math.round(b/boxes[i].weight);
+    }
+    const lookup=new Int16Array(32768).fill(-1);
+    for(let i=0;i<n;i++){
+      const p=i*4;if(src[p+3]<128){pixels[i]=255;continue}
+      const step=dither?(BAYER[(Math.floor(i/w)%4)*4+((i%w)%4)]-7.5)*.85:0;
+      const r=Math.max(0,Math.min(255,src[p]+step)),g=Math.max(0,Math.min(255,src[p+1]+step)),b=Math.max(0,Math.min(255,src[p+2]+step));
+      const key=((r>>3)<<10)|((g>>3)<<5)|(b>>3);
+      let match=lookup[key];
+      if(match<0){
+        match=0;let best=Infinity;
+        for(let j=0;j<boxes.length;j++){
+          const q=j*3,dr=r-palette[q],dg=g-palette[q+1],db=b-palette[q+2],dist=3*dr*dr+4*dg*dg+2*db*db;
+          if(dist<best){best=dist;match=j}
+        }
+        lookup[key]=match;
+      }
+      pixels[i]=match;
+    }
+    return{pixels,transparent,palette};
+  }
   function packLZW(pixels){const chunks=[];let bytes=[],cur=0,bits=0,codeSize=9,nextCode=258,dict=new Map();function writeCode(code){cur|=code<<bits;bits+=codeSize;while(bits>=8){bytes.push(cur&255);cur>>>=8;bits-=8}}function clear(){dict=new Map();codeSize=9;nextCode=258}writeCode(256);if(pixels.length){let prefix=pixels[0];for(let i=1;i<pixels.length;i++){const val=pixels[i],key=prefix*256+val,found=dict.get(key);if(found!==undefined){prefix=found}else{writeCode(prefix);if(nextCode<4096){dict.set(key,nextCode++);if(nextCode>(1<<codeSize)&&codeSize<12)codeSize++}else{writeCode(256);clear()}prefix=val}}writeCode(prefix)}writeCode(257);if(bits>0)bytes.push(cur&255);for(let i=0;i<bytes.length;i+=255){const len=Math.min(255,bytes.length-i);chunks.push(len,...bytes.slice(i,i+len))}chunks.push(0);return Uint8Array.from(chunks)}
-  function gifFromFrames(frames,w,h,loop){const parts=[],head=new Uint8Array(13),v=new DataView(head.buffer);head.set([71,73,70,56,57,97]);v.setUint16(6,w,true);v.setUint16(8,h,true);head[10]=0xf7;head[11]=0;head[12]=0;parts.push(head,gifPalette());if(frames.length>1)parts.push(Uint8Array.from([33,255,11,...Array.from('NETSCAPE2.0',c=>c.charCodeAt(0)),3,1,loop?0:1,0,0]));for(const f of frames){const centiseconds=Math.max(2,Math.min(65535,Math.round(f.duration/10))),gce=Uint8Array.from([33,249,4,f.transparent?9:8,centiseconds&255,(centiseconds>>>8)&255,0,0]),desc=new Uint8Array(10);desc[0]=44;desc[5]=w&255;desc[6]=w>>>8;desc[7]=h&255;desc[8]=h>>>8;parts.push(gce,desc,Uint8Array.of(8),packLZW(f.pixels))}parts.push(Uint8Array.of(59));return new Blob(parts,{type:'image/gif'})}
+  function gifFromFrames(frames,w,h,loop){const parts=[],head=new Uint8Array(13),v=new DataView(head.buffer);head.set([71,73,70,56,57,97]);v.setUint16(6,w,true);v.setUint16(8,h,true);head[10]=0xf7;head[11]=0;head[12]=0;parts.push(head,gifPalette());if(frames.length>1)parts.push(Uint8Array.from([33,255,11,...Array.from('NETSCAPE2.0',c=>c.charCodeAt(0)),3,1,loop?0:1,0,0]));for(const f of frames){const centiseconds=Math.max(2,Math.min(65535,Math.round(f.duration/10))),gce=Uint8Array.from([33,249,4,f.transparent?9:8,centiseconds&255,(centiseconds>>>8)&255,255,0]),desc=new Uint8Array(10);desc[0]=44;desc[5]=w&255;desc[6]=w>>>8;desc[7]=h&255;desc[8]=h>>>8;desc[9]=f.palette?0x87:0;parts.push(gce,desc);if(f.palette)parts.push(f.palette);parts.push(Uint8Array.of(8),packLZW(f.pixels))}parts.push(Uint8Array.of(59));return new Blob(parts,{type:'image/gif'})}
   function u24(number){return Uint8Array.of(number&255,(number>>>8)&255,(number>>>16)&255)}
   function riffChunk(type,data){const n=data.length,pad=n&1,a=new Uint8Array(8+n+pad);for(let i=0;i<4;i++)a[i]=type.charCodeAt(i);new DataView(a.buffer).setUint32(4,n,true);a.set(data,8);return a}
   function concatBytes(parts){const size=parts.reduce((a,b)=>a+b.length,0),out=new Uint8Array(size);let at=0;for(const b of parts){out.set(b,at);at+=b.length}return out}
   function webpImageChunks(bytes){const text=(at,n)=>String.fromCharCode(...bytes.subarray(at,at+n));if(text(0,4)!=='RIFF'||text(8,4)!=='WEBP')throw Error('Invalid WebP frame');const out=[];let alpha=false;for(let p=12;p+8<=bytes.length;){const type=text(p,4),len=new DataView(bytes.buffer,bytes.byteOffset+p+4,4).getUint32(0,true),end=p+8+len+(len&1);if(end>bytes.length)throw Error('Truncated WebP image data');if(type==='ALPH'||type==='VP8 '||type==='VP8L'){out.push(bytes.subarray(p,end));if(type==='ALPH'||type==='VP8L')alpha=true}p=end}if(!out.length)throw Error('Browser produced an incompatible WebP frame');return{bytes:concatBytes(out),alpha}}
   async function webpFromFrames(frames,w,h,loop){if(w>16384||h>16384)throw Error('Animated WebP frames must be 16384 pixels or smaller');const frameChunks=[],framed=[];let hasAlpha=false;for(const f of frames){const info=webpImageChunks(new Uint8Array(await f.blob.arrayBuffer()));hasAlpha||=info.alpha;const header=concatBytes([u24(0),u24(0),u24(w-1),u24(h-1),u24(Math.min(0xffffff,Math.round(f.duration))),Uint8Array.of(2)]);framed.push({data:concatBytes([header,info.bytes])})}const vp8x=concatBytes([Uint8Array.of(hasAlpha?0x12:0x02,0,0,0),u24(w-1),u24(h-1)]);const anim=Uint8Array.of(0,0,0,0,loop?0:1,0);frameChunks.push(riffChunk('VP8X',vp8x),riffChunk('ANIM',anim));for(const f of framed)frameChunks.push(riffChunk('ANMF',f.data));const size=4+frameChunks.reduce((n,c)=>n+c.length,0),header=new Uint8Array(12),v=new DataView(header.buffer);header.set([82,73,70,70]);v.setUint32(4,size,true);header.set([87,69,66,80],8);return new Blob([header,...frameChunks],{type:'image/webp'})}
   async function makeDecoder(rec){const mime=rec.file.type.startsWith('image/')?rec.file.type:(mimeForExt[extension(rec.file)]||'image/gif');const decoder=new ImageDecoder({data:rec.file.stream(),type:mime,preferAnimation:true});await decoder.tracks.ready;if(!decoder.tracks.selectedTrack)throw Error('No decodable image track');return decoder}
-  async function convertStill(rec,s,onProgress){let decoder=null,frame=null;try{let source,width,height;const ext=extension(rec.file);if(['gif','webp','apng'].includes(ext)&&'ImageDecoder'in window){try{decoder=await makeDecoder(rec);const decoded=await decoder.decode({frameIndex:0,completeFramesOnly:true});frame=decoded.image;source=frame;width=frame.displayWidth;height=frame.displayHeight}catch(_){decoder?.close?.();decoder=null;frame=null}}if(!source){const img=await loadImage(rec.url);source=img;width=img.naturalWidth;height=img.naturalHeight}const c=canvasFor(width,height,s,false),ctx=c.getContext('2d',{willReadFrequently:true});drawOn(ctx,source,c,rec.output==='jpg'?s.background:null);onProgress(65);let out;if(targetMime(rec.output))out=await canvasBlob(c,targetMime(rec.output),s.quality);else if(rec.output==='bmp')out=bmpFromCanvas(c,s.background);else if(rec.output==='ico')out=await icoFromCanvas(c);else if(rec.output==='gif'){const imgData=ctx.getImageData(0,0,c.width,c.height),indexed=indexedPixels(imgData,c.width,c.height,s.dither);out=gifFromFrames([{...indexed,duration:100}],c.width,c.height,s.loop)}else throw Error('Unsupported still-image output');onProgress(100);return out}finally{frame?.close?.();decoder?.close?.()}}
-  async function convertAnimatedImage(rec,s,onProgress){if(!('ImageDecoder'in window))return convertStill(rec,s,onProgress);let decoder;try{decoder=await makeDecoder(rec);const count=decoder.tracks.selectedTrack?.frameCount||1;if(count<=1||!['gif','webp'].includes(rec.output))return convertStill(rec,s,onProgress);const first=await decoder.decode({frameIndex:0,completeFramesOnly:true});const c=canvasFor(first.image.displayWidth,first.image.displayHeight,s,true),ctx=c.getContext('2d',{willReadFrequently:true}),frames=[];first.image.close();const used=Math.min(count,MAX_FRAMES);if(count>used)log(`Animation truncated to ${used} frames (safety limit)`);for(let i=0;i<used;i++){if(cancelRequested)throw Error('Conversion cancelled');const decoded=await decoder.decode({frameIndex:i,completeFramesOnly:true}),frame=decoded.image;drawOn(ctx,frame,c,null);const duration=Math.max(20,Math.round((frame.duration||100_000)/1000));if(rec.output==='gif')frames.push({...indexedPixels(ctx.getImageData(0,0,c.width,c.height),c.width,c.height,s.dither),duration});else frames.push({blob:await canvasBlob(c,'image/webp',s.quality),duration});frame.close();onProgress(5+80*(i+1)/used);if(i%6===0)await yieldUI()}return rec.output==='gif'?gifFromFrames(frames,c.width,c.height,s.loop):webpFromFrames(frames,c.width,c.height,s.loop)}finally{decoder?.close?.()}}
+  async function convertStill(rec,s,onProgress){let decoder=null,frame=null;try{let source,width,height;const ext=extension(rec.file);if(['gif','webp','apng'].includes(ext)&&'ImageDecoder'in window){try{decoder=await makeDecoder(rec);const decoded=await decoder.decode({frameIndex:0,completeFramesOnly:true});frame=decoded.image;source=frame;width=frame.displayWidth;height=frame.displayHeight}catch(_){decoder?.close?.();decoder=null;frame=null}}if(!source){const img=await loadImage(rec.url);source=img;width=img.naturalWidth;height=img.naturalHeight}const c=canvasFor(width,height,s,false),ctx=c.getContext('2d',{willReadFrequently:true});drawOn(ctx,source,c,rec.output==='jpg'?s.background:null);onProgress(65);let out;if(targetMime(rec.output))out=await canvasBlob(c,targetMime(rec.output),s.quality);else if(rec.output==='bmp')out=bmpFromCanvas(c,s.background);else if(rec.output==='ico')out=await icoFromCanvas(c);else if(rec.output==='gif'){const imgData=ctx.getImageData(0,0,c.width,c.height),indexed=adaptiveIndexedPixels(imgData,c.width,c.height,s.dither,s.quality);out=gifFromFrames([{...indexed,duration:100}],c.width,c.height,s.loop)}else throw Error('Unsupported still-image output');onProgress(100);return out}finally{frame?.close?.();decoder?.close?.()}}
+  async function convertAnimatedImage(rec,s,onProgress){if(!('ImageDecoder'in window))return convertStill(rec,s,onProgress);let decoder;try{decoder=await makeDecoder(rec);const count=decoder.tracks.selectedTrack?.frameCount||1;if(count<=1||!['gif','webp'].includes(rec.output))return convertStill(rec,s,onProgress);const first=await decoder.decode({frameIndex:0,completeFramesOnly:true});const c=canvasFor(first.image.displayWidth,first.image.displayHeight,s,true),ctx=c.getContext('2d',{willReadFrequently:true}),frames=[];first.image.close();const used=Math.min(count,MAX_FRAMES);if(count>used)log(`Animation truncated to ${used} frames (safety limit)`);for(let i=0;i<used;i++){if(cancelRequested)throw Error('Conversion cancelled');const decoded=await decoder.decode({frameIndex:i,completeFramesOnly:true}),frame=decoded.image;drawOn(ctx,frame,c,null);const duration=Math.max(20,Math.round((frame.duration||100_000)/1000));if(rec.output==='gif')frames.push({...adaptiveIndexedPixels(ctx.getImageData(0,0,c.width,c.height),c.width,c.height,s.dither,s.quality),duration});else frames.push({blob:await canvasBlob(c,'image/webp',s.quality),duration});frame.close();onProgress(5+80*(i+1)/used);if(i%6===0)await yieldUI()}return rec.output==='gif'?gifFromFrames(frames,c.width,c.height,s.loop):webpFromFrames(frames,c.width,c.height,s.loop)}finally{decoder?.close?.()}}
   async function seekVideo(video,time){if(Math.abs(video.currentTime-time)<.0005&&video.readyState>=2)return;await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{cleanup();reject(Error('Video seeking timed out. This codec may not be supported.'))},12000),ok=()=>{cleanup();resolve()},fail=()=>{cleanup();reject(Error('Video frame could not be decoded'))},cleanup=()=>{clearTimeout(timer);video.removeEventListener('seeked',ok);video.removeEventListener('error',fail)};video.addEventListener('seeked',ok);video.addEventListener('error',fail);video.currentTime=time})}
   async function loadVideo(rec){const video=document.createElement('video');video.src=rec.url;video.preload='auto';video.muted=true;video.playsInline=true;await mediaReady(video);if(video.readyState<2)await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Video decoding timed out')),10000);video.addEventListener('loadeddata',()=>{clearTimeout(timer);resolve()},{once:true});video.addEventListener('error',()=>{clearTimeout(timer);reject(Error('Video decoding failed'))},{once:true})});return video}
   function waitForVideoFrame(video){return new Promise(resolve=>{if(typeof video.requestVideoFrameCallback!=='function')return setTimeout(()=>resolve(video.currentTime),80);let finished=false;const id=video.requestVideoFrameCallback((_,meta)=>{if(finished)return;finished=true;clearTimeout(timer);resolve(meta.mediaTime)});const timer=setTimeout(()=>{if(finished)return;finished=true;video.cancelVideoFrameCallback?.(id);resolve(video.currentTime)},1400)})}
+  // Some GPU/video-decoder combinations expose only a narrow vertical strip when
+  // drawing a playing video straight into Canvas. Detect that before encoding.
+  function incompleteVideoFrame(ctx,w,h){
+    if(w<96||h<32)return false;
+    const {data}=ctx.getImageData(0,0,w,h);
+    const base=(Math.floor(h*.51)*w+Math.floor(w*.67))*4;
+    const baseR=data[base],baseG=data[base+1],baseB=data[base+2];
+    let outside=0,blank=0,left=0,nonblankLeft=0;
+    const stepX=Math.max(1,Math.floor(w/110)),stepY=Math.max(1,Math.floor(h/52));
+    for(let y=0;y<h;y+=stepY)for(let x=0;x<w;x+=stepX){
+      const i=(y*w+x)*4,delta=Math.abs(data[i]-baseR)+Math.abs(data[i+1]-baseG)+Math.abs(data[i+2]-baseB);
+      if(x>=w*.12){outside++;if(delta<9)blank++}
+      else{left++;if(delta>25)nonblankLeft++}
+    }
+    return outside>100&&blank/outside>.995&&left>10&&nonblankLeft/left>.075;
+  }
+  function videoPixelCoverage(data,w,h){
+    let active=0,total=0;
+    for(let y=0;y<h;y+=Math.max(1,Math.floor(h/40)))for(let x=0;x<w;x+=Math.max(1,Math.floor(w/70))){
+      const p=(y*w+x)*4;total++;if(data[p]+data[p+1]+data[p+2]>24)active++;
+    }
+    return active/total;
+  }
+  async function copyVideoPixels(video,ctx,canvas,background,cache){
+    if(typeof VideoFrame==='undefined')throw Error('Decoded video pixel access is unavailable');
+    const frame=new VideoFrame(video);
+    try{
+      const w=Math.round(frame.visibleRect.width),h=Math.round(frame.visibleRect.height);
+      if(!w||!h||w*h>36_000_000)throw Error('Invalid decoded video dimensions');
+      const options={format:'RGBA'},raw=new Uint8Array(frame.allocationSize(options));
+      const [layout]=await frame.copyTo(raw,options);
+      if(!cache.native||cache.native.width!==w||cache.native.height!==h){
+        cache.native=document.createElement('canvas');cache.native.width=w;cache.native.height=h;
+        cache.nativeContext=cache.native.getContext('2d',{willReadFrequently:true});
+      }
+      const pixels=new Uint8ClampedArray(w*h*4),stride=layout.stride,offset=layout.offset;
+      for(let y=0;y<h;y++)pixels.set(raw.subarray(offset+y*stride,offset+y*stride+w*4),y*w*4);
+      cache.nativeContext.putImageData(new ImageData(pixels,w,h),0,0);
+      drawOn(ctx,cache.native,canvas,background);
+    }finally{frame.close()}
+  }
+  async function drawVideoSafely(video,ctx,canvas,background,cache){
+    if(cache.cpu){await copyVideoPixels(video,ctx,canvas,background,cache);return}
+    drawOn(ctx,video,canvas,background);
+    const w=canvas.width,h=canvas.height;
+    const incomplete=incompleteVideoFrame(ctx,w,h);
+    if(!cache.checked){
+      cache.checked=true;
+      const direct=ctx.getImageData(0,0,w,h),directCoverage=videoPixelCoverage(direct.data,w,h);
+      try{
+        await copyVideoPixels(video,ctx,canvas,background,cache);
+        const decoded=ctx.getImageData(0,0,w,h),decodedCoverage=videoPixelCoverage(decoded.data,w,h);
+        if(!incompleteVideoFrame(ctx,w,h)&&(decodedCoverage>directCoverage+.22||incomplete)){
+          cache.cpu=true;log('Detected incomplete hardware canvas pixels; using full decoded video frames.');return;
+        }
+        if(incomplete)throw Error('Both video capture paths returned only a narrow strip');
+        // The ordinary Canvas path is faster when it matches the direct pixel copy.
+        drawOn(ctx,video,canvas,background);return;
+      }catch(e){
+        if(incomplete)throw Error(`The browser failed to read the complete video frame (${errMessage(e)}). Try disabling browser hardware acceleration; no broken GIF was saved.`);
+        drawOn(ctx,video,canvas,background);return;
+      }
+    }
+    if(!incomplete)return;
+    log('Video hardware rendering returned an incomplete frame; retrying via decoded pixel readback.');
+    try{await copyVideoPixels(video,ctx,canvas,background,cache)}
+    catch(e){throw Error(`Video frame capture failed (${errMessage(e)}). Try Chrome/Edge with hardware acceleration disabled.`)}
+    if(incompleteVideoFrame(ctx,canvas.width,canvas.height))throw Error('The browser decoded only a thin strip of this video. Try disabling browser hardware acceleration and reloading; no damaged output was saved.');
+    cache.cpu=true;log('Switched to full-frame pixel capture; GIF/WebP image data is now verified.');
+  }
   async function convertVideo(rec,s,onProgress){
     if(rec.output==='webm')return recordWebM(rec,s,onProgress);
     const video=await loadVideo(rec),duration=video.duration;
     if(!Number.isFinite(duration)||duration<=0)throw Error('This video has no readable duration');
     const start=Math.min(Math.max(0,s.start),Math.max(0,duration-.01)),end=Math.min(duration,start+s.clip),timeSpan=Math.max(.01,end-start);
-    const c=canvasFor(video.videoWidth,video.videoHeight,s,true),ctx=c.getContext('2d',{willReadFrequently:true}),still=['png','jpg'].includes(rec.output),total=still?1:Math.min(MAX_FRAMES,Math.max(1,Math.ceil(timeSpan*s.fps))),frames=[],zipFiles=[];
-    if(timeSpan*s.fps>MAX_FRAMES)log(`Frame safety cap: ${MAX_FRAMES} frames`);
+    const c=canvasFor(video.videoWidth,video.videoHeight,s,true),ctx=c.getContext('2d',{willReadFrequently:true}),still=['png','jpg'].includes(rec.output),total=still?1:Math.min(MAX_FRAMES,Math.max(1,Math.ceil(timeSpan*s.fps))),frames=[],zipFiles=[],captureCache={cpu:false};
+    const captureFPS=still?s.fps:Math.min(s.fps,MAX_FRAMES/timeSpan);
+    // Snapshot frames during playback, then run the heavier palette optimization
+    // afterward. This keeps animated output close to the requested capture FPS.
+    const deferGifPalette=rec.output==='gif'&&c.width*c.height*4*total<=192*1024*1024;
+    const stage=$('previewStage');
+    // A normally sized, painted video element keeps the hardware decoder active.
+    // It also gives the user a live visual of the video being converted.
+    stage.closest('.panel')?.classList.remove('minimized','closed');
+    stage.dataset.liveCapture='true';stage.innerHTML='<span class="preview-chip">● LIVE VIDEO CAPTURE</span>';
+    video.style.cssText='display:block;width:100%;max-height:320px;min-height:180px;object-fit:contain;opacity:1;visibility:visible;pointer-events:none;background:#070812';
+    stage.append(video);
+    if(timeSpan*s.fps>MAX_FRAMES)log(`Frame safety cap: sampling the full clip at ${captureFPS.toFixed(2)} FPS (${MAX_FRAMES} frames)`);
     try{
       await seekVideo(video,start);
-      if(still){drawOn(ctx,video,c,rec.output==='jpg'?s.background:null);onProgress(75);const out=await canvasBlob(c,targetMime(rec.output),s.quality);onProgress(100);return out}
+      if(still){await drawVideoSafely(video,ctx,c,rec.output==='jpg'?s.background:null,captureCache);onProgress(75);const out=await canvasBlob(c,targetMime(rec.output),s.quality);onProgress(100);return out}
       // Play the actual frames, instead of rapidly seeking a paused element.
       // On Chromium this ensures Canvas receives fully decoded video pixels.
       if(typeof video.requestVideoFrameCallback==='function'){
-        video.style.cssText='position:fixed!important;right:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:9999';
-        document.body.append(video);video.muted=true;video.playsInline=true;
+        video.muted=true;video.playsInline=true;
         await video.play();
         let nextSample=start,previousTime=null,lastFrame=null,captured=0;
         while(nextSample<end-.001&&captured<total&&!video.ended){
@@ -336,12 +472,12 @@
           const mediaTime=await waitForVideoFrame(video);
           if(mediaTime<nextSample-0.02)continue;
           if(mediaTime>=end)break;
-          drawOn(ctx,video,c,null);
-          const frame=rec.output==='gif'?{...indexedPixels(ctx.getImageData(0,0,c.width,c.height),c.width,c.height,s.dither),duration:1000/s.fps}:rec.output==='webp'?{blob:await canvasBlob(c,'image/webp',s.quality),duration:1000/s.fps}:null;
+          await drawVideoSafely(video,ctx,c,null,captureCache);
+          const frame=rec.output==='gif'?(deferGifPalette?{raw:ctx.getImageData(0,0,c.width,c.height),duration:1000/captureFPS}:{...adaptiveIndexedPixels(ctx.getImageData(0,0,c.width,c.height),c.width,c.height,s.dither,s.quality),duration:1000/captureFPS}):rec.output==='webp'?{blob:await canvasBlob(c,'image/webp',s.quality),duration:1000/captureFPS}:null;
           if(frame)frames.push(frame);else if(rec.output==='zip')zipFiles.push({name:`frame_${String(captured+1).padStart(4,'0')}.png`,blob:await canvasBlob(c,'image/png',1)});
           if(lastFrame&&previousTime!==null)lastFrame.duration=Math.max(20,Math.round((mediaTime-previousTime)*1000));
           lastFrame=frame;previousTime=mediaTime;captured++;
-          nextSample=start+(Math.floor(Math.max(0,mediaTime-start)*s.fps)+1)/s.fps;
+          nextSample=start+(Math.floor(Math.max(0,mediaTime-start)*captureFPS)+1)/captureFPS;
           onProgress(5+85*Math.min(1,(mediaTime-start)/timeSpan));
           if(captured%6===0)await yieldUI();
         }
@@ -351,21 +487,31 @@
         log('Using slower compatibility frame extraction');
         for(let i=0;i<total;i++){
           if(cancelRequested)throw Error('Conversion cancelled');
-          const t=Math.min(duration-.001,start+i/s.fps);await seekVideo(video,Math.max(0,t));await delay(90);
-          drawOn(ctx,video,c,null);
-          if(rec.output==='gif')frames.push({...indexedPixels(ctx.getImageData(0,0,c.width,c.height),c.width,c.height,s.dither),duration:1000/s.fps});
-          else if(rec.output==='webp')frames.push({blob:await canvasBlob(c,'image/webp',s.quality),duration:1000/s.fps});
+          const t=Math.min(duration-.001,start+i/captureFPS);await seekVideo(video,Math.max(0,t));await delay(90);
+          await drawVideoSafely(video,ctx,c,null,captureCache);
+          if(rec.output==='gif')frames.push(deferGifPalette?{raw:ctx.getImageData(0,0,c.width,c.height),duration:1000/captureFPS}:{...adaptiveIndexedPixels(ctx.getImageData(0,0,c.width,c.height),c.width,c.height,s.dither,s.quality),duration:1000/captureFPS});
+          else if(rec.output==='webp')frames.push({blob:await canvasBlob(c,'image/webp',s.quality),duration:1000/captureFPS});
           else if(rec.output==='zip')zipFiles.push({name:`frame_${String(i+1).padStart(4,'0')}.png`,blob:await canvasBlob(c,'image/png',1)});
           onProgress(5+85*(i+1)/total);if(i%4===0)await yieldUI();
         }
       }
       if(!frames.length&&!zipFiles.length)throw Error('No video frames were captured. Try playing the MP4 in your browser first.');
+      if(rec.output==='gif'&&deferGifPalette){
+        log(`Optimizing color palettes for ${frames.length} GIF frames…`);
+        for(let i=0;i<frames.length;i++){
+          if(cancelRequested)throw Error('Conversion cancelled');
+          const frame=frames[i],colors=adaptiveIndexedPixels(frame.raw,c.width,c.height,s.dither,s.quality);
+          delete frame.raw;Object.assign(frame,colors);
+          onProgress(86+9*(i+1)/frames.length);
+          if(i%2===0)await yieldUI();
+        }
+      }
       onProgress(95);
       if(rec.output==='gif')return gifFromFrames(frames,c.width,c.height,s.loop);
       if(rec.output==='webp')return webpFromFrames(frames,c.width,c.height,s.loop);
       if(rec.output==='zip')return zipBlobs(zipFiles);
       throw Error('Unsupported video target format');
-    }finally{video.pause();video.removeAttribute('src');video.load();video.remove()}
+    }finally{video.pause();video.removeAttribute('src');video.load();video.remove();delete stage.dataset.liveCapture}
   }
   async function recordWebM(rec,s,onProgress){if(!('MediaRecorder'in window))throw Error('MediaRecorder is unavailable in this browser');const mime=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));if(!mime)throw Error('WebM recording is not supported by this browser');const video=await loadVideo(rec);if(typeof video.captureStream!=='function')throw Error('This browser cannot capture a local video stream');const start=Math.min(s.start,Math.max(0,video.duration-.1)),end=Math.min(video.duration,start+s.clip);await seekVideo(video,start);video.muted=false;video.volume=0;const stream=video.captureStream();if(!stream.getVideoTracks().length)throw Error('No video track available for recording');const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:Math.round(500_000+6_000_000*s.quality)}),parts=[];recorder.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};let timer,resolveDone,rejectDone;const done=new Promise((a,b)=>{resolveDone=a;rejectDone=b});recorder.onstop=()=>resolveDone(new Blob(parts,{type:'video/webm'}));recorder.onerror=e=>rejectDone(Error(e.error?.message||'Video recording failed'));recorder.start(250);try{await video.play();await new Promise((resolve,reject)=>{timer=setInterval(()=>{const progress=(video.currentTime-start)/(end-start);onProgress(Math.min(95,progress*95));if(cancelRequested||video.currentTime>=end||video.ended){clearInterval(timer);resolve()}},100);video.addEventListener('error',()=>{clearInterval(timer);reject(Error('Playback error'))},{once:true})});}finally{clearInterval(timer);video.pause();if(recorder.state!=='inactive')recorder.stop();stream.getTracks().forEach(t=>t.stop());video.removeAttribute('src');video.load()}return await done}
   async function audioToWav(rec,s,onProgress){const bytes=await rec.file.arrayBuffer();onProgress(15);const ac=new(window.AudioContext||window.webkitAudioContext)();let audio;try{audio=await ac.decodeAudioData(bytes)}finally{await ac.close()}if(cancelRequested)throw Error('Conversion cancelled');onProgress(35);const channels=Math.min(2,audio.numberOfChannels),samples=audio.length,depth=s.wavDepth,bps=depth/8,total=samples*channels*bps,buffer=new ArrayBuffer(44+total),view=new DataView(buffer);function tag(offset,str){for(let i=0;i<str.length;i++)view.setUint8(offset+i,str.charCodeAt(i))}tag(0,'RIFF');view.setUint32(4,36+total,true);tag(8,'WAVE');tag(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,depth===32?3:1,true);view.setUint16(22,channels,true);view.setUint32(24,audio.sampleRate,true);view.setUint32(28,audio.sampleRate*channels*bps,true);view.setUint16(32,channels*bps,true);view.setUint16(34,depth,true);tag(36,'data');view.setUint32(40,total,true);const data=Array.from({length:channels},(_,i)=>audio.getChannelData(i));let off=44;for(let i=0;i<samples;i++){for(let ch=0;ch<channels;ch++){const val=Math.max(-1,Math.min(1,data[ch][i]));if(depth===32)view.setFloat32(off,val,true);else view.setInt16(off,val<0?val*32768:val*32767,true);off+=bps}if(i%100000===0){if(cancelRequested)throw Error('Conversion cancelled');onProgress(35+65*i/samples);await yieldUI()}}onProgress(100);return new Blob([buffer],{type:'audio/wav'})}
@@ -393,7 +539,13 @@
   function saveBlob(blob,name){const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),20000)}
   async function downloadAll(){const done=records.filter(r=>r.out);if(!done.length)return;try{if(done.length===1){saveBlob(done[0].out,makeName(done[0],done[0].output));return}log('Packaging converted files…');$('downloadAll').disabled=true;const used=new Map(),items=done.map(r=>{let name=makeName(r,r.output);const n=used.get(name)||0;used.set(name,n+1);if(n)name=name.replace(/(\.[^.]+)$/,`_${n+1}$1`);return{name,blob:r.out}});const zip=await zipBlobs(items);saveBlob(zip,'OmniConvert-outputs.zip');log(`Downloaded ZIP: ${done.length} files`,'done')}catch(e){toast(`Could not make ZIP: ${errMessage(e)}`,true)}finally{$('downloadAll').disabled=false}}
   function changeOutput(r,newFormat){if(!outputFor[r.kind].includes(newFormat)){toast(`${newFormat.toUpperCase()} is not available for ${r.kind} inputs`,true);return false}if(r.output!==newFormat){r.output=newFormat;r.status='ready';r.progress=0;if(r.outURL)URL.revokeObjectURL(r.outURL);r.outURL=null;r.out=null}return true}
-  function showModal(which){const format=which==='formats';$('modalTitle').textContent=format?'Supported formats & conversion paths':'Local privacy & technical limitations';$('modalContent').innerHTML=format?`<p>OMNICONVERT includes real local conversion engines for common media formats. Supported <em>input decoding</em> still depends on the browser and installed codecs.</p><div class="twocol"><div><h3>Image inputs</h3><ul><li>PNG, JPG/JPEG, WEBP, GIF</li><li>SVG, BMP, AVIF, ICO</li><li>APNG (browser-dependent)</li><li>Other images if your browser can decode them</li></ul><h3>Image outputs</h3><ul><li>PNG, JPG, WebP, GIF</li><li>AVIF (if browser can encode AVIF)</li><li>BMP, ICO (PNG-based icon)</li></ul></div><div><h3>Video inputs</h3><ul><li>MP4, WEBM, MOV, M4V, OGV</li><li>AVI / MKV if browser codec supports playback</li></ul><h3>Video outputs</h3><ul><li>Animated GIF, animated WebP</li><li>PNG/JPG snapshot; zipped PNG frames</li><li>WebM via real-time browser recording</li></ul><h3>Audio inputs</h3><ul><li>MP3, WAV, M4A/AAC, OGG, FLAC (browser support varies)</li><li>Output: PCM WAV (16-bit / float 32-bit)</li></ul></div></div><p><b>Animated GIF ↔ WebP:</b> animation is preserved in Chromium-based browsers that expose the built-in ImageDecoder API. Static conversions (such as GIF → JPG) intentionally use the first frame.</p>`:`<p><b>Your files stay on your device.</b> File contents are read through the browser's local File and Canvas APIs. No files, previews, metadata, or conversion requests are sent to any server. This HTML has no remote scripts, analytics, dependencies or network requests.</p><ul><li>MP4 → GIF, GIF → WebP and PNG → JPG run completely locally. GIFs use a 256-color palette, so gradients may show banding.</li><li>Browsers cannot decode every proprietary codec. If your browser cannot play the input video, it cannot convert it here.</li><li>Animated image encoding is capped at ${MAX_FRAMES} frames to help avoid memory crashes. Animated video defaults to a 480 px width and a 12-second clip; both are adjustable.</li><li>WebM recording happens in real time and must remain in an active tab. Depending on browser support, captured audio may not be included.</li><li>There is no cloud upload limit, but your computer's available RAM and browser memory limit still apply.</li><li>AVIF encoding, animated GIF decoding, animated WebP decoding, and WebM recording may differ across browsers.</li><li>For the widest compatibility, use an up-to-date Chrome or Edge browser.</li></ul>`;$('modalBg').classList.add('open')}
+  function showModal(which){
+    const format=which==='formats';
+    $('modalTitle').textContent=format?'Supported formats & conversion paths':'Local privacy & technical limitations';
+    $('modalContent').innerHTML=format?`<p>OMNICONVERT includes real local conversion engines for common media formats. Supported <em>input decoding</em> still depends on the browser and installed codecs.</p><div class="twocol"><div><h3>Image inputs</h3><ul><li>PNG, JPG/JPEG, WEBP, GIF</li><li>SVG, BMP, AVIF, ICO</li><li>APNG (browser-dependent)</li><li>Other images if your browser can decode them</li></ul><h3>Image outputs</h3><ul><li>PNG, JPG, WebP, GIF</li><li>AVIF (if browser can encode AVIF)</li><li>BMP, ICO (PNG-based icon)</li></ul></div><div><h3>Video inputs</h3><ul><li>MP4, WEBM, MOV, M4V, OGV</li><li>AVI / MKV if browser codec supports playback</li></ul><h3>Video outputs</h3><ul><li>Animated GIF, animated WebP</li><li>PNG/JPG snapshot; zipped PNG frames</li><li>WebM via real-time browser recording</li></ul><h3>Audio inputs</h3><ul><li>MP3, WAV, M4A/AAC, OGG, FLAC (browser support varies)</li><li>Output: PCM WAV (16-bit / float 32-bit)</li></ul></div></div><p><b>Animated GIF ↔ WebP:</b> animation is preserved in Chromium-based browsers that expose the built-in ImageDecoder API. Static conversions (such as GIF → JPG) intentionally use the first frame.</p>`
+    :`<p><b>Your files stay on your device.</b> File contents are processed through the browser's local media and Canvas APIs. No file contents, previews, metadata, or conversion requests are uploaded. The optional decorative wallpaper is loaded from anrat.link when online.</p><ul><li>MP4 → GIF, GIF → WebP and PNG → JPG run completely locally. GIFs use a 256-color palette with adaptive colors, so some color loss is unavoidable.</li><li>Browsers cannot decode every proprietary codec. If your browser cannot play the input video, it cannot convert it here.</li><li>Animated image encoding is capped at ${MAX_FRAMES} frames to help avoid memory crashes. Animated video defaults to a 480 px width and uses the full clip (up to 120 seconds); both are adjustable.</li><li>For long clips, the sample frame rate is reduced to cover the full chosen duration within ${MAX_FRAMES} frames.</li><li>WebM recording happens in real time and must remain in an active tab. Depending on browser support, captured audio may not be included.</li><li>There is no cloud upload limit, but your device's available RAM and browser memory limit still apply.</li><li>AVIF encoding, animated GIF decoding, animated WebP decoding, and WebM recording may differ across browsers.</li><li>For the widest compatibility, use an up-to-date Chrome or Edge browser.</li></ul>`;
+    $('modalBg').classList.add('open');
+  }
   $('drop').addEventListener('click',e=>{if(e.target.closest('#browse'))return;$('files').click()});$('drop').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target===$('drop')){e.preventDefault();$('files').click()}});$('browse').addEventListener('click',e=>{e.stopPropagation();$('files').click()});$('files').addEventListener('change',e=>{addFiles([...e.target.files]);e.target.value=''});$('addMore').addEventListener('click',()=>$('files').click());
   let dragDepth=0;document.addEventListener('dragenter',e=>{if(e.dataTransfer?.types?.includes('Files')){e.preventDefault();dragDepth++;$('drop').classList.add('drag')}});document.addEventListener('dragover',e=>{if(e.dataTransfer?.types?.includes('Files'))e.preventDefault()});document.addEventListener('dragleave',()=>{dragDepth=Math.max(0,dragDepth-1);if(!dragDepth)$('drop').classList.remove('drag')});document.addEventListener('drop',e=>{if(e.dataTransfer?.files?.length){e.preventDefault();addFiles([...e.dataTransfer.files])}dragDepth=0;$('drop').classList.remove('drag')});
   $('queue').addEventListener('click',e=>{const rm=e.target.closest('[data-remove]');if(rm){removeRec(rm.dataset.remove);return}const download=e.target.closest('[data-download]');if(download){const r=records.find(x=>x.id===download.dataset.download);if(r?.out)saveBlob(r.out,makeName(r,r.output));return}const convert=e.target.closest('[data-convert]');if(convert){convertOne(convert.dataset.convert);return}const row=e.target.closest('[data-id]');if(row)selectRec(row.dataset.id)});$('queue').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.file-row')){e.preventDefault();selectRec(e.target.dataset.id)}});

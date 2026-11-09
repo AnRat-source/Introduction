@@ -69,7 +69,17 @@
   <script src="./game-stats.js"></script>
   <script>
     const tools = document.getElementById('tools');
-    const gameIds = { 'Crossword.html': 'crossword', 'Wordle-Unlimited.html': 'wordle', 'Connections.html': 'connections', 'Word-Search.html': 'wordsearch', 'Word-Wheel.html': 'wordwheel', 'layers.html': 'layers' };
+    // This order is also used when file-index.json lists the games differently.
+    const gameIds = {
+      'layers.html': 'layers',
+      'Crossword.html': 'crossword',
+      'Mini-Crossword.html': 'minicrossword',
+      'Minute-Cryptic.html': 'minutecryptic',
+      'Wordle-Unlimited.html': 'wordle',
+      'Connections.html': 'connections',
+      'Word-Search.html': 'wordsearch',
+      'Word-Wheel.html': 'wordwheel'
+    };
     function refreshTotals() {
       const total = GameStats.read('overall');
       document.getElementById('totalPlayed').textContent = total.played.toLocaleString();
@@ -89,10 +99,25 @@
     window.addEventListener('storage', refreshTotals);
     window.addEventListener('wordgames:stats-changed', refreshTotals);
     const toolDetails = {
+      'FileExplorer/Misc/Games/Word-Games/layers.html': {
+        name: 'Layers',
+        icon: '✳',
+        description: 'Beat four secret mini-challenges to reveal a final Connections puzzle.'
+      },
       'FileExplorer/Misc/Games/Word-Games/Crossword.html': {
         name: 'Crossword',
         icon: '🧩',
         description: 'Solve crossword puzzles using clues to fill in intersecting words across and down.'
+      },
+      'FileExplorer/Misc/Games/Word-Games/Mini-Crossword.html': {
+        name: 'Mini Crossword',
+        icon: '▦',
+        description: 'Solve a quick, compact crossword with intersecting clues.'
+      },
+      'FileExplorer/Misc/Games/Word-Games/Minute-Cryptic.html': {
+        name: 'Minute Cryptic',
+        icon: '🗝',
+        description: 'Crack a bite-sized cryptic clue by decoding its hidden wordplay.'
       },
       'FileExplorer/Misc/Games/Word-Games/Wordle-Unlimited.html': {
         name: 'Wordle',
@@ -113,11 +138,6 @@
         name: 'Word Wheel',
         icon: '🔤',
         description: 'Connect letters in a wheel to form words and complete crossword-style puzzles.'
-      },
-      'FileExplorer/Misc/Games/Word-Games/layers.html': {
-        name: 'Layers',
-        icon: '✳',
-        description: 'Beat four secret mini-challenges to reveal a final Connections puzzle.'
       }
     };
     function findTools(entries) {
@@ -157,7 +177,7 @@
       }
       if (!gameIds[entry.name]) return;
       const item = document.createElement('button');
-      const details = toolDetails[entry.path] || {
+      const details = toolDetails[entry.path] || toolDetails[`FileExplorer/Misc/Games/Word-Games/${entry.name}`] || {
         name: entry.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
         icon: '▤', description: 'Open this tool.'
       };
@@ -180,9 +200,9 @@
     const localEntries = Object.keys(gameIds).map(name => ({ type: 'file', name, path: './' + name }));
     function showEntries(entries) {
       tools.replaceChildren();
-      const list = entries.length ? [...entries] : [...localEntries];
-      // Layers is bundled next to this index, even if the site's file index omits it.
-      if (!list.some(entry => entry.name === 'layers.html')) list.push(localEntries.find(entry => entry.name === 'layers.html'));
+      // Prefer paths in the generated index, but always show all games in a stable order.
+      const indexed = new Map(entries.filter(entry => entry.type === 'file' && gameIds[entry.name]).map(entry => [entry.name, entry]));
+      const list = localEntries.map(entry => indexed.get(entry.name) || entry);
       list.forEach(entry => addEntry(entry, tools));
       if (!tools.children.length) localEntries.forEach(entry => addEntry(entry, tools));
       refreshTotals();
