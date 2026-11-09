@@ -60,8 +60,18 @@
               },
               {
                 "type": "file",
+                "name": "connections.json",
+                "path": "FileExplorer/Misc/Games/Word-Games/connections.json"
+              },
+              {
+                "type": "file",
                 "name": "Crossword.html",
                 "path": "FileExplorer/Misc/Games/Word-Games/Crossword.html"
+              },
+              {
+                "type": "file",
+                "name": "crossword.json",
+                "path": "FileExplorer/Misc/Games/Word-Games/crossword.json"
               },
               {
                 "type": "file",
@@ -85,6 +95,11 @@
               },
               {
                 "type": "file",
+                "name": "README.md",
+                "path": "FileExplorer/Misc/Games/Word-Games/README.md"
+              },
+              {
+                "type": "file",
                 "name": "Word-Search.html",
                 "path": "FileExplorer/Misc/Games/Word-Games/Word-Search.html"
               },
@@ -97,6 +112,11 @@
                 "type": "file",
                 "name": "Wordle-Unlimited.html",
                 "path": "FileExplorer/Misc/Games/Word-Games/Wordle-Unlimited.html"
+              },
+              {
+                "type": "file",
+                "name": "words.json",
+                "path": "FileExplorer/Misc/Games/Word-Games/words.json"
               }
             ]
           },
@@ -131,8 +151,24 @@
     "children": [
       {
         "type": "directory",
+        "name": "AI",
+        "children": [
+          {
+            "type": "file",
+            "name": "Nano-LLM.html",
+            "path": "FileExplorer/Tools/AI/Nano-LLM.html"
+          }
+        ]
+      },
+      {
+        "type": "directory",
         "name": "Calculate",
         "children": [
+          {
+            "type": "file",
+            "name": "OmniConvert.html",
+            "path": "FileExplorer/Tools/Calculate/OmniConvert.html"
+          },
           {
             "type": "file",
             "name": "Surface-Measure.html",
@@ -146,8 +182,13 @@
         "children": [
           {
             "type": "file",
-            "name": "Blueprint-Maker.html",
-            "path": "FileExplorer/Tools/Diagrams/Blueprint-Maker.html"
+            "name": "Blueprint-Maker-2D.html",
+            "path": "FileExplorer/Tools/Diagrams/Blueprint-Maker-2D.html"
+          },
+          {
+            "type": "file",
+            "name": "Blueprint-Maker-3D.html",
+            "path": "FileExplorer/Tools/Diagrams/Blueprint-Maker-3D.html"
           }
         ]
       },
