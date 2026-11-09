@@ -69,6 +69,7 @@
   let puzzles=FALLBACK, dictionary=Object.entries(FALLBACK_CLUES).map(([word,clue])=>({word,clue})), wordCatalogue=new Set(), apiOnline=false;
   let roundOffset=Number(sessionStorage.getItem('anrat.layers.offset')||0)||0;
   let puzzle=null,locks={},boardOrder=[],state=null,stateKey='',activeModal=null,miniSession={},toastTimer=null,started=false,soundOn=true,hasInteracted=false;
+  const roundClock=GameStats.createActiveTimer();
   let justUnlockedType=null,justSolvedGroup=null;
 
   const validPuzzle = p => p&&Array.isArray(p.groups)&&p.groups.length===4&&p.groups.every(g=>typeof g.category==='string'&&Array.isArray(g.words)&&g.words.length===4&&g.words.every(w=>typeof w==='string'&&w.trim()))&&new Set(p.groups.flatMap(g=>g.words.map(clean))).size===16;
@@ -132,6 +133,7 @@
     throw Error('No compatible puzzles');
   }
   function beginRound(offset=roundOffset){
+    if(state)save();
     roundOffset=offset;sessionStorage.setItem('anrat.layers.offset',String(offset));
     const round=findRound(offset);puzzle=round.candidate;locks=round.planned;
     const rng=random(hash(dayKey+':'+puzzle.id+':layout:'+offset));
@@ -140,6 +142,9 @@
     const saved=getJSON(stateKey,null);
     if(saved&&(saved.unlocked?.length||saved.solved?.length||saved.selected?.length||saved.endedAt))hasInteracted=true;
     state={unlocked:[],solved:[],selected:[],mistakes:4,startedAt:Date.now(),endedAt:null,won:false,order:boardOrder.map(t=>t.word),...saved};
+    // Legacy unfinished rounds cannot distinguish time away from active play.
+    const legacyMs=state.endedAt?Math.max(0,state.endedAt-state.startedAt):0;
+    roundClock.reset(Number.isFinite(Number(saved?.elapsedMs))?Number(saved.elapsedMs):legacyMs,!state.endedAt);
     state.unlocked=(state.unlocked||[]).filter(t=>TYPES.includes(t));
     state.solved=(state.solved||[]).filter(n=>Number.isInteger(n)&&n>=0&&n<4);
     state.selected=(state.selected||[]).filter(word=>boardOrder.some(t=>t.word===word));
@@ -152,12 +157,12 @@
     $('#boardSubhead').textContent='Four secret groups. Sixteen connected words.';
     render();
   }
-  function save(){if(!state)return;state.order=boardOrder.map(t=>t.word);try{localStorage.setItem(stateKey,JSON.stringify(state))}catch{}}
+  function save(){if(!state)return;state.order=boardOrder.map(t=>t.word);state.elapsedMs=roundClock.elapsed();try{localStorage.setItem(stateKey,JSON.stringify(state))}catch{}}
   function getStats(){return GameStats.read('layers')}
   function completeRound(won){
     if(state.endedAt)return;
-    state.endedAt=Date.now();state.won=won;
-    GameStats.record('layers',won,(state.endedAt-state.startedAt)/1000);
+    state.endedAt=Date.now();state.won=won;roundClock.stop();
+    GameStats.record('layers',won,roundClock.elapsed()/1000);
     save();render();sound(won?'win':'error');
     setTimeout(()=>{if(!activeModal)openEnd()},550);
   }
@@ -199,7 +204,7 @@
     else setMessage(state.solved.length?'Nice! Keep discovering the remaining groups.':'Tap a mystery tile to play a mini-game, or choose four related words.');
     tick();
   }
-  function tick(){if(!state)return;const elapsed=(state.endedAt||Date.now())-state.startedAt;$('#timeValue').textContent=timeFormat(elapsed)}
+  function tick(){if(!state)return;$('#timeValue').textContent=timeFormat(roundClock.elapsed())}
   function updateSelectionUI(){
     // Preserve existing tiles and solved-category nodes while selecting words.
     // Replacing their HTML would restart each reveal animation and flash the board.
@@ -538,18 +543,18 @@
   function openStats(){
     const stats=getStats(),winRate=stats.played?Math.round(100*stats.wins/stats.played):0;
     openModal(frame('YOUR JOURNEY','Your stats','All finished rounds count. Your streak grows when you win on consecutive days.',
-      `<div class="stats-grid"><div><span>PLAYED</span><b>${stats.played}</b></div><div><span>WIN RATE</span><b>${winRate}%</b></div><div><span>STREAK</span><b>${stats.streak}</b></div><div><span>BEST STREAK</span><b>${stats.bestStreak}</b></div><div><span>WINS</span><b>${stats.wins}</b></div><div><span>THIS ROUND</span><b style="font-size:20px">${timeFormat((state?.endedAt||Date.now())-(state?.startedAt||Date.now()))}</b></div></div><div class="mini-controls"><button type="button" class="game-button" data-action="share">Copy today's result</button><button type="button" class="game-button primary" data-action="close">Back to puzzle ↗</button></div>`),'stats');
+      `<div class="stats-grid"><div><span>PLAYED</span><b>${stats.played}</b></div><div><span>WIN RATE</span><b>${winRate}%</b></div><div><span>STREAK</span><b>${stats.streak}</b></div><div><span>BEST STREAK</span><b>${stats.bestStreak}</b></div><div><span>WINS</span><b>${stats.wins}</b></div><div><span>THIS ROUND</span><b style="font-size:20px">${timeFormat(roundClock.elapsed())}</b></div></div><div class="mini-controls"><button type="button" class="game-button" data-action="share">Copy today's result</button><button type="button" class="game-button primary" data-action="close">Back to puzzle ↗</button></div>`),'stats');
   }
   function openEnd(){
     if(!state?.endedAt)return;
-    const won=state.won,elapsed=timeFormat(state.endedAt-state.startedAt);
+    const won=state.won,elapsed=timeFormat(roundClock.elapsed());
     const text=won?'Every layer, connected.':'The mystery is revealed.';
     openModal(frame('ROUND COMPLETE',won?'Brilliantly done.':'Almost there.','',
       `<div class="end-banner"><div class="end-symbol">${won?'✦':'◈'}</div><h2>${text}</h2><p>${won?'You found all four hidden connections.':'No more mistakes remain, but every puzzle is another chance to learn.'}</p></div><div class="stats-grid"><div><span>WORDS REVEALED</span><b>${state.unlocked.length}/4</b></div><div><span>GROUPS FOUND</span><b>${won?'4':state.correctGroups||0}</b></div><div><span>TIME</span><b style="font-size:23px">${elapsed}</b></div></div><div class="mini-controls"><button type="button" class="game-button" data-action="share">Share result</button><button type="button" class="game-button" data-action="close">View board</button><button type="button" class="game-button primary" data-action="new">Another puzzle ↗</button></div>`),'end');
   }
   async function share(){
     if(!state)return;
-    const lines=[`AnRat Layers · ${dayKey}`,`${state.won?4:state.endedAt?state.correctGroups||0:state.solved.length}/4 groups · ${state.unlocked.length}/4 layers`,`${state.won?'✦ Solved!':state.endedAt?'◇ Better luck next time':'◈ In progress'} · ${timeFormat((state.endedAt||Date.now())-state.startedAt)}`,'🟪🟦🟩🟨',new URL('./',location.href).href];
+    const lines=[`AnRat Layers · ${dayKey}`,`${state.won?4:state.endedAt?state.correctGroups||0:state.solved.length}/4 groups · ${state.unlocked.length}/4 layers`,`${state.won?'✦ Solved!':state.endedAt?'◇ Better luck next time':'◈ In progress'} · ${timeFormat(roundClock.elapsed())}`,'🟪🟦🟩🟨',new URL('./',location.href).href];
     const value=lines.join('\n');
     try{await navigator.clipboard.writeText(value);toast('Result copied! Share it with a friend.')}catch{toast('Clipboard unavailable on this device.')}
   }
@@ -596,7 +601,9 @@
     if(activeModal==='anagram'&&!event.ctrlKey&&!event.metaKey&&!event.altKey){const letter=event.key.toUpperCase();if(/^[A-Z]$/.test(letter)){const s=miniSession.anagram,index=s.order.findIndex((item,i)=>item.letter===letter&&!s.picked.includes(i));if(index>=0)anagramPick(index)}if(letter==='BACKSPACE')anagramAction('anagram-back');if(letter==='ENTER')anagramAction('anagram-check');return}
     if(!activeModal&&event.key==='Enter'&&state?.selected.length===4){event.preventDefault();submitGroup()}
   });
-  setInterval(tick,1000);
+  document.addEventListener('visibilitychange',()=>{save();tick();});
+  window.addEventListener('pagehide',save);
+  let persistTick=0;setInterval(()=>{tick();if(state&&!state.endedAt&&++persistTick%5===0)save();},1000);
   beginRound(roundOffset);
   loadAPIs().catch(error=>{console.error('Initialization failed',error);puzzles=FALLBACK;$('#apiStatus').textContent='OFFLINE PACK READY'});
 })();

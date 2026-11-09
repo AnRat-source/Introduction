@@ -86,6 +86,39 @@
     persist(data);
     window.dispatchEvent(new CustomEvent('wordgames:stats-changed', { detail: { id } }));
   }
+  // Measure only foreground time. Background tabs, closed pages and BFCache
+  // restores never contribute to a round's elapsed time.
+  function createActiveTimer(initialMs = 0, initiallyRunning = true) {
+    let accumulated = Math.max(0, Number(initialMs) || 0);
+    let running = Boolean(initiallyRunning);
+    let mark = running && !document.hidden ? performance.now() : null;
+    const pause = () => {
+      if (mark !== null) accumulated += Math.max(0, performance.now() - mark);
+      mark = null;
+    };
+    const resume = () => {
+      if (running && !document.hidden && mark === null) mark = performance.now();
+    };
+    const onVisibility = () => document.hidden ? pause() : resume();
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', pause);
+    window.addEventListener('pageshow', resume);
+    return {
+      elapsed: () => accumulated + (mark === null ? 0 : Math.max(0, performance.now() - mark)),
+      reset(ms = 0, play = true) {
+        accumulated = Math.max(0, Number(ms) || 0);
+        running = Boolean(play);
+        mark = running && !document.hidden ? performance.now() : null;
+      },
+      stop() { pause(); running = false; },
+      destroy() {
+        pause(); running = false;
+        document.removeEventListener('visibilitychange', onVisibility);
+        window.removeEventListener('pagehide', pause);
+        window.removeEventListener('pageshow', resume);
+      }
+    };
+  }
   function mount(id, anchor) {
     if (!Object.hasOwn(GAMES, id)) return;
     const insert = () => {
@@ -125,5 +158,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', insert, { once: true });
     else insert();
   }
-  window.GameStats = Object.freeze({ GAMES, read, record, mount });
+  window.GameStats = Object.freeze({ GAMES, read, record, mount, createActiveTimer });
 })();

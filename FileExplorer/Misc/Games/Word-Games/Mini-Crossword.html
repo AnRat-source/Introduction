@@ -75,6 +75,19 @@
     const SHAPE = ['#...#','.....','.....','.....','#...#'];
     const STORE = 'anrat.wordgames.mini.v1';
     const $ = id => document.getElementById(id);
+    function createActiveTimer() {
+      let total=0, running=false, mark=null;
+      const pause=()=>{if(mark!==null)total+=Math.max(0,performance.now()-mark);mark=null;};
+      const resume=()=>{if(running&&!document.hidden&&mark===null)mark=performance.now();};
+      document.addEventListener('visibilitychange',()=>document.hidden?pause():resume());
+      window.addEventListener('pagehide',pause);
+      window.addEventListener('pageshow',resume);
+      return {
+        elapsed:()=>total+(mark===null?0:Math.max(0,performance.now()-mark)),
+        reset(ms=0,play=true){total=Math.max(0,Number(ms)||0);running=play;mark=running&&!document.hidden?performance.now():null;},
+        stop(){pause();running=false;}
+      };
+    }
     const common = new Set((
       'ABOUT ABOVE ACTOR ADAPT ADMIT ADULT AFTER AGAIN AGENT AGREE AHEAD ALARM ALBUM ALERT ALIKE ALIVE ALLOW ALONE ALONG AMONG ANGER ANGLE ANGRY APART APPLE APPLY APRIL ARGUE ARISE ARRAY ASIDE ASSET AUDIO AVOID AWARE AWFUL ' +
       'BASIC BEACH BEGIN BEING BELOW BENCH BIRTH BLACK BLADE BLAME BLANK BLAST BLEND BLESS BLIND BLOCK BLOOD BLOOM BOARD BONUS BOOST BOUND BRAIN BRAND BRAVE BREAD BREAK BRICK BRIDE BRIEF BRING BROAD BROKE BROWN BRUSH BUILD BUILT BUNCH BURST ' +
@@ -128,6 +141,7 @@
     const today = dateKey();
     let pool = null, puzzle = null, values = {}, hints = new Set(), selected = null, cursor = 0, checkedBoard = false;
     let started = 0, stopped = 0, finished = false, mode = 'random', nonce = 0, working = false;
+    const roundClock=createActiveTimer();
     let stats = safeGet(STORE+'.stats') || { played:0,wins:0,streak:0,best:0,lastWin:'' };
     const SHARED_KEY = 'anrat.wordgames.stats.v1';
     const SHARED_ID = 'minicrossword';
@@ -232,7 +246,7 @@
       return best?.entries || null;
     }
     function fallbackPuzzle() { return slots.map(s => ({...s,word:fallback[s.id][0],clue:fallback[s.id][1]})); }
-    function serialize() { return { words:puzzle.map(w=>[w.word,w.clue]), values, hints:[...hints],started,stopped,finished,nonce }; }
+    function serialize() { return { words:puzzle.map(w=>[w.word,w.clue]), values, hints:[...hints],started,stopped,finished,nonce,elapsedMs:roundClock.elapsed() }; }
     const stateKey = () => STORE+'.'+(mode==='daily'?'daily.'+today:'random');
     function save() { if(puzzle) safeSet(stateKey(),serialize()); }
     function restore(saved) {
@@ -249,6 +263,9 @@
       values = Object.fromEntries(Object.entries(saved.values || {}).filter(([k,v]) => /^\d{1,2}$/.test(k) && /^[A-Z]$/.test(v)));
       hints = new Set(Array.isArray(saved.hints)?saved.hints.filter(i=>Number.isInteger(i)&&i>=0&&i<25):[]);
       started = Number(saved.started) || Date.now(); stopped = Number(saved.stopped)||0; finished=!!saved.finished; nonce=Number(saved.nonce)||0;
+      // Old unfinished saves have no reliable foreground-time total; start at zero.
+      const legacyFinishedMs=finished?Math.max(0,stopped-started):0;
+      roundClock.reset(Number.isFinite(Number(saved.elapsedMs))?Number(saved.elapsedMs):legacyFinishedMs,!finished);
       checkedBoard=finished;
       return true;
     }
@@ -274,7 +291,7 @@
         stats.best=Math.max(Number(stats.best)||0,stats.streak);
       }
       safeSet(STORE+'.stats',stats);
-      shareResult(won,Math.max(0,((stopped||Date.now())-started)/1000));
+      shareResult(won,roundClock.elapsed()/1000);
       renderStats();
     }
     function renderStats() {
@@ -363,12 +380,12 @@
     }
     function timer() {
       if(!started)return;
-      const s=Math.max(0,Math.floor(((stopped||Date.now())-started)/1000));
+      const s=Math.floor(roundClock.elapsed()/1000);
       $('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
     }
     function finishIfSolved() {
       if(finished||correctCount()!==puzzle.length)return false;
-      finished=true;stopped=Date.now();record(true);save();paint();timer();
+      finished=true;stopped=Date.now();roundClock.stop();record(true);save();paint();timer();
       announce('Perfect grid! Mini complete in '+$('timer').textContent+' ✨','good');return true;
     }
     function letter(ch) {
@@ -416,7 +433,7 @@
     }
     function install(entries,existing=false) {
       puzzle=entries;selected=null;cursor=0;checkedBoard=existing&&finished;
-      if(!existing){values={};hints=new Set();started=Date.now();stopped=0;finished=false;}
+      if(!existing){values={};hints=new Set();started=Date.now();stopped=0;finished=false;roundClock.reset();}
       renderBoard();renderClues();pick(puzzle[0]);paint();timer();save();
       announce(finished?'You finished this mini! Press NEW for another.':mode==='daily'?'Today’s mini is ready. Good luck!':'Tap a clue or cell, then start typing.',finished?'good':'');
     }
@@ -424,6 +441,7 @@
       if(working)return;
       const changing=nextMode!==mode;
       if(!changing && force && mode==='daily' && puzzle){announce('One daily mini per day! Come back tomorrow.');return;}
+      if(puzzle)save();
       if(!changing && force && puzzle && !finished && Object.keys(values).length)record(false);
       mode=nextMode;
       if(!force){if(restore(safeGet(stateKey()))){install(puzzle,true);return;}}
@@ -476,7 +494,9 @@
       else if(event.key==='Enter' && !['BUTTON','A'].includes(event.target.tagName)){event.preventDefault();check();}
       else if(event.key===' ' && event.target===document.body){event.preventDefault();pickCell(selected.cells[cursor]);}
     });
-    migratePreviousMiniStats();buildKeyboard();renderStats();setInterval(timer,1000);
+    document.addEventListener('visibilitychange',()=>{if(puzzle){save();timer();}});
+    window.addEventListener('pagehide',()=>{if(puzzle)save();});
+    migratePreviousMiniStats();buildKeyboard();renderStats();let persistTick=0;setInterval(()=>{timer();if(puzzle&&!finished&&++persistTick%5===0)save();},1000);
     // Load the last game immediately; synchronize API clues in the background.
     begin('random').then(sync);
   })();

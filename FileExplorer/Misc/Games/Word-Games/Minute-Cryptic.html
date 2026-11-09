@@ -119,6 +119,19 @@
   const STATS_KEY = 'anrat.wordgames.stats.v1';
   const SESSION_PREFIX = 'anrat.minutecryptic.puzzle.v1.';
   const $ = id => document.getElementById(id);
+  function createActiveTimer() {
+    let total=0, running=false, mark=null;
+    const pause=()=>{if(mark!==null)total+=Math.max(0,performance.now()-mark);mark=null;};
+    const resume=()=>{if(running&&!document.hidden&&mark===null)mark=performance.now();};
+    document.addEventListener('visibilitychange',()=>document.hidden?pause():resume());
+    window.addEventListener('pagehide',pause);
+    window.addEventListener('pageshow',resume);
+    return {
+      elapsed:()=>total+(mark===null?0:Math.max(0,performance.now()-mark)),
+      reset(ms=0,play=true){total=Math.max(0,Number(ms)||0);running=play;mark=running&&!document.hidden?performance.now():null;},
+      stop(){pause();running=false;}
+    };
+  }
   const ui = Object.fromEntries(['status','dailyBtn','randomBtn','browseBtn','puzzleNumber','modeLabel','difficultyBadge','typeBadge','clue','enumeration','answerForm','answerGrid','keyboard','checkBtn','feedback','hintBtn','skipBtn','shareBtn','hintBox','hints','reveal','resultTitle','solution','explanation','timer','timeNote','playedStat','winsStat','streakStat','difficultyFilter','typeFilter','idForm','idInput','listCount','sourceTag','puzzleList'].map(id => [id, $(id)]));
   const DEMOS = [
     {id:'demo-1',clue:'Silent, rearranged, means to pay attention (6)',answer:'LISTEN',difficulty:1,type:'anagram',explanation:'LISTEN is an anagram of SILENT. “Rearranged” is the anagram indicator.'},
@@ -129,6 +142,7 @@
     {id:'demo-6',clue:'Insect concealed in elephantine prose (3)',answer:'ANT',difficulty:1,type:'hidden',explanation:'elephANTine conceals ANT.'}
   ];
   let catalog = [], usingDemo = false, active = null, progress = null, mode = 'daily', requestToken = 0, feedbackText = '', feedbackKind = '';
+  const roundClock=createActiveTimer();
   let activeList = [];
   const compact = text => String(text ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/gi, '').toUpperCase();
   const asText = x => x == null ? '' : (typeof x === 'object' ? (x.text ?? x.word ?? x.value ?? '') : String(x));
@@ -217,9 +231,15 @@
   function sessionKey(puzzle) {return SESSION_PREFIX + puzzle.id;}
   function readProgress(puzzle) {
     const saved=readJSON(sessionKey(puzzle),null);
-    return saved && saved.answerKey===compact(puzzle.answer) ? saved : {answerKey:compact(puzzle.answer),startedAt:Date.now(),endedAt:null,status:'playing',guesses:[],revealed:0};
+    return saved && saved.answerKey===compact(puzzle.answer) ? saved : {answerKey:compact(puzzle.answer),startedAt:Date.now(),endedAt:null,elapsedMs:0,status:'playing',guesses:[],revealed:0};
   }
-  function saveProgress(){if(active&&progress)storeJSON(sessionKey(active),progress);}
+  function saveProgress(){if(active&&progress){progress.elapsedMs=roundClock.elapsed();storeJSON(sessionKey(active),progress);}}
+  function restoreClock(){
+    if(!progress)return;
+    const finished=progress.status!=='playing';
+    const legacyMs=finished?Math.max(0,(Number(progress.endedAt)||0)-(Number(progress.startedAt)||0)):0;
+    roundClock.reset(Number.isFinite(Number(progress.elapsedMs))?Number(progress.elapsedMs):legacyMs,!finished);
+  }
   const isFinished = () => !!progress && progress.status !== 'playing';
   let focusedCellIndex = 0;
   const letterInputs = () => [...ui.answerGrid.querySelectorAll('.letter-cell')];
@@ -328,7 +348,7 @@
     }
   }
   function formatTime(ms){const seconds=Math.max(0,Math.floor(ms/1000));return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');}
-  function elapsed(){return !progress ? 0 : (progress.endedAt||Date.now())-progress.startedAt;}
+  function elapsed(){return !progress ? 0 : roundClock.elapsed();}
   function updateTimer(){ui.timer.textContent=formatTime(elapsed());if(!progress)return;ui.timeNote.textContent=isFinished()?(progress.status==='won' ? (elapsed()<60000?'Solved in under one minute ✦':'Solved! Great work.') : 'The answer has been revealed.'):'One minute is the goal, not the limit.';}
   function showStatus(text,kind=''){ui.status.className='status '+kind;ui.status.textContent=text;}
   function setFeedback(text,kind=''){feedbackText=text;feedbackKind=kind;ui.feedback.className='feedback '+kind;ui.feedback.textContent=text;}
@@ -375,7 +395,7 @@
   }
   function setActive(puzzle,nextMode){
     if(!puzzle)return;
-    active=puzzle;mode=nextMode;progress=readProgress(puzzle);saveProgress();
+    saveProgress();active=puzzle;mode=nextMode;progress=readProgress(puzzle);restoreClock();saveProgress();
     for(const [key,btn] of [['daily',ui.dailyBtn],['random',ui.randomBtn],['browse',ui.browseBtn]])btn.classList.toggle('active',mode===key);
     renderPuzzle();
   }
@@ -383,8 +403,8 @@
     if(!active||isFinished())return;
     // Recheck persisted completion, so reopening a completed puzzle never awards another win.
     const previous=readJSON(sessionKey(active),null);
-    if(previous && previous.status && previous.status!=='playing'){progress=previous;renderPuzzle();return;}
-    progress.status=won?'won':'lost';progress.endedAt=Date.now();saveProgress();
+    if(previous && previous.status && previous.status!=='playing'){progress=previous;restoreClock();renderPuzzle();return;}
+    progress.status=won?'won':'lost';progress.endedAt=Date.now();roundClock.stop();saveProgress();
     recordResult(won,elapsed()/1000);renderPuzzle();
   }
   function pickDaily(list){
@@ -468,9 +488,11 @@
   ui.difficultyFilter.addEventListener('change',()=>{activeList=[];loadBrowse();});
   ui.typeFilter.addEventListener('change',()=>{activeList=[];loadBrowse();});
   ui.idForm.addEventListener('submit',e=>{e.preventDefault();loadById(ui.idInput.value);});
-  window.addEventListener('storage',e=>{if(e.key===STATS_KEY)renderStats();if(active&&e.key===sessionKey(active)){progress=readProgress(active);renderPuzzle();}});
+  window.addEventListener('storage',e=>{if(e.key===STATS_KEY)renderStats();if(active&&e.key===sessionKey(active)){progress=readProgress(active);restoreClock();renderPuzzle();}});
   window.addEventListener('resize',resizeGrid);
-  renderKeyboard();setInterval(updateTimer,1000);renderStats();
+  document.addEventListener('visibilitychange',()=>{if(progress){saveProgress();updateTimer();}});
+  window.addEventListener('pagehide',saveProgress);
+  renderKeyboard();let persistTick=0;setInterval(()=>{updateTimer();if(progress&&!isFinished()&&++persistTick%5===0)saveProgress();},1000);renderStats();
   async function start(){
     // Load the entire 83-puzzle collection for browsing, then use the single-puzzle API routes.
     try{const puzzles=await request();usingDemo=false;setCatalog(puzzles);showStatus(puzzles.length+' puzzles loaded from api.anrat.link.','success');}

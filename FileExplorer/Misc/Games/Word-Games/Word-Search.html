@@ -112,7 +112,8 @@
     const scoreEl=document.querySelector('#score'), bonusEl=document.querySelector('#bonusScore'), timerEl=document.querySelector('#timer'), infoEl=document.querySelector('#gridInfo');
     const progressEl=document.querySelector('#progressFill'), sourceEl=document.querySelector('#wordSource'), difficultyEl=document.querySelector('#difficulty');
     let pool=[...new Set(FALLBACK_WORDS)], globalWords=new Set(pool), puzzle=null, found=new Set(), bonusFound=new Set(), selected=[], tapAnchor=null, drag=null;
-    let cellNodes=[], traceSvg=null, startedAt=0, completedAt=null, hintTimeout=null, hasInteracted=false;
+    let cellNodes=[], traceSvg=null, completedAt=null, hintTimeout=null, hasInteracted=false;
+    const roundClock=GameStats.createActiveTimer();
 
     const shuffle=list=>{ const copy=[...list]; for(let i=copy.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [copy[i],copy[j]]=[copy[j],copy[i]]; } return copy; };
     const sameCell=(a,b)=>a&&b&&a.r===b.r&&a.c===b.c;
@@ -164,7 +165,7 @@
 
     function setMessage(text,tone='') { messageEl.textContent=text; messageEl.className='board-caption'+(tone?' '+tone:''); }
     function formatTime(seconds){ return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0'); }
-    function tick(){ if(!puzzle) return; const end=completedAt??Date.now(); timerEl.textContent=formatTime(Math.floor((end-startedAt)/1000)); }
+    function tick(){ if(!puzzle) return; timerEl.textContent=formatTime(Math.floor(roundClock.elapsed()/1000)); }
     function updateProgress(){ scoreEl.textContent=found.size+' / '+puzzle.placed.length; bonusEl.textContent=String(bonusFound.size); bonusEl.title=[...bonusFound].sort().join(', ')||'No bonus words yet'; progressEl.style.width=(found.size/puzzle.placed.length*100)+'%';
       for(const item of listEl.children) item.classList.toggle('found',found.has(item.dataset.word));
     }
@@ -208,9 +209,9 @@
       const settings=SETTINGS[difficultyEl.value];
       const next=makePuzzle(settings);
       if(!next) { setMessage('Could not build a puzzle. Please try again.','error'); return; }
-      if(puzzle&&completedAt===null&&hasInteracted) GameStats.record('wordsearch',false,(Date.now()-startedAt)/1000);
+      if(puzzle&&completedAt===null&&hasInteracted) GameStats.record('wordsearch',false,roundClock.elapsed()/1000);
       clearTimeout(hintTimeout); puzzle=next; found=new Set(); bonusFound=new Set(); selected=[]; tapAnchor=null; drag=null; hasInteracted=false;
-      startedAt=Date.now(); completedAt=null; infoEl.textContent=`${puzzle.size} × ${puzzle.size} · 8 DIRECTIONS`;
+      roundClock.reset(); completedAt=null; infoEl.textContent=`${puzzle.size} × ${puzzle.size} · 8 DIRECTIONS`;
       buildGrid(); buildList(); tick(); setMessage('Drag across letters or tap the first and last letter.');
     }
     function pathBetween(start,end){
@@ -235,7 +236,7 @@
       if(entry) {
         if(found.has(entry.word)) setMessage('You already found '+entry.word+'.');
         else { found.add(entry.word); setMessage('Nice — '+entry.word+' found!','success'); updateProgress();
-          if(found.size===puzzle.placed.length){completedAt=Date.now();GameStats.record('wordsearch',true,(completedAt-startedAt)/1000);tick();setMessage('Puzzle complete! All '+found.size+' words found in '+timerEl.textContent+'. 🎉','success');}
+          if(found.size===puzzle.placed.length){completedAt=Date.now();roundClock.stop();GameStats.record('wordsearch',true,roundClock.elapsed()/1000);tick();setMessage('Puzzle complete! All '+found.size+' words found in '+timerEl.textContent+'. 🎉','success');}
         }
       } else if(selected.length>1) {
         const letters=selected.map(({r,c})=>puzzle.board[r][c]).join('');

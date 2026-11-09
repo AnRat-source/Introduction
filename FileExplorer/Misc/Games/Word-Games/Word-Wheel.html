@@ -96,7 +96,8 @@
     const complete = document.querySelector('#complete');
     const letterCount = document.querySelector('#letterCount');
     const remainingScore = document.querySelector('#remainingScore');
-    let puzzle, selected = [], found = new Set(), activePointer = false, hasInteracted = false, roundStartedAt = 0, finishedAt = null;
+    let puzzle, selected = [], found = new Set(), activePointer = false, hasInteracted = false, finishedAt = null;
+    const roundClock = GameStats.createActiveTimer();
     let selectionLine, pointerPosition = null;
     const shuffle = list => {
       const result = [...list];
@@ -258,9 +259,9 @@
         message.classList.add('bad');
         return;
       }
-      if(puzzle && finishedAt===null && hasInteracted) GameStats.record('wordwheel',false,(Date.now()-roundStartedAt)/1000);
+      if(puzzle && finishedAt===null && hasInteracted) GameStats.record('wordwheel',false,roundClock.elapsed()/1000);
       puzzle={ sourceLetters:source.letters,letters:shuffle(source.letters.split('')),validWords:new Set(source.words),...layout };
-      roundStartedAt=Date.now(); finishedAt=null; hasInteracted=false;
+      roundClock.reset(); finishedAt=null; hasInteracted=false;
       found=new Set(); clearSelection(); renderWheel(); renderBoard();
       score.textContent='0 / '+puzzle.placed.length; remainingScore.textContent=puzzle.placed.length;
       letterCount.textContent=puzzle.letters.length+' LETTERS';
@@ -275,7 +276,7 @@
       if(!target) { message.textContent='That word is not in this puzzle.'; message.classList.add('bad'); clearSelection(); return; }
       if(found.has(target.word)) { message.textContent='Already found that one.'; message.classList.add('bad'); clearSelection(); return; }
       found.add(target.word); message.textContent='Nice — '+target.word+' found!'; message.classList.remove('bad'); clearSelection(); renderBoard(); score.textContent=found.size+' / '+puzzle.placed.length; remainingScore.textContent=puzzle.placed.length-found.size;
-      if(found.size===puzzle.placed.length && finishedAt===null) { finishedAt=Date.now(); GameStats.record('wordwheel',true,(finishedAt-roundStartedAt)/1000); complete.innerHTML='<strong>Board cleared!</strong> Generate another random crossword.'; }
+      if(found.size===puzzle.placed.length && finishedAt===null) { finishedAt=Date.now(); roundClock.stop(); GameStats.record('wordwheel',true,roundClock.elapsed()/1000); complete.innerHTML='<strong>Board cleared!</strong> Generate another random crossword.'; }
     }
     // Find all API words that can be made from the wheel, including repeated letters.
     function wordsForWheel(letters, index) {
