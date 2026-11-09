@@ -75,6 +75,16 @@
               },
               {
                 "type": "file",
+                "name": "Mini-Crossword.html",
+                "path": "FileExplorer/Misc/Games/Word-Games/Mini-Crossword.html"
+              },
+              {
+                "type": "file",
+                "name": "Minute-Cryptic.html",
+                "path": "FileExplorer/Misc/Games/Word-Games/Minute-Cryptic.html"
+              },
+              {
+                "type": "file",
                 "name": "Word-Search.html",
                 "path": "FileExplorer/Misc/Games/Word-Games/Word-Search.html"
               },
