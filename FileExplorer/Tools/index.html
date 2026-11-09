@@ -51,7 +51,12 @@
       'FileExplorer/Tools/Study/ParSci-Notes.href': {
         name: 'Paranaque Science Notes', icon: '✦',
         description: 'Open the Paranaque Science study notes site.'
-      }
+      },
+      'FileExplorer/Tools/Calculate/Surface-Measure.html': {
+        name: 'Perspective Measurement',
+        icon: '📐',
+        description: 'Measure surfaces and distances in photos using perspective calibration.'
+      },
     };
     function findTools(entries) {
       return entries.find(entry => entry.type === 'directory' && entry.name === 'Tools')?.children || [];
@@ -102,7 +107,7 @@
       parent.append(item);
     }
 
-    fetch('../../file-index.json', { cache: 'no-store' })
+    fetch('../file-index.json', { cache: 'no-store' })
       .then(response => response.ok ? response.json() : Promise.reject())
       .then(entries => {
         tools.replaceChildren();
