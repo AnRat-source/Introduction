@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#130d1c">
+  <meta name="description" content="A daily cryptic crossword clue, plus unlimited puzzles from the AnRat word games API.">
+  <title>Minute Cryptic · AnRat Games</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2321172b'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='40'%3E%F0%9F%94%8E%3C/text%3E%3C/svg%3E">
+  <style>
+    :root{color-scheme:dark;--bg:#130d1c;--panel:#21172b;--panel2:#2c1e38;--line:#624b70;--text:#faf5ff;--muted:#bfaecb;--purple:#d69cff;--pink:#ff98d8;--green:#a8e776;--red:#ff9db0}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{min-height:100vh;margin:0;color:var(--text);font:15px/1.55 Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(ellipse at 5% 3%,#51306c 0,transparent 34rem),radial-gradient(ellipse at 100% 95%,#5b2d52 0,transparent 30rem),var(--bg)}
+    button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--pink);outline-offset:3px}button:disabled{opacity:.45;cursor:not-allowed;transform:none!important}button,input,select{min-width:0}
+    .shell{width:min(1180px,calc(100% - 30px));margin:0 auto;padding:32px 0 55px}
+    .masthead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}.eyebrow,.mono{font:800 .74rem/1.5 ui-monospace,"Cascadia Code",Consolas,monospace;letter-spacing:.11em;text-transform:uppercase}.eyebrow{color:var(--purple);margin:0 0 8px}h1{font-size:clamp(2.6rem,7vw,5.3rem);line-height:.95;letter-spacing:-.075em;margin:0}h1 span{color:var(--pink)}.intro{color:var(--muted);max-width:58ch;margin:17px 0 0}.home{color:var(--purple);border:1px solid #765c85;text-decoration:none;border-radius:12px;padding:11px 14px;white-space:nowrap;font:800 .75rem ui-monospace,monospace}.home:hover{background:var(--panel2)}
+    .mode-bar{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}.btn{border:1px solid #785c89;background:#3c2a4b;color:var(--text);border-radius:11px;padding:12px 16px;font:800 .76rem ui-monospace,"Cascadia Code",monospace;letter-spacing:.04em;transition:background .15s,transform .15s}.btn:hover:not(:disabled){background:#553869;transform:translateY(-1px)}.btn.primary{color:#25102e;background:var(--purple);border-color:var(--purple)}.btn.primary:hover:not(:disabled){background:#ebc2ff}.btn.active{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink);color:#ffcbeb}.btn.danger{border-color:#97566c;color:#ffb4c4;background:#432534}.btn.small{padding:9px 12px;font-size:.69rem}
+    .status{min-height:29px;color:var(--muted);font-size:12px;margin:0 0 13px}.status strong{color:var(--purple)}.status.error{color:var(--red)}.status.success{color:var(--green)}
+    .game{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(288px,.85fr);gap:16px;align-items:start}.window{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:linear-gradient(140deg,#ffffff08,transparent 45%),var(--panel);box-shadow:0 23px 55px #0004}.window-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:9px 16px;border-bottom:1px solid var(--line);background:#30213d;color:#d5bde4;font:800 .67rem ui-monospace,monospace;letter-spacing:.08em}.window-dots{display:flex;gap:6px}.window-dots span{width:8px;height:8px;border:1px solid #a783bb;border-radius:50%}.board{padding:clamp(18px,3vw,36px)}.board-labels{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font:800 .7rem ui-monospace,monospace;letter-spacing:.08em}.pill{display:inline-flex;align-items:center;border:1px solid #826393;border-radius:100px;padding:5px 10px;color:#e6bfff;background:#392647;white-space:nowrap}.pills{display:flex;flex-wrap:wrap;gap:7px;margin:17px 0 0}
+    .clue-label{margin:34px 0 8px;color:var(--pink);font:900 .71rem ui-monospace,monospace;letter-spacing:.13em}.clue{font-size:clamp(1.7rem,3.55vw,2.85rem);line-height:1.25;letter-spacing:-.032em;margin:0;min-height:110px;overflow-wrap:anywhere}.number-hint{color:var(--purple);margin:12px 0 25px;font:800 .75rem ui-monospace,monospace}.answer-form{display:flex;gap:9px;align-items:stretch}.answer-form input{flex:1;width:100%;padding:15px 16px;color:var(--text);background:#130e1c;border:1px solid #8e6a9e;border-radius:11px;font:800 clamp(1rem,2.4vw,1.38rem) ui-monospace,"Cascadia Code",monospace;letter-spacing:.1em;text-transform:uppercase}.answer-form input::placeholder{color:#856f94;letter-spacing:.01em;font-size:.91rem}.answer-form .btn{padding-inline:20px}.feedback{min-height:26px;margin:12px 0 0;color:var(--muted);font-size:13px}.feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}
+    .extras{display:flex;flex-wrap:wrap;gap:8px;margin:21px 0 0}.hint-box,.reveal{border:1px solid #6f547e;border-radius:12px;padding:15px 17px;background:#2c2039;margin-top:18px}.hint-box h3,.reveal h3{font:900 .75rem ui-monospace,monospace;letter-spacing:.1em;color:var(--purple);margin:0 0 8px}.hint-box ol{margin:0;padding-left:20px;color:#edddf6}.hint-box li+li{margin-top:6px}.reveal{border-color:#68985a;background:#213128}.reveal h3{color:var(--green)}.reveal .solution{font:900 clamp(1.6rem,4vw,2.35rem) ui-monospace,monospace;letter-spacing:.1em;color:var(--green);overflow-wrap:anywhere;margin:0 0 8px}.reveal p{margin:6px 0;color:#e2eedf}.reveal p strong{color:#caffc3}
+    .panel-section{padding:19px;border-bottom:1px solid #5b4668}.panel-section:last-child{border-bottom:0}.panel-section h2{font:900 .84rem ui-monospace,monospace;letter-spacing:.04em;margin:0 0 14px}.time{font:900 clamp(2.3rem,5vw,3.2rem)/1.1 ui-monospace,monospace;letter-spacing:-.05em;color:var(--pink);font-variant-numeric:tabular-nums}.time-note{margin:6px 0 0;font-size:12px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{border:1px solid #665274;border-radius:9px;background:#2b2038;padding:10px 8px;min-width:0}.stat small{display:block;color:var(--muted);font:800 .58rem ui-monospace,monospace;letter-spacing:.02em}.stat strong{display:block;margin-top:6px;font:900 1.36rem ui-monospace,monospace;color:var(--purple)}
+    .browse-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.field label{display:block;margin-bottom:6px;color:var(--muted);font:800 .64rem ui-monospace,monospace}.field select,.field input{width:100%;border:1px solid #856893;border-radius:8px;padding:10px;background:#170f21;color:var(--text);font:700 .8rem ui-monospace,monospace}.id-row{display:flex;gap:8px;margin-top:10px}.id-row input{width:100%;min-width:0;border:1px solid #856893;border-radius:8px;padding:10px;background:#170f21;color:var(--text)}.list-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:16px 0 8px;font:800 .68rem ui-monospace,monospace;color:var(--muted)}.puzzle-list{display:grid;gap:6px;max-height:270px;overflow:auto;scrollbar-color:#77558b transparent}.puzzle-item{display:flex;align-items:center;gap:8px;min-width:0;width:100%;padding:10px 12px;border:1px solid #675172;border-radius:8px;background:#281c34;color:var(--text);text-align:left}.puzzle-item:hover{background:#3c2a4a}.puzzle-item.current{border-color:var(--pink);background:#513257}.puzzle-item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.puzzle-item small{font:700 .65rem ui-monospace,monospace;color:var(--purple)}.puzzle-item .done{color:var(--green)}.help{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.help strong{color:var(--purple)}.footer{padding:17px 2px;color:#a28ab3;font:700 .67rem ui-monospace,monospace;letter-spacing:.07em;text-align:center}.footer a{color:var(--pink)}
+    @media(max-width:800px){.game{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}.side .panel-section:nth-child(odd){border-right:1px solid var(--line)}}
+    @media(max-width:530px){.shell{width:calc(100% - 20px);padding-top:19px}.masthead{align-items:flex-start}.home{padding:8px 9px;font-size:.66rem}h1{font-size:clamp(2.35rem,10vw,3.4rem)}.intro{font-size:13px}.mode-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.mode-bar .btn{padding:11px 6px;font-size:.66rem}.board{padding:19px 15px 24px}.clue{min-height:90px;font-size:clamp(1.65rem,6.8vw,2.5rem)}.clue-label{margin-top:27px}.answer-form{flex-wrap:wrap}.answer-form input{min-width:0}.answer-form .btn{padding-inline:12px}.side{display:block}.side .panel-section:nth-child(odd){border-right:0}.panel-section{padding:17px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="masthead">
+    <div><p class="eyebrow">One clue · one clever answer</p><h1>Minute <span>Cryptic.</span></h1><p class="intro">Every word has a secret. Solve a cryptic crossword clue, uncover the wordplay, and see if you can crack it in under a minute.</p></div>
+    <a class="home" href="./index.html" aria-label="Back to word games">← GAMES</a>
+  </header>
+  <nav class="mode-bar" aria-label="Puzzle mode">
+    <button class="btn active" id="dailyBtn" type="button">☀ DAILY</button>
+    <button class="btn" id="randomBtn" type="button">↻ RANDOM</button>
+    <button class="btn" id="browseBtn" type="button">▤ BROWSE ALL</button>
+  </nav>
+  <p id="status" class="status" role="status" aria-live="polite">Connecting to the puzzle API…</p>
+  <div class="game">
+    <section class="window" aria-labelledby="clueHeading">
+      <div class="window-bar"><span>cryptic@anrat: ~/puzzle</span><span class="window-dots" aria-hidden="true"><span></span><span></span><span></span></span></div>
+      <div class="board">
+        <div class="board-labels"><span id="puzzleNumber">PUZZLE #—</span><span id="modeLabel">DAILY CHALLENGE</span></div>
+        <div class="pills"><span class="pill" id="difficultyBadge">DIFFICULTY —</span><span class="pill" id="typeBadge">CLUE TYPE —</span></div>
+        <p class="clue-label" id="clueHeading">YOUR CRYPTIC CLUE</p>
+        <h2 class="clue" id="clue">Loading your mystery…</h2>
+        <p class="number-hint" id="enumeration">ANSWER LENGTH: —</p>
+        <form id="answerForm" class="answer-form" autocomplete="off">
+          <input id="answerInput" type="text" enterkeyhint="done" spellcheck="false" autocomplete="off" autocapitalize="characters" aria-label="Your answer" placeholder="TYPE YOUR ANSWER" disabled required>
+          <button id="checkBtn" class="btn primary" type="submit" disabled>CHECK ↵</button>
+        </form>
+        <p id="feedback" class="feedback" role="status" aria-live="polite">Think about both the definition and the hidden wordplay.</p>
+        <div class="extras"><button id="hintBtn" class="btn small" type="button" disabled>✧ REVEAL HINT</button><button id="skipBtn" class="btn small danger" type="button" disabled>GIVE UP</button><button id="shareBtn" class="btn small" type="button" disabled>SHARE ↗</button></div>
+        <section id="hintBox" class="hint-box" hidden aria-label="Revealed hints"><h3>CLUES WITHIN THE CLUE</h3><ol id="hints"></ol></section>
+        <section id="reveal" class="reveal" hidden aria-label="Solution"><h3 id="resultTitle">ANSWER REVEALED</h3><p class="solution" id="solution"></p><p id="explanation"></p></section>
+      </div>
+    </section>
+    <aside class="window side" aria-label="Puzzle controls and progress">
+      <section class="panel-section"><h2>◷ YOUR TIME</h2><div class="time" id="timer">00:00</div><p class="time-note" id="timeNote">One minute is the goal, not the limit.</p></section>
+      <section class="panel-section"><h2>✦ YOUR JOURNEY</h2><div class="stats"><div class="stat"><small>PLAYED</small><strong id="playedStat">0</strong></div><div class="stat"><small>WINS</small><strong id="winsStat">0</strong></div><div class="stat"><small>STREAK 🔥</small><strong id="streakStat">0</strong></div></div></section>
+      <section class="panel-section" id="librarySection"><h2>⌕ PUZZLE LIBRARY</h2>
+        <div class="browse-controls"><div class="field"><label for="difficultyFilter">DIFFICULTY</label><select id="difficultyFilter"><option value="">ALL LEVELS</option><option value="1">1 · EASY</option><option value="2">2 · MEDIUM</option><option value="3">3 · HARD</option><option value="4">4 · EXPERT</option></select></div><div class="field"><label for="typeFilter">CLUE TYPE</label><select id="typeFilter"><option value="">ALL TYPES</option><option value="anagram">ANAGRAM</option><option value="hidden">HIDDEN</option><option value="charade">CHARADE</option><option value="homophone">HOMOPHONE</option><option value="reversal">REVERSAL</option></select></div></div>
+        <form id="idForm" class="id-row"><input id="idInput" type="number" min="1" step="1" placeholder="PUZZLE ID (e.g. 1)" aria-label="Puzzle ID" required><button class="btn small primary" type="submit">GO</button></form>
+        <div class="list-head"><span id="listCount">LOADING LIBRARY…</span><span id="sourceTag">API</span></div><div class="puzzle-list" id="puzzleList"></div>
+      </section>
+      <section class="panel-section"><h2>¿ HOW DOES IT WORK?</h2><p class="help">A cryptic clue usually contains <strong>two routes</strong> to the same answer: a normal definition and playful word instructions. Look for anagrams, hidden words, sounds-like clues, and reversals. Reveal a hint if you get stuck. Each puzzle counts toward your saved stats once you solve it or give up.</p></section>
+    </aside>
+  </div>
+  <footer class="footer">ANRAT WORD GAMES · <a href="https://api.anrat.link/minute-cryptic" target="_blank" rel="noopener noreferrer">POWERED BY API.ANRAT.LINK</a></footer>
+</main>
+<script>
+(() => {
+  'use strict';
+  const API = 'https://api.anrat.link/minute-cryptic';
+  const GAME_ID = 'minutecryptic';
+  const STATS_KEY = 'anrat.wordgames.stats.v1';
+  const SESSION_PREFIX = 'anrat.minutecryptic.puzzle.v1.';
+  const $ = id => document.getElementById(id);
+  const ui = Object.fromEntries(['status','dailyBtn','randomBtn','browseBtn','puzzleNumber','modeLabel','difficultyBadge','typeBadge','clue','enumeration','answerForm','answerInput','checkBtn','feedback','hintBtn','skipBtn','shareBtn','hintBox','hints','reveal','resultTitle','solution','explanation','timer','timeNote','playedStat','winsStat','streakStat','difficultyFilter','typeFilter','idForm','idInput','listCount','sourceTag','puzzleList'].map(id => [id, $(id)]));
+  const DEMOS = [
+    {id:'demo-1',clue:'Silent, rearranged, means to pay attention (6)',answer:'LISTEN',difficulty:1,type:'anagram',explanation:'LISTEN is an anagram of SILENT. “Rearranged” is the anagram indicator.'},
+    {id:'demo-2',clue:'A French capital hiding in comparison (5)',answer:'PARIS',difficulty:1,type:'hidden',explanation:'comPARISon contains PARIS, a capital city.'},
+    {id:'demo-3',clue:'A fruit, we hear, is a couple (4)',answer:'PEAR',difficulty:2,type:'homophone',explanation:'PEAR sounds like PAIR, meaning a couple.'},
+    {id:'demo-4',clue:'Sweet treats from stressed backwards (8)',answer:'DESSERTS',difficulty:2,type:'reversal',explanation:'STRESSED reversed spells DESSERTS.'},
+    {id:'demo-5',clue:'Flower from sore, strangely (4)',answer:'ROSE',difficulty:1,type:'anagram',explanation:'ROSE is SORE rearranged. “Strangely” signals the anagram.'},
+    {id:'demo-6',clue:'Insect concealed in elephantine prose (3)',answer:'ANT',difficulty:1,type:'hidden',explanation:'elephANTine conceals ANT.'}
+  ];
+  let catalog = [], usingDemo = false, active = null, progress = null, mode = 'daily', requestToken = 0, feedbackText = '', feedbackKind = '';
+  let activeList = [];
+  const compact = text => String(text ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/gi, '').toUpperCase();
+  const asText = x => x == null ? '' : (typeof x === 'object' ? (x.text ?? x.word ?? x.value ?? '') : String(x));
+  const first = (...values) => values.find(v => v !== undefined && v !== null && String(asText(v)).trim() !== '');
+  const attr = (raw, ...names) => names.map(k => raw[k]).find(v => v !== undefined && v !== null);
+  function normalizePuzzle(raw, index = 0) {
+    if (!raw || typeof raw !== 'object') return null;
+    const clue = first(raw.clue, raw.cryptic_clue, raw.crypticClue, raw.question, raw.prompt, raw.text);
+    const solution = first(raw.answer, raw.solution, raw.word, raw.result, Array.isArray(raw.answers) ? raw.answers[0] : null);
+    const answer = asText(solution).trim();
+    if (!asText(clue).trim() || !compact(answer)) return null;
+    const difficulty = Number(attr(raw, 'difficulty', 'level', 'rating')) || 1;
+    const type = asText(first(raw.type, raw.clue_type, raw.clueType, raw.category, 'other')).toLowerCase().trim();
+    let hints = attr(raw, 'hints', 'hint_list', 'hintList');
+    if (hints && !Array.isArray(hints)) hints = typeof hints === 'object' ? Object.values(hints) : [hints];
+    if (!hints) hints = [];
+    const singleHint = asText(raw.hint).trim();
+    if (singleHint && !hints.some(h => asText(h) === singleHint)) hints.unshift(singleHint);
+    const id = first(raw.id, raw.puzzle_id, raw.puzzleId, index + 1);
+    const enumeration = asText(first(raw.enumeration, raw.letter_count, raw.answer_length, raw.length)).trim();
+    return {
+      id: String(id), clue: asText(clue).trim(), answer, difficulty: Math.min(4, Math.max(1, Math.round(difficulty))),
+      type, hints: hints.map(asText).map(s => s.trim()).filter(Boolean),
+      definition: asText(raw.definition).trim(), wordplay: asText(first(raw.wordplay, raw.parsing, raw.breakdown)).trim(),
+      explanation: asText(first(raw.explanation, raw.explain, raw.solution_explanation, raw.solutionExplanation)).trim(), enumeration
+    };
+  }
+  function unpack(data) {
+    if (Array.isArray(data)) return data;
+    if (!data || typeof data !== 'object') return [];
+    for (const key of ['puzzles','results','items','data','puzzle','result']) {
+      if (data[key] !== undefined) {
+        const nested = unpack(data[key]);
+        if (nested.length) return nested;
+      }
+    }
+    return [data];
+  }
+  async function request(params = {}) {
+    const url = new URL(API);
+    Object.entries(params).forEach(([k,v]) => { if (v !== '' && v != null) url.searchParams.set(k,v); });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(url, {headers:{accept:'application/json'},signal:controller.signal});
+      if (!response.ok) throw Error('API returned HTTP ' + response.status);
+      const data = await response.json();
+      const rows = unpack(data).map(normalizePuzzle).filter(Boolean);
+      if (!rows.length) throw Error('No valid puzzles in the response');
+      return rows;
+    } finally { clearTimeout(timeout); }
+  }
+  const readJSON = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
+  const storeJSON = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* Graceful private-mode fallback */ } };
+  const localDay = (date = new Date()) => [date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');
+  const dayDistance = (a,b) => !/^\d{4}-\d{2}-\d{2}$/.test(a||'') || !/^\d{4}-\d{2}-\d{2}$/.test(b||'') ? Infinity : Math.round((Date.parse(a+'T12:00:00')-Date.parse(b+'T12:00:00'))/86400000);
+  const freshStat = () => ({played:0,wins:0,losses:0,streak:0,bestStreak:0,lastWinDay:null,totalSeconds:0});
+  function statsRead() {
+    const db = readJSON(STATS_KEY, {games:{}});
+    const stat = {...freshStat(),...db.games?.[GAME_ID]};
+    stat.streak = dayDistance(localDay(),stat.lastWinDay) <= 1 ? stat.streak : 0;
+    return stat;
+  }
+  // The same storage format as game-stats.js: this game has NO external script dependency.
+  function recordResult(won, seconds) {
+    const db = readJSON(STATS_KEY,{games:{},overall:freshStat()});
+    db.games ||= {}; db.overall ||= freshStat();
+    for (const key of [GAME_ID,'overall']) {
+      const stat = key === 'overall' ? db.overall : (db.games[GAME_ID] ||= freshStat());
+      stat.played = (Number(stat.played)||0)+1;
+      stat.wins = (Number(stat.wins)||0)+(won ? 1 : 0);
+      stat.losses = stat.played-stat.wins;
+      stat.totalSeconds = (Number(stat.totalSeconds)||0)+Math.max(0,Math.floor(seconds));
+      if (won && stat.lastWinDay !== localDay()) {
+        stat.streak = dayDistance(localDay(),stat.lastWinDay) === 1 ? (Number(stat.streak)||0)+1 : 1;
+        stat.lastWinDay = localDay();
+        stat.bestStreak = Math.max(Number(stat.bestStreak)||0,stat.streak);
+      }
+    }
+    storeJSON(STATS_KEY, db);
+    window.dispatchEvent(new CustomEvent('wordgames:stats-changed',{detail:{id:GAME_ID}}));
+  }
+  function renderStats() {
+    const stat=statsRead();ui.playedStat.textContent=stat.played;ui.winsStat.textContent=stat.wins;ui.streakStat.textContent=stat.streak;
+  }
+  function sessionKey(puzzle) {return SESSION_PREFIX + puzzle.id;}
+  function readProgress(puzzle) {
+    const saved=readJSON(sessionKey(puzzle),null);
+    return saved && saved.answerKey===compact(puzzle.answer) ? saved : {answerKey:compact(puzzle.answer),startedAt:Date.now(),endedAt:null,status:'playing',guesses:[],revealed:0};
+  }
+  function saveProgress(){if(active&&progress)storeJSON(sessionKey(active),progress);}
+  const isFinished = () => !!progress && progress.status !== 'playing';
+  function formatTime(ms){const seconds=Math.max(0,Math.floor(ms/1000));return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');}
+  function elapsed(){return !progress ? 0 : (progress.endedAt||Date.now())-progress.startedAt;}
+  function updateTimer(){ui.timer.textContent=formatTime(elapsed());if(!progress)return;ui.timeNote.textContent=isFinished()?(progress.status==='won' ? (elapsed()<60000?'Solved in under one minute ✦':'Solved! Great work.') : 'The answer has been revealed.'):'One minute is the goal, not the limit.';}
+  function showStatus(text,kind=''){ui.status.className='status '+kind;ui.status.textContent=text;}
+  function setFeedback(text,kind=''){feedbackText=text;feedbackKind=kind;ui.feedback.className='feedback '+kind;ui.feedback.textContent=text;}
+  function allHints() {
+    if(!active)return [];
+    const hints=[...active.hints];
+    if(active.definition && !hints.includes(active.definition))hints.push('Definition: '+active.definition);
+    if(active.wordplay && !hints.includes(active.wordplay))hints.push('Wordplay: '+active.wordplay);
+    // There are always a couple of available hints even if the API supplies none.
+    hints.push('First letter: '+active.answer.trim().charAt(0).toUpperCase());
+    if(compact(active.answer).length>2)hints.push('Last letter: '+active.answer.trim().slice(-1).toUpperCase());
+    return [...new Set(hints)];
+  }
+  function renderHints(){
+    const hints=allHints();ui.hints.replaceChildren();
+    hints.slice(0,progress?.revealed||0).forEach(hint=>{const li=document.createElement('li');li.textContent=hint;ui.hints.append(li);});
+    ui.hintBox.hidden=!progress?.revealed;
+    ui.hintBtn.disabled=!active||isFinished()||(progress?.revealed||0)>=hints.length;
+    ui.hintBtn.textContent='✧ REVEAL HINT'+(progress?.revealed?' ('+progress.revealed+'/'+hints.length+')':'');
+  }
+  function renderReveal(){
+    const finished=!!active&&isFinished();ui.reveal.hidden=!finished;
+    if(!finished)return;
+    ui.resultTitle.textContent=progress.status==='won'?'✦ YOU CRACKED IT':'ANSWER REVEALED';
+    ui.solution.textContent=active.answer;
+    const detail=[active.explanation,active.wordplay&&!active.explanation?'Wordplay: '+active.wordplay:'',active.definition&&!active.explanation?'Definition: '+active.definition:''].filter(Boolean).join(' ');
+    ui.explanation.textContent=detail||'Every cryptic clue includes a definition and a wordplay route to the answer.';
+  }
+  function renderPuzzle(){
+    if(!active)return;
+    ui.puzzleNumber.textContent='PUZZLE #'+active.id;
+    ui.modeLabel.textContent=mode==='daily'?'DAILY CHALLENGE':mode==='random'?'RANDOM CHALLENGE':'LIBRARY MODE';
+    ui.difficultyBadge.textContent='✦ DIFFICULTY '+active.difficulty+'/4';
+    ui.typeBadge.textContent=active.type.toUpperCase().replace(/[_-]/g,' ');
+    ui.clue.textContent=active.clue;
+    const len=active.enumeration||active.answer.split(/[\s-]+/).map(part=>compact(part).length).join(',');
+    ui.enumeration.textContent=/\(\d+(?:[,\s-]+\d+)*\)\s*$/.test(active.clue)?'': 'ANSWER LENGTH: ('+len+')';
+    ui.answerInput.disabled=isFinished();ui.checkBtn.disabled=isFinished();ui.skipBtn.disabled=isFinished();ui.shareBtn.disabled=!isFinished();
+    ui.answerInput.value='';ui.answerInput.placeholder=isFinished()?'ROUND COMPLETE':'TYPE YOUR ANSWER';
+    if(isFinished())setFeedback(progress.status==='won'?'Correct! Brilliant deduction.':'You can review the solution below.',progress.status==='won'?'good':'bad');
+    else if(progress.guesses.length)setFeedback(progress.guesses.length+' previous attempt'+(progress.guesses.length===1?'':'s')+'. Try another answer.','bad');
+    else setFeedback('Think about both the definition and the hidden wordplay.');
+    renderHints();renderReveal();updateTimer();renderStats();renderList();
+  }
+  function setActive(puzzle,nextMode){
+    if(!puzzle)return;
+    active=puzzle;mode=nextMode;progress=readProgress(puzzle);saveProgress();
+    for(const [key,btn] of [['daily',ui.dailyBtn],['random',ui.randomBtn],['browse',ui.browseBtn]])btn.classList.toggle('active',mode===key);
+    renderPuzzle();
+  }
+  function endGame(won){
+    if(!active||isFinished())return;
+    // Recheck persisted completion, so reopening a completed puzzle never awards another win.
+    const previous=readJSON(sessionKey(active),null);
+    if(previous && previous.status && previous.status!=='playing'){progress=previous;renderPuzzle();return;}
+    progress.status=won?'won':'lost';progress.endedAt=Date.now();saveProgress();
+    recordResult(won,elapsed()/1000);renderPuzzle();
+  }
+  function pickDaily(list){
+    if(!list.length)return null;
+    const date=localDay().replace(/-/g,'');let hash=0;for(const c of date)hash=(hash*31+c.charCodeAt(0))>>>0;
+    return list[hash%list.length];
+  }
+  function pickRandom(list){return list[Math.floor(Math.random()*list.length)];}
+  function findCached(id){return catalog.find(p=>p.id===String(id));}
+  function selectedFilters(){return {difficulty:ui.difficultyFilter.value,type:ui.typeFilter.value};}
+  function localFiltered(){const f=selectedFilters();return catalog.filter(p=>(!f.difficulty||p.difficulty===Number(f.difficulty))&&(!f.type||p.type===f.type));}
+  function fillTypes(){
+    const values=new Set([...['anagram','hidden','charade','homophone','reversal'],...catalog.map(p=>p.type)].filter(Boolean));
+    const old=ui.typeFilter.value;ui.typeFilter.replaceChildren(new Option('ALL TYPES',''));
+    for(const type of [...values].sort())ui.typeFilter.add(new Option(type.replace(/[_-]/g,' ').toUpperCase(),type));
+    ui.typeFilter.value=old;
+  }
+  function renderList(){
+    const rows=activeList.length?activeList:localFiltered();ui.puzzleList.replaceChildren();
+    ui.listCount.textContent=rows.length+' PUZZLE'+(rows.length===1?'':'S');
+    for(const puzzle of rows){
+      const item=document.createElement('button');item.type='button';item.className='puzzle-item'+(puzzle.id===active?.id?' current':'');
+      const n=document.createElement('small');n.textContent='#'+puzzle.id;
+      const label=document.createElement('span');label.textContent=puzzle.clue;
+      const tag=document.createElement('small');tag.textContent=puzzle.difficulty+'/4';
+      const record=readJSON(sessionKey(puzzle),null);
+      if(record?.status==='won'){tag.textContent='✓';tag.classList.add('done');}
+      else if(record?.status==='lost')tag.textContent='✗';
+      item.append(n,label,tag);item.title=puzzle.clue;item.addEventListener('click',()=>loadById(puzzle.id));ui.puzzleList.append(item);
+    }
+    if(!rows.length){const message=document.createElement('p');message.className='help';message.textContent='No puzzles match these filters.';ui.puzzleList.append(message);}
+  }
+  function setCatalog(puzzles){catalog=puzzles;fillTypes();ui.sourceTag.textContent=usingDemo?'OFFLINE DEMO':'LIVE API';renderList();}
+  function explainError(err){return err?.name==='AbortError'?'Request timed out':err?.message||'Network error';}
+  async function loadDaily(){
+    const token=++requestToken;mode='daily';showStatus('Loading today’s puzzle…');
+    try{const rows=usingDemo?[pickDaily(catalog)]:await request({daily:1});if(token!==requestToken)return;setActive(rows[0],mode);showStatus(usingDemo?'Offline demo mode · live puzzles are unavailable.':'Today’s cryptic clue is ready. ✦',usingDemo?'error':'success');}
+    catch(err){if(token!==requestToken)return;const fallback=pickDaily(catalog);if(fallback){setActive(fallback,mode);showStatus('Daily API unavailable ('+explainError(err)+'). Showing '+(usingDemo?'a demo':'a cached')+' puzzle.','error');}else showStatus('Could not load a puzzle: '+explainError(err),'error');}
+  }
+  async function loadRandom(){
+    const token=++requestToken;mode='random';showStatus('Finding a random clue…');
+    try{const rows=usingDemo?[pickRandom(catalog)]:await request({random:1});if(token!==requestToken)return;setActive(rows[0],mode);showStatus(usingDemo?'Offline demo mode · live puzzles are unavailable.':'Random puzzle loaded. Good luck!',usingDemo?'error':'success');}
+    catch(err){if(token!==requestToken)return;const fallback=pickRandom(catalog);if(fallback){setActive(fallback,mode);showStatus('Random API unavailable; showing a '+(usingDemo?'demo':'cached')+' puzzle.','error');}else showStatus('Could not load a random puzzle: '+explainError(err),'error');}
+  }
+  async function loadById(id){
+    if(!/^\d+$/.test(String(id))&& !findCached(id)){showStatus('Please enter a valid puzzle ID.','error');return;}
+    const token=++requestToken;mode='browse';showStatus('Loading puzzle #'+id+'…');
+    try{const rows=usingDemo?[findCached(id)].filter(Boolean):await request({id});if(!rows.length)throw Error('Puzzle not found');if(token!==requestToken)return;setActive(rows[0],mode);showStatus(usingDemo?'Offline demo puzzle loaded.':'Puzzle #'+id+' loaded.',usingDemo?'error':'success');}
+    catch(err){if(token!==requestToken)return;const cached=findCached(id);if(cached){setActive(cached,mode);showStatus('Using a cached puzzle (#'+id+').','error');}else showStatus('Could not load #'+id+': '+explainError(err),'error');}
+  }
+  async function loadBrowse(){
+    const token=++requestToken;mode='browse';
+    const filters=selectedFilters();showStatus('Searching the cryptic library…');
+    try{
+      // Exercise the API's difficulty/type filter endpoints directly.
+      const rows=usingDemo?localFiltered():await request(filters);
+      if(token!==requestToken)return;
+      activeList=rows.filter(p=>(!filters.difficulty||p.difficulty===Number(filters.difficulty))&&(!filters.type||p.type===filters.type));
+      renderList();
+      if(activeList.length)setActive(activeList[0],mode);
+      showStatus((usingDemo?'Offline demo · ':'')+activeList.length+' matching puzzle'+(activeList.length===1?'':'s')+'. Choose one from the list.',usingDemo?'error':'success');
+    }catch(err){if(token!==requestToken)return;activeList=localFiltered();renderList();if(activeList.length)setActive(activeList[0],mode);showStatus(activeList.length?'Using cached results ('+explainError(err)+').':'No matching puzzles: '+explainError(err),'error');}
+  }
+  ui.answerForm.addEventListener('submit',e=>{
+    e.preventDefault();if(!active||isFinished())return;
+    const guess=ui.answerInput.value.trim();if(!compact(guess)){setFeedback('Type an answer first.','bad');return;}
+    progress.guesses.push(guess);saveProgress();
+    if(compact(guess)===compact(active.answer)){endGame(true);return;}
+    setFeedback('Not quite. Look for a second meaning or wordplay trick.','bad');ui.answerInput.select();
+  });
+  ui.hintBtn.addEventListener('click',()=>{if(!active||isFinished()||progress.revealed>=allHints().length)return;progress.revealed++;saveProgress();renderHints();ui.answerInput.focus();});
+  ui.skipBtn.addEventListener('click',()=>{if(active&&!isFinished()&&window.confirm('Reveal the answer? This puzzle will count as a loss.'))endGame(false);});
+  ui.shareBtn.addEventListener('click',async()=>{
+    if(!active||!isFinished())return;
+    const text='Minute Cryptic #'+active.id+' '+(progress.status==='won'?'✓':'✗')+' · '+formatTime(elapsed())+' · '+progress.guesses.length+' guesses\n'+location.href.split('?')[0]+'?id='+encodeURIComponent(active.id);
+    try{await navigator.clipboard.writeText(text);showStatus('Result and puzzle link copied!','success');}catch{showStatus('Sharing is not available in this browser.','error');}
+  });
+  ui.dailyBtn.addEventListener('click',loadDaily);ui.randomBtn.addEventListener('click',loadRandom);ui.browseBtn.addEventListener('click',loadBrowse);
+  ui.difficultyFilter.addEventListener('change',()=>{activeList=[];loadBrowse();});
+  ui.typeFilter.addEventListener('change',()=>{activeList=[];loadBrowse();});
+  ui.idForm.addEventListener('submit',e=>{e.preventDefault();loadById(ui.idInput.value);});
+  window.addEventListener('storage',e=>{if(e.key===STATS_KEY)renderStats();if(active&&e.key===sessionKey(active)){progress=readProgress(active);renderPuzzle();}});
+  setInterval(updateTimer,1000);renderStats();
+  async function start(){
+    // Load the entire 83-puzzle collection for browsing, then use the single-puzzle API routes.
+    try{const puzzles=await request();usingDemo=false;setCatalog(puzzles);showStatus(puzzles.length+' puzzles loaded from api.anrat.link.','success');}
+    catch(err){usingDemo=true;setCatalog(DEMOS.map(normalizePuzzle).filter(Boolean));showStatus('API offline ('+explainError(err)+'). Playing '+catalog.length+' original demo puzzles.','error');}
+    const query=new URLSearchParams(location.search);
+    const difficulty=query.get('difficulty'),type=query.get('type');
+    if(difficulty && /^[1-4]$/.test(difficulty))ui.difficultyFilter.value=difficulty;
+    if(type)ui.typeFilter.value=type.toLowerCase();
+    if(query.has('id'))await loadById(query.get('id'));
+    else if(difficulty||type)await loadBrowse();
+    else if(query.get('random')==='1')await loadRandom();
+    else await loadDaily();
+  }
+  start();
+})();
+</script>
+</body>
+</html>

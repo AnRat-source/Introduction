@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#130d1c">
+  <title>Mini Crossword · AnRat Games</title>
+  <style>
+    :root{color-scheme:dark;--bg:#130d1c;--panel:#21172b;--panel2:#2d203a;--line:#684d7d;--text:#faf5ff;--muted:#c2b2ce;--purple:#d69cff;--pink:#ff98d8;--green:#b3f08a}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(circle at 10% 0%,#573878 0,transparent 32rem),radial-gradient(circle at 98% 95%,#54244f 0,transparent 30rem),var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,sans-serif}
+    button{font:800 .72rem 'Cascadia Code',Consolas,monospace;letter-spacing:.025em;cursor:pointer}button:disabled{opacity:.5;cursor:default}button:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+    .shell{width:min(1000px,calc(100% - 24px));margin:0 auto;padding:30px 0 35px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.eyebrow{margin:0 0 4px;color:var(--pink);font:800 .68rem 'Cascadia Code',monospace;letter-spacing:.17em}.top h1{margin:0;font-size:clamp(2rem,6vw,3.7rem);letter-spacing:-.06em;line-height:1.05}.sub{margin:8px 0 0;color:var(--muted);font-size:.82rem}.top-actions{display:flex;gap:7px;align-self:center;flex-wrap:wrap;justify-content:flex-end}
+    .btn{padding:11px 13px;border:1px solid #815d9a;border-radius:9px;color:var(--text);background:#3c2b4b;box-shadow:none;transition:background .12s,border-color .12s}.btn:hover{background:#59406c}.btn.primary{border-color:var(--purple);background:var(--purple);color:#2d143b}.btn.primary:hover{background:#efc7ff}.btn.active{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink);color:#ffe2f3}
+    .game{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);border:1px solid var(--line);border-radius:20px;overflow:hidden;background:linear-gradient(145deg,#ffffff09,transparent 40%),var(--panel);box-shadow:0 20px 70px #0007}
+    .left{padding:22px 20px;min-width:0;display:flex;flex-direction:column;align-items:center}.meta{display:flex;justify-content:space-between;gap:12px;width:100%;margin-bottom:17px;font:800 .68rem 'Cascadia Code',monospace;letter-spacing:.07em;color:var(--muted)}#modeBadge{color:var(--pink)}
+    .grid-frame{width:100%;display:grid;place-items:center}.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;width:min(100%,410px);aspect-ratio:1;user-select:none}.square{position:relative;min-width:0;min-height:0;padding:0;display:grid;place-items:center;border:1px solid #77588b;border-radius:5px;background:#392946;color:var(--text);font:900 clamp(1.45rem,4vw,2.5rem)/1 'Cascadia Code',Consolas,monospace;transition:background .11s,border-color .11s}.square.black{background:#100c18;border-color:#130d1c;cursor:default}.square.selected{background:#654875;border-color:#b28ad1}.square.cursor{z-index:1;background:#d69cff;color:#281035;border-color:#ffbee9;box-shadow:0 0 0 2px #ffbee966}.square.verified{background:#536d4a;border-color:#9cd782}.square.hinted .letter{color:var(--pink)}.square.wrong{background:#8c4268;border-color:var(--pink)}.square .num{position:absolute;top:3px;left:4px;color:#dbc6e6;font:900 clamp(.49rem,1.2vw,.71rem)/1 'Cascadia Code',monospace}.square.cursor .num{color:#4b2454}.square .letter{margin-top:8px}
+    .focus-clue{display:flex;align-items:center;gap:10px;min-height:65px;width:100%;margin:17px 0 11px;padding:12px;border:1px solid #785e89;border-radius:11px;background:#362542}.focus-clue strong{flex:none;color:var(--pink);font:900 .69rem 'Cascadia Code',monospace}.focus-clue span{font-weight:700;font-size:.84rem;overflow-wrap:anywhere}
+    .tools{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;width:100%}.tools .btn{flex:1;padding:10px 7px;white-space:nowrap;font-size:.68rem}.keyboard{width:100%;max-width:420px;display:grid;gap:5px;margin-top:15px;touch-action:manipulation}.keyrow{display:flex;justify-content:center;gap:4px}.key{height:43px;flex:1;min-width:0;max-width:45px;padding:0;border:1px solid #745787;border-radius:6px;background:#43304e;color:var(--text);font:900 clamp(.73rem,2.2vw,.96rem) 'Cascadia Code',monospace}.key:hover,.key:active{background:#74548a}.key.wide{flex:1.35;max-width:63px;color:var(--pink);background:#54395f}
+    #notice{margin:12px 0 0;min-height:35px;color:var(--muted);text-align:center;font-size:.78rem}#notice.good{color:var(--green)}#notice.bad{color:var(--pink)}
+    .right{min-width:0;padding:23px 20px;background:#0002;border-left:1px solid #624971}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.stat{padding:11px 8px;border:1px solid #654c73;border-radius:10px;background:#ffffff08}.stat small{display:block;color:var(--muted);font:800 .59rem 'Cascadia Code',monospace;letter-spacing:.04em}.stat strong{display:block;margin-top:6px;color:var(--purple);font:900 clamp(.95rem,2vw,1.34rem) 'Cascadia Code',monospace}.progress{height:6px;margin:17px 0 18px;background:#3b2b46;border-radius:100px;overflow:hidden}.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--pink));transition:width .2s}
+    .clue-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.clue-group{min-width:0}.clue-group h2{margin:0 0 10px;color:var(--pink);font:900 .8rem 'Cascadia Code',monospace;letter-spacing:.06em}.clue-list{display:grid;gap:6px}.clue{width:100%;padding:9px;border:1px solid #624a70;border-radius:7px;background:#30223c;color:var(--text);text-align:left;font:600 .78rem/1.4 system-ui,sans-serif;overflow-wrap:anywhere}.clue b{color:var(--purple);font-family:'Cascadia Code',monospace}.clue:hover{background:#4a3559}.clue.active{background:#553b65;border-color:var(--pink)}.clue.done{background:#314231;border-color:#68855a;color:#d8ebd1}.clue.done b{color:var(--green)}
+    .history{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:20px}.record{padding:9px 7px;border:1px solid #534363;border-radius:8px;background:#22192c}.record small{display:block;color:var(--muted);font:800 .58rem 'Cascadia Code',monospace}.record strong{display:block;color:var(--purple);margin-top:4px;font:900 1.1rem 'Cascadia Code',monospace}.hint-text{margin:15px 0 0;color:var(--muted);font-size:.72rem;line-height:1.55}.source{margin:9px 0 0;color:#a98cbb;font:700 .65rem 'Cascadia Code',monospace}
+    @media(max-width:760px){.shell{padding:15px 0 25px}.game{grid-template-columns:1fr}.left{padding:14px 12px 10px}.right{padding:19px 15px;border-left:0;border-top:1px solid #624971}.grid{width:min(100%,min(65vh,420px))}.top{margin-bottom:13px}.sub{display:none}.meta{margin-bottom:10px}.focus-clue{margin:13px 0 10px}.keyboard{margin-top:12px}}
+    @media(max-width:440px){.top h1{font-size:clamp(1.75rem,8vw,2.3rem)}.eyebrow{display:none}.top-actions{gap:5px}.top-actions .btn{padding:9px 8px;font-size:.58rem}.game{border-radius:14px}.grid{width:100%;gap:2px}.square{font-size:clamp(1.35rem,6.5vw,2.1rem);border-radius:3px}.square .num{top:2px;left:3px}.key{height:40px}.tools .btn{font-size:.6rem}.clue-columns{gap:8px}.clue{padding:8px 7px;font-size:.73rem}.history{gap:4px}.record{padding:7px 5px}.record small{font-size:.49rem}.record strong{font-size:.97rem}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top"><div><p class="eyebrow">ANRAT / WORD GAMES</p><h1>Mini Crossword<span style="color:var(--pink)">.</span></h1><p class="sub">Five by five. Ten clues. A little brain workout.</p></div><div class="top-actions"><button id="daily" class="btn" type="button">DAILY</button><button id="new" class="btn primary" type="button">NEW ↻</button></div></header>
+    <section class="game" aria-label="Mini crossword game">
+      <div class="left"><div class="meta"><span>5 × 5 · MINI</span><span id="modeBadge">LOADING…</span></div><div class="grid-frame"><div id="grid" class="grid" role="group" aria-label="Five by five crossword"></div></div><div class="focus-clue"><strong id="focusNumber">—</strong><span id="focusText">Getting your puzzle ready…</span></div><div class="tools"><button id="previous" class="btn" type="button">← PREV</button><button id="check" class="btn" type="button">CHECK ✓</button><button id="hint" class="btn" type="button">HINT ✦</button><button id="next" class="btn" type="button">NEXT →</button></div><div id="keyboard" class="keyboard" aria-label="On-screen keyboard"></div><p id="notice" role="status" aria-live="polite">Fetching clues…</p></div>
+      <aside class="right"><div class="stats"><div class="stat"><small>WORDS</small><strong id="solved">0 / 10</strong></div><div class="stat"><small>TIME</small><strong id="timer">00:00</strong></div><div class="stat"><small>HINTS</small><strong id="hints">0</strong></div></div><div class="progress"><div id="progress"></div></div><div class="clue-columns"><section class="clue-group"><h2>ACROSS →</h2><div id="across" class="clue-list"></div></section><section class="clue-group"><h2>DOWN ↓</h2><div id="down" class="clue-list"></div></section></div><div class="history" aria-label="Saved results"><div class="record"><small>PLAYED</small><strong id="played">0</strong></div><div class="record"><small>WINS</small><strong id="wins">0</strong></div><div class="record"><small>STREAK</small><strong id="streak">0</strong></div><div class="record"><small>BEST</small><strong id="best">0</strong></div></div><p class="hint-text">Tap a square twice to switch direction, or tap an Across/Down clue. Type on your keyboard or use the on-screen keys. Tab jumps to the next clue. Your puzzle and stats are saved on this device.</p><p class="source" id="source">Connecting to api.anrat.link/crossword…</p></aside>
+    </section>
+  </main>
+  <script>
+  (() => {
+    'use strict';
+    const API = 'https://api.anrat.link/crossword';
+    const SHAPE = ['#...#','.....','.....','.....','#...#'];
+    const STORE = 'anrat.wordgames.mini.v1';
+    const $ = id => document.getElementById(id);
+    const common = new Set((
+      'ABOUT ABOVE ACTOR ADAPT ADMIT ADULT AFTER AGAIN AGENT AGREE AHEAD ALARM ALBUM ALERT ALIKE ALIVE ALLOW ALONE ALONG AMONG ANGER ANGLE ANGRY APART APPLE APPLY APRIL ARGUE ARISE ARRAY ASIDE ASSET AUDIO AVOID AWARE AWFUL ' +
+      'BASIC BEACH BEGIN BEING BELOW BENCH BIRTH BLACK BLADE BLAME BLANK BLAST BLEND BLESS BLIND BLOCK BLOOD BLOOM BOARD BONUS BOOST BOUND BRAIN BRAND BRAVE BREAD BREAK BRICK BRIDE BRIEF BRING BROAD BROKE BROWN BRUSH BUILD BUILT BUNCH BURST ' +
+      'CABLE CAMEL CANDY CARRY CATCH CAUSE CHAIN CHAIR CHALK CHARM CHART CHASE CHEAP CHECK CHEEK CHEER CHEST CHIEF CHILD CHILL CHIPS CHOIR CHOKE CIVIL CLAIM CLASS CLEAN CLEAR CLICK CLIFF CLIMB CLOCK CLOSE CLOTH CLOUD CLOWN COACH COAST COLOR COMIC COMMA COUNT COURT COVER CRACK CRAFT CRASH CRAZY CREAM CREEK CRIME CRISP CROWD CROWN CRUEL CRUSH CURVE CYCLE ' +
+      'DAILY DAIRY DANCE DEATH DEBUT DELAY DEPTH DEVIL DIARY DIRTY DISCO DOING DOUBT DOUGH DRAFT DRAIN DRAMA DRAWN DREAM DRESS DRINK DRIVE DROVE ' +
+      'EARLY EARTH EIGHT ELBOW ELDER ELECT ELITE EMAIL EMPTY ENEMY ENJOY ENTER ENTRY EQUAL ERROR ESSAY EVENT EVERY EXACT EXTRA ' +
+      'FAITH FALSE FANCY FAULT FAVOR FEAST FEVER FIBER FIELD FIGHT FINAL FIRST FLAME FLASH FLEET FLESH FLOAT FLOOD FLOOR FLOUR FOCUS FORCE FORTH FOUND FRAME FRESH FRONT FROST FRUIT FULLY FUNNY ' +
+      'GAMES GHOST GIANT GIVEN GLASS GLOBE GLOVE GOING GOOSE GRACE GRADE GRAIN GRAND GRANT GRAPE GRAPH GRASS GRAVE GREAT GREEN GROUP GROWN GUARD GUESS GUEST GUIDE ' +
+      'HABIT HAPPY HARSH HASTE HEART HEAVY HELLO HONEY HORSE HOTEL HOUSE HUMAN HUMOR HURRY IDEAL IMAGE INDEX INNER INPUT ISSUE ITEMS JEANS JELLY JOINT JOKER JUDGE JUICE ' +
+      'KNIFE KNOCK KNOWN LABEL LABOR LARGE LASER LATER LAUGH LAYER LEARN LEAST LEAVE LEGAL LEMON LEVEL LIGHT LIMIT LIVER LOCAL LOGIC LOOSE LOVER LOWER LUCKY LUNCH ' +
+      'MAGIC MAJOR MAKER MANGO MARCH MATCH MAYBE MAYOR MEANT MEDIA MERCY MERGE METAL METER MIGHT MINOR MINUS MIXED MODEL MONEY MONTH MOTOR MOUSE MOUTH MOVIE MUSIC ' +
+      'NEEDS NEVER NIGHT NOISE NORTH NOVEL NURSE OCEAN OFFER OFTEN OLDER ONION OPERA ORDER OTHER OUTER OWNER ' +
+      'PAINT PANEL PANIC PAPER PARTY PASTA PATCH PAUSE PEACE PEACH PEARL PHASE PHONE PHOTO PIANO PIECE PILOT PITCH PIZZA PLACE PLAIN PLANE PLANT PLATE POINT POLAR POUND POWER PRESS PRICE PRIDE PRIME PRINT PRIOR PRIZE PROOF PROUD ' +
+      'QUEEN QUERY QUEST QUICK QUIET QUITE RADIO RAISE RALLY RANGE RAPID RATIO REACH REACT READY REALM REBEL REFER RELAX REPLY RESET RIDER RIDGE RIGHT RIVER ROAST ROBOT ROUGH ROUND ROUTE ROYAL RULER RURAL ' +
+      'SAINT SALAD SALES SALON SALSA SAUCE SCALE SCARY SCENE SCENT SCOPE SCORE SCOUT SCREW SENSE SERVE SETUP SHADE SHAKE SHAPE SHARE SHARK SHARP SHEEP SHEET SHELF SHELL SHIFT SHINE SHINY SHIRT SHOCK SHOES SHOOT SHORT SHOUT SHOWN SIGHT SILLY SINCE SKILL SKIRT SKULL SLATE SLEEP SLICE SLIDE SLOPE SMALL SMART SMELL SMILE SMOKE SNAKE SOLAR SOLID SOLVE SORRY SOUND SOUTH SPACE SPARE SPEAK SPEED SPELL SPEND SPICE SPICY SPIKE SPILL SPINE SPLIT SPOKE SPORT SPRAY STAGE STAIR STAKE STAMP STAND STARE START STATE STEAK STEAL STEAM STEEL STEEP STEER STICK STILL STOCK STONE STOOD STOOL STORE STORM STORY STOVE STRAP STRAW STRIP STUCK STUDY STUFF STYLE SUGAR SUITE SUNNY SUPER SWEAR SWEAT SWEET SWIFT SWING SWORD ' +
+      'TABLE TAKEN TASTE TEACH TEARS TEENS TEETH TEMPO TENSE TERMS THANK THEME THERE THESE THICK THIEF THING THINK THIRD THOSE THREE THROW THUMB TIGER TIGHT TIMER TIRED TITLE TODAY TOKEN TOWER TRACK TRADE TRAIL TRAIN TREAT TREND TRIAL TRICK TRIED TRUCK TRULY TRUST TRUTH TULIP TWICE TWIST ' +
+      'UNDER UNION UNITE UNITY UNTIL UPPER UPSET URBAN USAGE USUAL VALID VALUE VIDEO VIRAL VIRUS VISIT VITAL VOICE WAGON WASTE WATCH WATER WAVES WEARY WEIGH WEIRD WHALE WHEAT WHEEL WHERE WHICH WHILE WHITE WHOLE WHOSE WITCH WOMAN WOMEN WORLD WORRY WORSE WORST WORTH WOULD WOUND WRITE WRONG YACHT YIELD YOUNG YOUTH ZEBRA ' +
+      'ACE ACT AGE AIR ANT ARC ARM ART ASH AWE BAG BAR BAT BAY BED BEE BET BIN BOG BOW BOX BUD BUG BUS CAB CAP CAR CAT COW CUB CUP CUT DAY DEN DEW DIG DOG DOT DRY EAR EAT EEL EGG ELF ELK END ERA EYE FAN FAX FIG FIN FLY FOG FOX GAS GEM GUM GYM HAM HAT HAY HEN HOG HOP HUG HUT ICE INK INN ION IVY JAM JAR JAW JET JOB JOG JOY JUG KEY LAB LAP LAW LEG LID LIP LOG MAP MAT MIX MOP MUD MUG NAP NET NOD NUN NUT OAK OAR OAT OIL ORE OWL PAN PAW PEA PEN PET PIE PIG PIN PIT POT RAG RAM RAN RAT RAW RED RIB RIG RIM RIP ROB ROD ROW RUG RUN SAD SAP SAT SAW SEA SEE SET SEW SIP SIR SIT SKI SKY SOB SON SOW SPA SPY SUN TAN TAP TAR TAX TEA TEN TIE TIN TIP TOE TON TOP TOY TRY TUB TUG TWO URN USE VAN VAT VET VIA VOW WAR WAS WAX WAY WEB WED WET WHO WHY WIG WIN WIT WOK WON YAK YAM YES YET ZIP ZOO'
+    ).split(/\s+/));
+
+    // Every square in the symmetric 5×5 layout belongs to an Across or Down entry.
+    const slots = [];
+    const starts = new Map();
+    let number = 0;
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
+      if (SHAPE[r][c] === '#') continue;
+      const across = c === 0 || SHAPE[r][c - 1] === '#';
+      const down = r === 0 || SHAPE[r - 1][c] === '#';
+      if (!across && !down) continue;
+      number++;
+      starts.set(r * 5 + c, number);
+      for (const [start, dir] of [[across, 'across'], [down, 'down']]) {
+        if (!start) continue;
+        const cells = [];
+        let y = r, x = c;
+        while (y < 5 && x < 5 && SHAPE[y][x] !== '#') { cells.push(y * 5 + x); y += dir === 'down' ? 1 : 0; x += dir === 'across' ? 1 : 0; }
+        if (cells.length >= 3) slots.push({ id: dir[0] + r + c, number, dir, cells });
+      }
+    }
+    const fallback = {
+      a01: ['ROW','A line of things'], a10: ['SOLID','A state of matter with a fixed shape'],
+      a20: ['ABIDE','Accept or tolerate'], a30: ['WOVEN','Made by interlacing threads'], a41: ['TEN','One more than nine'],
+      d01: ['ROBOT','A programmable machine'], d02: ['OLIVE','A small green or black fruit'],
+      d03: ['WIDEN','Make broader'], d10: ['SAW','A tool for cutting wood'], d14: ['DEN','An animal shelter']
+    };
+    const dateKey = () => { const d = new Date(); return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'); };
+    const seedOf = str => { let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h,16777619); } return h >>> 0; };
+    const randomOf = seed => () => { seed += 0x6D2B79F5; let t=seed; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; };
+    const safeGet = (key) => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
+    const safeSet = (key, value) => { try { localStorage.setItem(key,JSON.stringify(value)); } catch { /* Private mode can block storage. */ } };
+    const today = dateKey();
+    let pool = null, puzzle = null, values = {}, hints = new Set(), selected = null, cursor = 0, wrong = null;
+    let started = 0, stopped = 0, finished = false, mode = 'random', nonce = 0, working = false;
+    let stats = safeGet(STORE+'.stats') || { played:0,wins:0,streak:0,best:0,lastWin:'' };
+
+    function makeEntries(dictionary, seed) {
+      const rand = randomOf(seed);
+      const pools = {};
+      for (const len of [3,5]) {
+        pools[len] = (dictionary[len] || []).map(pair => ({ word:pair[0], clue:pair[1], easy:common.has(pair[0]) ? 1 : 0, roll:rand() }));
+        pools[len].sort((a,b) => b.easy-a.easy || b.roll-a.roll);
+      }
+      let steps = 0, assigned = new Map();
+      const search = (board, used) => {
+        if (++steps > 28000) return false;
+        if (assigned.size === slots.length) return true;
+        let chosen = null, choices = null;
+        for (const slot of slots) {
+          if (assigned.has(slot.id)) continue;
+          const pattern = slot.cells.map(i => board[i] || '.');
+          const options = pools[slot.cells.length].filter(entry => !used.has(entry.word) && pattern.every((ch,i) => ch === '.' || ch === entry.word[i]));
+          if (!options.length) return false;
+          if (!choices || options.length < choices.length) { chosen = slot; choices = options; if (options.length === 1) break; }
+        }
+        // Cap extremely broad branches; restarting with a different seed adds variety.
+        for (const entry of choices.slice(0,Math.min(choices.length,75))) {
+          const next = board.slice();
+          chosen.cells.forEach((idx,i) => next[idx] = entry.word[i]);
+          used.add(entry.word); assigned.set(chosen.id,entry);
+          if (search(next,used)) return true;
+          assigned.delete(chosen.id); used.delete(entry.word);
+        }
+        return false;
+      };
+      if (!search(Array(25).fill(''),new Set())) return null;
+      const entries = slots.map(slot => ({...slot, word:assigned.get(slot.id).word,clue:assigned.get(slot.id).clue}));
+      return { entries, rating:entries.reduce((s,e) => s + (common.has(e.word) ? 5 : 0) + (e.clue.length < 65 ? 1 : 0),0) };
+    }
+
+    function generate(dictionary, seed) {
+      let best = null;
+      for (let i=0;i<4;i++) {
+        const candidate = makeEntries(dictionary,seed + i * 1009);
+        if (candidate && (!best || candidate.rating > best.rating)) best = candidate;
+        if (best?.rating >= 50) break;
+      }
+      return best?.entries || null;
+    }
+    function fallbackPuzzle() { return slots.map(s => ({...s,word:fallback[s.id][0],clue:fallback[s.id][1]})); }
+    function serialize() { return { words:puzzle.map(w=>[w.word,w.clue]), values, hints:[...hints],started,stopped,finished,nonce }; }
+    const stateKey = () => STORE+'.'+(mode==='daily'?'daily.'+today:'random');
+    function save() { if(puzzle) safeSet(stateKey(),serialize()); }
+    function restore(saved) {
+      if (!saved || !Array.isArray(saved.words) || saved.words.length !== slots.length) return false;
+      if (saved.words.some((pair,i) => !Array.isArray(pair) || !/^[A-Z]{3,5}$/.test(pair[0]) || pair[0].length!==slots[i].cells.length || typeof pair[1]!=='string')) return false;
+      // Ignore cached puzzles if their letters disagree at an intersection.
+      const seen = new Map();
+      for (let i=0;i<slots.length;i++) for (let j=0;j<slots[i].cells.length;j++) {
+        const cell=slots[i].cells[j],ch=saved.words[i][0][j];
+        if (seen.has(cell) && seen.get(cell)!==ch) return false;
+        seen.set(cell,ch);
+      }
+      puzzle = slots.map((slot,i)=>({...slot,word:saved.words[i][0],clue:saved.words[i][1]}));
+      values = Object.fromEntries(Object.entries(saved.values || {}).filter(([k,v]) => /^\d{1,2}$/.test(k) && /^[A-Z]$/.test(v)));
+      hints = new Set(Array.isArray(saved.hints)?saved.hints.filter(i=>Number.isInteger(i)&&i>=0&&i<25):[]);
+      started = Number(saved.started) || Date.now(); stopped = Number(saved.stopped)||0; finished=!!saved.finished; nonce=Number(saved.nonce)||0;
+      return true;
+    }
+
+    function announce(text,kind='') { $('notice').textContent=text; $('notice').className=kind; }
+    function corrected(word) { return word.cells.every((idx,i)=>values[idx]===word.word[i]); }
+    function correctCount() { return puzzle?.filter(corrected).length || 0; }
+    function record(won) {
+      stats.played = (Number(stats.played)||0)+1;
+      if (won) {
+        stats.wins=(Number(stats.wins)||0)+1;
+        if (stats.lastWin!==today) {
+          const prev=new Date(today+'T12:00:00'); prev.setDate(prev.getDate()-1);
+          const prevDay=[prev.getFullYear(),String(prev.getMonth()+1).padStart(2,'0'),String(prev.getDate()).padStart(2,'0')].join('-');
+          stats.streak=stats.lastWin===prevDay?(Number(stats.streak)||0)+1:1;
+          stats.lastWin=today;
+        }
+        stats.best=Math.max(Number(stats.best)||0,stats.streak);
+      }
+      safeSet(STORE+'.stats',stats); renderStats();
+    }
+    function renderStats() {
+      const prev=new Date(today+'T12:00:00'); prev.setDate(prev.getDate()-1);
+      const previous=[prev.getFullYear(),String(prev.getMonth()+1).padStart(2,'0'),String(prev.getDate()).padStart(2,'0')].join('-');
+      $('played').textContent=stats.played||0; $('wins').textContent=stats.wins||0;
+      $('streak').textContent=stats.lastWin===today||stats.lastWin===previous?stats.streak||0:0;
+      $('best').textContent=stats.best||0;
+    }
+    function currentList() { return [...puzzle].sort((a,b)=>a.number-b.number||(a.dir==='across'?-1:1)); }
+    function pick(word,index=0) {
+      if (!word) return;
+      selected=word;cursor=Math.max(0,Math.min(word.cells.length-1,index)); wrong=null;
+      $('focusNumber').textContent=word.number+(word.dir==='across'?' ACROSS':' DOWN');
+      $('focusText').textContent=word.clue+' ('+word.word.length+')';
+      paint();
+    }
+    function pickCell(idx) {
+      const matches=puzzle.filter(word=>word.cells.includes(idx));
+      if (!matches.length) return;
+      const here=selected && selected.cells[cursor]===idx;
+      const same=matches.find(w=>w.id===selected?.id);
+      const next=here && matches.length>1?matches.find(w=>w!==same):same||matches[0];
+      pick(next,next.cells.indexOf(idx));
+    }
+    function cycle(delta=1) {
+      const list=currentList();
+      const idx=list.findIndex(w=>w.id===selected?.id);
+      pick(list[(idx+delta+list.length)%list.length]);
+    }
+    function renderBoard() {
+      const grid=$('grid');grid.replaceChildren();
+      for(let i=0;i<25;i++) {
+        if(SHAPE[Math.floor(i/5)][i%5]==='#') { const el=document.createElement('div');el.className='square black';el.setAttribute('aria-hidden','true');grid.append(el);continue; }
+        const el=document.createElement('button');el.type='button';el.className='square';el.dataset.idx=i;
+        const n=starts.get(i);if(n){const small=document.createElement('span');small.className='num';small.textContent=n;el.append(small);}
+        const letter=document.createElement('span');letter.className='letter';el.append(letter);
+        el.addEventListener('click',()=>pickCell(i));grid.append(el);
+      }
+    }
+    function renderClues() {
+      for(const direction of ['across','down']) {
+        const dest=$(direction); dest.replaceChildren();
+        for(const word of puzzle.filter(w=>w.dir===direction)) {
+          const btn=document.createElement('button');btn.type='button';btn.className='clue';btn.dataset.id=word.id;
+          const bold=document.createElement('b');bold.textContent=word.number+'. ';
+          btn.append(bold,document.createTextNode(word.clue));btn.addEventListener('click',()=>pick(word));dest.append(btn);
+        }
+      }
+    }
+    function paint() {
+      if(!puzzle)return;
+      for(const el of $('grid').querySelectorAll('button.square')) {
+        const idx=Number(el.dataset.idx),cursorCell=selected?.cells[cursor]===idx;
+        el.querySelector('.letter').textContent=values[idx]||'';
+        el.classList.toggle('selected',!!selected?.cells.includes(idx));
+        el.classList.toggle('cursor',cursorCell);
+        el.classList.toggle('hinted',hints.has(idx));
+        el.classList.toggle('wrong',wrong===selected?.id && selected.cells.includes(idx));
+        el.classList.toggle('verified',puzzle.some(w=>w.cells.includes(idx)&&corrected(w)));
+        el.setAttribute('aria-label',`${starts.get(idx)||''} ${values[idx]||'Blank'}, row ${Math.floor(idx/5)+1}, column ${idx%5+1}`);
+      }
+      for(const el of document.querySelectorAll('.clue')) {
+        const word=puzzle.find(w=>w.id===el.dataset.id);
+        el.classList.toggle('active',selected?.id===word.id);
+        el.classList.toggle('done',corrected(word));
+      }
+      const n=correctCount();$('solved').textContent=n+' / '+puzzle.length;$('progress').style.width=(n/puzzle.length*100)+'%';
+      $('hints').textContent=hints.size;
+      $('daily').classList.toggle('active',mode==='daily');
+      $('modeBadge').textContent=mode==='daily'?'DAILY · '+today:'UNLIMITED · RANDOM';
+      for(const id of ['hint','check','previous','next']) $(id).disabled=finished;
+    }
+    function timer() {
+      if(!started)return;
+      const s=Math.max(0,Math.floor(((stopped||Date.now())-started)/1000));
+      $('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+    }
+    function finishIfSolved() {
+      if(finished||correctCount()!==puzzle.length)return false;
+      finished=true;stopped=Date.now();record(true);save();paint();timer();
+      announce('Perfect grid! Mini complete in '+$('timer').textContent+' ✨','good');return true;
+    }
+    function letter(ch) {
+      if(!selected||finished)return;
+      let pos=cursor;
+      for(let i=0;i<selected.cells.length;i++) {
+        const test=(cursor+i)%selected.cells.length;
+        if(!hints.has(selected.cells[test])) { pos=test;break; }
+      }
+      const idx=selected.cells[pos]; if(hints.has(idx))return;
+      values[idx]=ch.toUpperCase();wrong=null;
+      const advance=selected.cells.findIndex((cell,i)=>i>pos&&!hints.has(cell));
+      cursor=advance<0?pos:advance;save();paint();
+      if(!finishIfSolved())announce('Keep going — '+correctCount()+' of '+puzzle.length+' words filled correctly.');
+    }
+    function erase() {
+      if(!selected||finished)return;
+      let pos=cursor;
+      if(!values[selected.cells[pos]] || hints.has(selected.cells[pos])) pos--;
+      while(pos>=0 && hints.has(selected.cells[pos]))pos--;
+      if(pos<0)return;
+      delete values[selected.cells[pos]];cursor=pos;wrong=null;save();paint();announce('Letter removed.');
+    }
+    function check() {
+      if(!selected||finished)return;
+      const complete=selected.cells.every(i=>values[i]);
+      if(!complete){announce('Fill the entire selected word first.','bad');return;}
+      if(corrected(selected)){announce('Correct! '+selected.word+' ✓','good');if(!finishIfSolved())paint();}
+      else{wrong=selected.id;paint();announce('Not quite — take another look.','bad');}
+    }
+    function reveal() {
+      if(!selected||finished)return;
+      const pos=selected.cells.findIndex((idx,i)=>values[idx]!==selected.word[i]);
+      if(pos<0){announce('This word is already right.','good');return;}
+      const idx=selected.cells[pos]; values[idx]=selected.word[pos];hints.add(idx);cursor=pos;wrong=null;save();paint();
+      if(!finishIfSolved())announce('Revealed one letter.','good');
+    }
+    function buildKeyboard() {
+      for(const row of ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM']) {
+        const outer=document.createElement('div');outer.className='keyrow';
+        for(const ch of row) {const btn=document.createElement('button');btn.type='button';btn.className='key';btn.textContent=ch;btn.setAttribute('aria-label','Type '+ch);btn.addEventListener('click',()=>letter(ch));outer.append(btn);}
+        if(row==='ZXCVBNM'){const back=document.createElement('button');back.type='button';back.className='key wide';back.textContent='⌫';back.setAttribute('aria-label','Backspace');back.addEventListener('click',erase);outer.append(back);}
+        $('keyboard').append(outer);
+      }
+    }
+    function install(entries,existing=false) {
+      puzzle=entries;selected=null;cursor=0;wrong=null;
+      if(!existing){values={};hints=new Set();started=Date.now();stopped=0;finished=false;}
+      renderBoard();renderClues();pick(puzzle[0]);paint();timer();save();
+      announce(finished?'You finished this mini! Press NEW for another.':mode==='daily'?'Today’s mini is ready. Good luck!':'Tap a clue or cell, then start typing.',finished?'good':'');
+    }
+    async function begin(nextMode=mode,force=false) {
+      if(working)return;
+      const changing=nextMode!==mode;
+      if(!changing && force && mode==='daily' && puzzle){announce('One daily mini per day! Come back tomorrow.');return;}
+      if(!changing && force && puzzle && !finished && Object.keys(values).length)record(false);
+      mode=nextMode;
+      if(!force){if(restore(safeGet(stateKey()))){install(puzzle,true);return;}}
+      const seed=mode==='daily'?seedOf('mini.'+today):seedOf('mini.'+Date.now()+'.'+(++nonce));
+      working=true;$('new').disabled=true;$('daily').disabled=true;
+      announce(pool?'Generating a fresh 5 × 5…':'Loading crossword API…');
+      // Yield a frame so the loading notice is visible before the synchronous solver runs.
+      await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+      let generated=pool?generate(pool,seed):null;
+      if(!generated)generated=fallbackPuzzle();
+      working=false;$('new').disabled=false;$('daily').disabled=false;
+      install(generated);
+      if(!pool)$('source').textContent='Offline sample · reconnect to load new API puzzles';
+    }
+    async function sync() {
+      const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),12000);
+      try {
+        const res=await fetch(API,{headers:{accept:'application/json'},signal:controller.signal,cache:'default'});
+        if(!res.ok)throw new Error('HTTP '+res.status);
+        const data=await res.json(),dict={3:[],5:[]};
+        for(const len of [3,5])for(const [word,clue] of Object.entries(data.lengths?.[len] || {})) {
+          if(new RegExp('^[A-Z]{'+len+'}$').test(word) && typeof clue==='string' && clue.trim().length>=5 && clue.length<=115 && !/https?:|\n/.test(clue)) {
+            // Favor familiar three-letter answers over specialist acronyms and technical terms.
+            if(len===3 && !common.has(word) && (clue.length>42 || /[();]/.test(clue)))continue;
+            dict[len].push([word,clue.trim()]);
+          }
+        }
+        if(dict[3].length<50||dict[5].length<100)throw new Error('Dictionary too small');
+        pool=dict;$('source').textContent=(dict[3].length+dict[5].length).toLocaleString()+' live clues · api.anrat.link/crossword';
+        // Replace the untouched offline sample with a genuinely API-generated puzzle.
+        if(puzzle && !finished && !Object.keys(values).length && !hints.size && puzzle.every(w=>fallback[w.id]?.[0]===w.word)){
+          const seed=mode==='daily'?seedOf('mini.'+today):seedOf('mini.'+Date.now());
+          const entries=generate(pool,seed);if(entries)install(entries);
+        }
+      } catch(err) {
+        $('source').textContent='Offline sample · live API unavailable';
+        console.warn('Mini Crossword API:',err);
+      } finally { clearTimeout(timeout); }
+    }
+    $('new').addEventListener('click',()=>begin('random',true));
+    $('daily').addEventListener('click',()=>begin(mode==='daily'?'random':'daily'));
+    $('check').addEventListener('click',check);$('hint').addEventListener('click',reveal);
+    $('previous').addEventListener('click',()=>cycle(-1));$('next').addEventListener('click',()=>cycle(1));
+    document.addEventListener('keydown',event=>{
+      if(!puzzle||finished||event.ctrlKey||event.metaKey||event.altKey||/INPUT|TEXTAREA|SELECT/.test(event.target.tagName))return;
+      if(/^[a-z]$/i.test(event.key)){event.preventDefault();letter(event.key);}
+      else if(event.key==='Backspace'||event.key==='Delete'){event.preventDefault();erase();}
+      else if(event.key==='Tab'){event.preventDefault();cycle(event.shiftKey?-1:1);}
+      else if(event.key==='ArrowLeft'||event.key==='ArrowUp'){event.preventDefault();cursor=Math.max(0,cursor-1);paint();}
+      else if(event.key==='ArrowRight'||event.key==='ArrowDown'){event.preventDefault();cursor=Math.min(selected.cells.length-1,cursor+1);paint();}
+      else if(event.key==='Enter' && !['BUTTON','A'].includes(event.target.tagName)){event.preventDefault();check();}
+      else if(event.key===' ' && event.target===document.body){event.preventDefault();pickCell(selected.cells[cursor]);}
+    });
+    buildKeyboard();renderStats();setInterval(timer,1000);
+    // Load the last game immediately; synchronize API clues in the background.
+    begin('random').then(sync);
+  })();
+  </script>
+</body>
+</html>

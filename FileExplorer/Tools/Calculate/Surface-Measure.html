@@ -91,6 +91,16 @@
     .conversion-line.current { background: #49325e66; border-color: #a77ce5; }
     .conversion-unit { color: #cfabf9; font-weight: 800; }
     .conversion-dims { color: #ddd3e8; text-align: right; overflow-wrap: anywhere; }
+    .line-actions { display: flex; gap: 8px; margin-bottom: 13px; }
+    .line-actions .btn:first-child { flex: 1; }
+    .line-actions .btn { min-height: 38px; }
+    .line-list { display: grid; gap: 7px; }
+    .line-entry { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; border: 1px solid #3d5350; background: #152a28; padding: 9px 10px; border-radius: 10px; }
+    .line-entry b { color: #91f4d4; font-size: 12px; }
+    .line-entry small { display: block; color: #b9d3cc; font-size: 12px; margin-top: 3px; }
+    .line-entry .btn { padding: 6px 9px; }
+    .line-empty { padding: 16px 8px; text-align: center; border: 1px dashed #574a68; border-radius: 9px; color: #a599b7; font-size: 11px; line-height: 1.65; }
+    .line-note { font-size: 11px; color: #aa9dbd; line-height: 1.6; margin: 0 0 14px; }
     .side-measurements { margin-top: 13px; display: grid; gap: 2px; }
     .side-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 3px; border-bottom: 1px solid #ffffff12; font-size: 12px; }
     .side-row:last-child { border-bottom: none; }
@@ -133,8 +143,9 @@
           <button class="btn icon-btn" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
           <button class="btn" id="fitBtn" title="Fit image within workspace">Fit</button>
           <button class="btn" id="panBtn" title="Pan the image (or hold Space)">Pan</button>
-          <button class="btn" id="undoBtn" title="Remove last point">Undo</button>
-          <button class="btn" id="clearBtn" title="Remove all points">Reset</button>
+          <button class="btn" id="lineTool" title="Draw additional measurements on the calibrated plane" disabled>＋ Line</button>
+          <button class="btn" id="undoBtn" title="Undo the last point or line">Undo</button>
+          <button class="btn" id="clearBtn" title="Remove calibration and all measured lines">Reset</button>
         </div>
       </div>
 
@@ -200,6 +211,15 @@
         </div>
         <p class="explain"><strong>How it works.</strong> The four corners define a perspective-projected <strong>rectangle</strong>. The tool rectifies its geometry using an assumed camera field of view, then scales it by your known side. Opposite sides are equal in the real world. Measurements are <strong>estimates</strong>, not survey-grade measurements.</p>
       </section>
+
+      <section class="panel">
+        <div class="panel-head"><div class="panel-title">Additional lines</div><span class="panel-kicker">SAME PLANE</span></div>
+        <p class="line-note">After calibrating the rectangle, add any number of straight measurements. Click a start point and an end point. Finish line mode to drag endpoints and refine existing measurements.</p>
+        <div class="line-actions"><button class="btn primary" id="addLineBtn" disabled>＋ Measure a line</button><button class="btn" id="clearLinesBtn" disabled>Clear lines</button></div>
+        <div class="line-empty" id="lineEmpty">Calibrate the surface to start measuring extra lines.</div>
+        <div class="line-list" id="lineList"></div>
+        <p class="field-note">Only lines on the same flat surface are valid. Lines on a different wall, tilted object, or away from that plane need a new calibration. Measurements far outside the marked rectangle may be less reliable.</p>
+      </section>
     </aside>
   </main>
 
@@ -216,7 +236,9 @@
       const SIDES = ['top', 'right', 'bottom', 'left'];
       const SIDE_LABELS = ['Top (A–B)', 'Right (B–C)', 'Bottom (C–D)', 'Left (D–A)'];
       const UNIT_TO_METERS = Object.freeze({ mm: 0.001, cm: 0.01, m: 1, in: 0.0254, ft: 0.3048 });
-      const state = { image: null, points: [], scale: 1, x: 0, y: 0, w: 0, h: 0, panMode: false, space: false, dragging: null, hover: null, last: null, result: null };
+      const state = { image: null, points: [], lines: [], nextLineId: 1, draftLine: null, lineMode: false,
+        calibration: null, scale: 1, x: 0, y: 0, w: 0, h: 0, panMode: false, space: false,
+        dragging: null, hover: null, last: null, result: null };
       let toastTimeout, objectURL, previousInputUnit = $('unit').value;
 
       function displayUnit() { return $('outputUnit').value === 'auto' ? $('unit').value : $('outputUnit').value; }
@@ -253,6 +275,15 @@
           const q = toScreen(state.points[i]); if (Math.hypot(q.x - pos.x, q.y - pos.y) <= 19) return i;
         }
         return -1;
+      }
+      function hitLineHandle(pos) {
+        for (let i = state.lines.length - 1; i >= 0; i--) {
+          for (const endpoint of ['b','a']) {
+            const p=toScreen(state.lines[i][endpoint]);
+            if (Math.hypot(p.x-pos.x,p.y-pos.y)<=14) return {index:i,endpoint};
+          }
+        }
+        return null;
       }
       function drawGrid() {
         const { w, h } = state; ctx.save(); ctx.strokeStyle = '#bba0e30b'; ctx.lineWidth = 1;
@@ -300,6 +331,27 @@
             const dx=mid.x-center.x,dy=mid.y-center.y, mag=Math.max(1,Math.hypot(dx,dy));
             label(format(lengths[i])+' '+displayUnit(), mid.x+dx/mag*27, mid.y+dy/mag*27, SIDES[i] === $('knownSide').value ? '#75efc2' : '#c59af8');
           }
+        }
+        for (let i=0;i<state.lines.length;i++) {
+          const line=state.lines[i],a=toScreen(line.a),b=toScreen(line.b);
+          const measured=measureLine(line), length=Math.hypot(b.x-a.x,b.y-a.y);
+          ctx.save();ctx.lineWidth=3;ctx.strokeStyle='#80efd0';ctx.shadowColor='#70f0cd92';ctx.shadowBlur=7;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore();
+          if (measured !== null) {
+            const nx=length>0?-(b.y-a.y)/length:0,ny=length>0?(b.x-a.x)/length:-1;
+            label('L'+line.id+' · '+format(measured)+' '+displayUnit(),(a.x+b.x)/2+nx*25,(a.y+b.y)/2+ny*25,'#70ecc5');
+          }
+          for (const [key,p] of [['a',a],['b',b]]) {
+            const hot=state.dragging?.type==='linePoint' && state.dragging.index===i && state.dragging.endpoint===key;
+            ctx.save();ctx.beginPath();ctx.arc(p.x,p.y,hot?8:6,0,2*Math.PI);
+            ctx.fillStyle='#0e2420';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#93ffe0';ctx.stroke();ctx.restore();
+          }
+        }
+        if (state.draftLine && state.result) {
+          const a=toScreen(state.draftLine),b=state.hover||a;
+          ctx.save();ctx.setLineDash([8,5]);ctx.strokeStyle='#84f5d4';ctx.lineWidth=2.5;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore();
+          ctx.save();ctx.beginPath();ctx.arc(a.x,a.y,7,0,2*Math.PI);ctx.fillStyle='#7ee7c4';ctx.fill();ctx.restore();
         }
         for (let i=0;i<pts.length;i++) {
           const p=pts[i], hot=state.dragging?.type === 'point' && state.dragging.index === i;
@@ -352,6 +404,25 @@
         const orthogonality=Math.abs((u[0]*v[0]+u[1]*v[1]+u[2]*v[2])/(un*vn));
         return { ratio, orthogonality, H, focal };
       }
+      // Convert a photo pixel to coordinates on the rectified unit rectangle.
+      // This inverse homography lets any segment on the same plane be measured.
+      function imageToPlane(p,H) {
+        const a=H.a-p.x*H.g,b=H.b-p.x*H.h,c=p.x-H.c;
+        const d=H.d-p.y*H.g,e=H.e-p.y*H.h,f=p.y-H.f;
+        const det=a*e-b*d;
+        if (!Number.isFinite(det) || Math.abs(det)<1e-9) return null;
+        const u=(c*e-b*f)/det,v=(a*f-c*d)/det;
+        if (!Number.isFinite(u) || !Number.isFinite(v) || Math.max(Math.abs(u),Math.abs(v))>50) return null;
+        return {u,v};
+      }
+      function measureLine(line) {
+        if (!state.result || !state.calibration) return null;
+        const a=imageToPlane(line.a,state.calibration.H),b=imageToPlane(line.b,state.calibration.H);
+        if (!a || !b) return null;
+        const width=state.result.width,height=state.result.height;
+        const length=Math.hypot((b.u-a.u)*width,(b.v-a.v)*height);
+        return Number.isFinite(length)?length:null;
+      }
       function autoFovEstimate() {
         if (!state.image || !validQuad(state.points)) { toast('Trace four corners first, in order A → B → C → D.'); return; }
         const H=squareHomography(state.points),cx=state.image.naturalWidth/2,cy=state.image.naturalHeight/2;
@@ -381,19 +452,14 @@
         $('step1').classList.toggle('active',!state.image);
         $('step2').classList.toggle('active',!!state.image && state.points.length<4);
         $('step3').classList.toggle('active',state.points.length===4);
-        $('undoBtn').disabled=!state.points.length;
-        $('clearBtn').disabled=!state.points.length;
+        $('undoBtn').disabled=!(state.points.length || state.lines.length || state.draftLine);
+        $('clearBtn').disabled=!(state.points.length || state.lines.length);
         $('fitBtn').disabled=!state.image;
         $('panBtn').disabled=!state.image;
         $('zoomIn').disabled=!state.image;
         $('zoomOut').disabled=!state.image;
         $('panBtn').classList.toggle('selected',state.panMode);
-        if (state.image) {
-          $('canvasHint').innerHTML=state.points.length<4
-            ? '<b>Next:</b> '+['click top-left corner A','click top-right corner B','click bottom-right corner C','click bottom-left corner D'][state.points.length]+' · Follow the surface perimeter.'
-            : '<b>Ready:</b> drag A/B/C/D to refine the corners. Edit the known length for live estimates.';
-        }
-        state.result=null;
+        state.result=null;state.calibration=null;
         const g=geometry(fov);
         let error='';
         if (state.points.length===4 && !g) error='The four corners must make a non-crossing, convex quadrilateral.';
@@ -405,8 +471,31 @@
           const height=(horizontal?len*g.ratio:len)*factor;
           if (Number.isFinite(width) && Number.isFinite(height) && width>0 && height>0) {
             state.result={width,height,area:width*height,perimeter:2*(width+height),ratio:g.ratio,orthogonality:g.orthogonality};
+            state.calibration=g;
           }
         }
+        const canMeasure=!!state.result;
+        $('lineTool').disabled=!canMeasure;
+        $('addLineBtn').disabled=!canMeasure;
+        $('lineTool').classList.toggle('selected',state.lineMode && canMeasure);
+        $('lineTool').textContent=state.lineMode?'✓ Line mode':'＋ Line';
+        $('addLineBtn').textContent=state.lineMode?'Done adding lines':'＋ Measure a line';
+        if (state.image) {
+          $('canvasHint').innerHTML=state.lineMode && canMeasure
+            ? (state.draftLine?'<b>Line mode:</b> click the second endpoint to finish this measurement.':'<b>Line mode:</b> click a starting point, then an endpoint. Press Esc to finish.')
+            : state.points.length<4
+              ? '<b>Next:</b> '+['click top-left corner A','click top-right corner B','click bottom-right corner C','click bottom-left corner D'][state.points.length]+' · Follow the surface perimeter.'
+              : '<b>Ready:</b> drag markers to refine measurements, or select + Line for extra distances.';
+        }
+        $('clearLinesBtn').disabled=!state.lines.length && !state.draftLine;
+        $('lineEmpty').hidden=!!state.lines.length;
+        $('lineEmpty').textContent=canMeasure?'Select “Measure a line” and choose two endpoints on the photo.':
+          'Calibrate the surface to start measuring extra lines.';
+        $('lineList').innerHTML=state.lines.map((line,i)=>{
+          const measured=measureLine(line);
+          return '<div class="line-entry"><div><b>Line '+line.id+'</b><small>'+ (measured===null?'Unavailable':format(measured)+' '+displayUnit()) +'</small></div>'+
+            '<button class="btn" type="button" data-remove-line="'+i+'" aria-label="Delete line '+line.id+'" title="Delete this line">✕</button></div>';
+        }).join('');
         $('results').hidden=!state.result;
         $('resultEmpty').hidden=!!state.result;
         if (!state.result) {
@@ -446,11 +535,24 @@
       function mousePos(e) { const r=canvas.getBoundingClientRect(); return { x:e.clientX-r.left,y:e.clientY-r.top }; }
       canvas.addEventListener('pointerdown',e=>{
         if (!state.image) return;
-        const pos=mousePos(e),hit=hitPoint(pos), p=toImage(pos);
-        if (e.button===1 || state.panMode || state.space || (state.points.length===4 && hit<0)) {
+        const pos=mousePos(e),hit=hitPoint(pos),lineHit=hitLineHandle(pos),p=toImage(pos);
+        if (e.button===1 || state.panMode || state.space) {
           state.dragging={type:'pan'}; state.last=pos; canvas.classList.add('grabbing');
+        } else if (e.button===0 && state.lineMode && state.result && inImage(p)) {
+          if (!state.draftLine) state.draftLine=clampPoint(p);
+          else {
+            const a=state.draftLine,b=clampPoint(p);
+            if (Math.hypot(a.x-b.x,a.y-b.y)<2) {toast('Choose a different endpoint for the line.');return;}
+            state.lines.push({id:state.nextLineId++,a,b});state.draftLine=null;
+            toast('Line measured. Click two more points to add another.');
+          }
+          state.hover=pos;e.preventDefault();update();return;
         } else if (hit>=0) {
           state.dragging={type:'point',index:hit}; canvas.classList.add('drag-point');
+        } else if (lineHit) {
+          state.dragging={type:'linePoint',...lineHit};canvas.classList.add('drag-point');
+        } else if (state.points.length===4) {
+          state.dragging={type:'pan'};state.last=pos;canvas.classList.add('grabbing');
         } else if (e.button===0 && state.points.length<4 && inImage(p)) {
           state.points.push(clampPoint(p)); state.dragging={type:'point',index:state.points.length-1};
           canvas.classList.add('drag-point'); update();
@@ -462,10 +564,13 @@
         const pos=mousePos(e);
         if (state.dragging?.type==='point') {
           state.points[state.dragging.index]=clampPoint(toImage(pos)); update();
+        } else if (state.dragging?.type==='linePoint') {
+          state.lines[state.dragging.index][state.dragging.endpoint]=clampPoint(toImage(pos));update();
         } else if (state.dragging?.type==='pan') {
           state.x+=pos.x-state.last.x;state.y+=pos.y-state.last.y;state.last=pos;draw();
-        } else { state.hover=pos; canvas.style.cursor=hitPoint(pos)>=0?'move':''; draw(); }
+        } else { state.hover=pos; canvas.style.cursor=state.lineMode && state.result?'crosshair':hitPoint(pos)>=0||hitLineHandle(pos)?'move':''; draw(); }
       });
+      canvas.addEventListener('pointerleave',()=>{if(!state.dragging){state.hover=null;draw();}});
       function finishDrag() { state.dragging=null;state.last=null;canvas.classList.remove('grabbing','drag-point');canvas.style.cursor='';draw(); }
       canvas.addEventListener('pointerup',finishDrag);canvas.addEventListener('pointercancel',finishDrag);canvas.addEventListener('lostpointercapture',finishDrag);
       canvas.addEventListener('wheel',e=>{
@@ -475,7 +580,8 @@
       document.addEventListener('keydown',e=>{
         const typing=['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName);
         if (!typing && e.code==='Space') {e.preventDefault();state.space=true;canvas.classList.add('pan');}
-        if (!typing && ['Backspace','Delete'].includes(e.key) && state.points.length) {e.preventDefault();state.points.pop();update();}
+        if (!typing && ['Backspace','Delete'].includes(e.key) && (state.draftLine||state.lines.length||state.points.length)) {e.preventDefault();undoLast();}
+        if (!typing && e.key==='Escape' && (state.lineMode||state.draftLine)) {state.lineMode=false;state.draftLine=null;update();}
         if (!typing && (e.key==='+' || e.key==='=')) zoomAt(1.25,{x:state.w/2,y:state.h/2});
         if (!typing && e.key==='-') zoomAt(.8,{x:state.w/2,y:state.h/2});
       });
@@ -488,7 +594,7 @@
         const url=URL.createObjectURL(file),img=new Image();
         img.onload=()=>{
           if (objectURL) URL.revokeObjectURL(objectURL);
-          objectURL=url;state.image=img;state.points=[];state.hover=null;
+          objectURL=url;state.image=img;state.points=[];state.lines=[];state.nextLineId=1;state.draftLine=null;state.lineMode=false;state.hover=null;
           $('photoName').textContent=file.name+' · '+img.naturalWidth+' × '+img.naturalHeight;
           fitImage();update();toast('Photo loaded. Click A → B → C → D around the rectangle.');
         };
@@ -508,9 +614,39 @@
       $('zoomIn').addEventListener('click',()=>zoomAt(1.3,{x:state.w/2,y:state.h/2}));
       $('zoomOut').addEventListener('click',()=>zoomAt(1/1.3,{x:state.w/2,y:state.h/2}));
       $('fitBtn').addEventListener('click',fitImage);
-      $('panBtn').addEventListener('click',()=>{state.panMode=!state.panMode;canvas.classList.toggle('pan',state.panMode);update();});
-      $('undoBtn').addEventListener('click',()=>{state.points.pop();update();});
-      $('clearBtn').addEventListener('click',()=>{state.points=[];update();toast('Corner markers cleared.');});
+      $('panBtn').addEventListener('click',()=>{
+        state.panMode=!state.panMode;
+        if(state.panMode){state.lineMode=false;state.draftLine=null;}
+        canvas.classList.toggle('pan',state.panMode);update();
+      });
+      function toggleLineMode() {
+        if (!state.result) return toast('Calibrate the rectangle before measuring extra lines.');
+        state.lineMode=!state.lineMode;
+        if (!state.lineMode) state.draftLine=null;
+        if (state.lineMode) {state.panMode=false;canvas.classList.remove('pan');}
+        update();
+      }
+      function undoLast() {
+        if (state.draftLine) state.draftLine=null;
+        else if (state.lines.length) state.lines.pop();
+        else if (state.lineMode) return toast('No extra lines to undo. Finish line mode to edit the original corners.');
+        else if (state.points.length) state.points.pop();
+        update();
+      }
+      $('lineTool').addEventListener('click',toggleLineMode);
+      $('addLineBtn').addEventListener('click',toggleLineMode);
+      $('lineList').addEventListener('click',e=>{
+        const button=e.target.closest('[data-remove-line]');if(!button)return;
+        const index=Number(button.dataset.removeLine);
+        if (!Number.isInteger(index)||index<0||index>=state.lines.length)return;
+        state.lines.splice(index,1);update();
+      });
+      $('clearLinesBtn').addEventListener('click',()=>{state.lines=[];state.draftLine=null;update();toast('Additional measurements cleared.');});
+      $('undoBtn').addEventListener('click',undoLast);
+      $('clearBtn').addEventListener('click',()=>{
+        state.points=[];state.lines=[];state.draftLine=null;state.lineMode=false;state.nextLineId=1;
+        update();toast('Calibration and line measurements cleared.');
+      });
       for (const id of ['knownSide','length','outputUnit','fov']) $(id).addEventListener('input',update);
       $('unit').addEventListener('change',()=>{
         const newUnit=$('unit').value, lengthField=$('length');
@@ -530,6 +666,10 @@
           'Area: '+format(r.area)+' '+u+'²','Perimeter: '+format(r.perimeter)+' '+u,
           'Known side: '+$('knownSide').value+' = '+$('length').value+' '+$('unit').value,'Assumed horizontal FOV: '+$('fov').value+'°',
           'Assumption: planar rectangular surface; results are estimates.'];
+        if (state.lines.length) {
+          lines.push('Additional line measurements (same plane):');
+          state.lines.forEach(line=>{const length=measureLine(line);lines.push('Line '+line.id+': '+(length===null?'unavailable':format(length)+' '+u));});
+        }
         const summary=lines.join('\n');
         try { await navigator.clipboard.writeText(summary);toast('Measurements copied to clipboard.'); }
         catch { const field=document.createElement('textarea');field.value=summary;field.style.position='fixed';field.style.opacity='0';document.body.append(field);field.select();const success=document.execCommand('copy');field.remove();toast(success?'Measurements copied.':'Copy unavailable in this browser.'); }

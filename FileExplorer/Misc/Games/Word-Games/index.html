@@ -68,7 +68,7 @@
   <script src="./game-stats.js"></script>
   <script>
     const tools = document.getElementById('tools');
-    const gameIds = { 'Crossword.html': 'crossword', 'Wordle-Unlimited.html': 'wordle', 'Connections.html': 'connections', 'Word-Search.html': 'wordsearch', 'Word-Wheel.html': 'wordwheel', 'layers.html': 'layers' };
+    const gameIds = { 'Crossword.html': 'crossword', 'Wordle-Unlimited.html': 'wordle', 'Connections.html': 'connections', 'Word-Search.html': 'wordsearch', 'Word-Wheel.html': 'wordwheel', 'layers.html': 'layers', 'Minute-Cryptic.html': 'minutecryptic' };
     function refreshTotals() {
       const total = GameStats.read('overall');
       document.getElementById('totalPlayed').textContent = total.played.toLocaleString();
@@ -117,6 +117,11 @@
         name: 'Layers',
         icon: '✳',
         description: 'Beat four secret mini-challenges to reveal a final Connections puzzle.'
+      },
+      'FileExplorer/Misc/Games/Word-Games/Minute-Cryptic.html': {
+        name: 'Minute Cryptic',
+        icon: '🕵️',
+        description: 'Crack one cryptic clue at a time. Play the daily puzzle, try random clues, or browse by difficulty and type.'
       }
     };
     function findTools(entries) {
@@ -180,8 +185,8 @@
     function showEntries(entries) {
       tools.replaceChildren();
       const list = entries.length ? [...entries] : [...localEntries];
-      // Layers is bundled next to this index, even if the site's file index omits it.
-      if (!list.some(entry => entry.name === 'layers.html')) list.push(localEntries.find(entry => entry.name === 'layers.html'));
+      // Include bundled games even if a previously generated file-index.json omits them.
+      for (const entry of localEntries) if (!list.some(item => item.name === entry.name)) list.push(entry);
       list.forEach(entry => addEntry(entry, tools));
       if (!tools.children.length) localEntries.forEach(entry => addEntry(entry, tools));
       refreshTotals();

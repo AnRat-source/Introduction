@@ -7,7 +7,8 @@
   const KEY = 'anrat.wordgames.stats.v1';
   const GAMES = {
     crossword: 'Crossword', wordle: 'Wordle Unlimited', connections: 'Connections',
-    wordsearch: 'Word Search', wordwheel: 'Word Wheel', layers: 'Layers'
+    wordsearch: 'Word Search', wordwheel: 'Word Wheel', layers: 'Layers',
+    minutecryptic: 'Minute Cryptic'
   };
   const empty = () => ({ played: 0, wins: 0, losses: 0, streak: 0, bestStreak: 0, lastWinDay: null, totalSeconds: 0 });
   const number = value => Math.max(0, Number.isFinite(Number(value)) ? Math.floor(Number(value)) : 0);
