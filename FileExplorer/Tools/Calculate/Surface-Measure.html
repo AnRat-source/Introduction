@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Surface Measure — Perspective Dimension Tool</title>
+  <style>
+    :root {
+      --bg: #0b0a12; --panel: #15121f; --panel-2: #1d1829; --line: #322b43;
+      --text: #f5f1ff; --muted: #a49bb6; --violet: #af84ff; --pink: #f17cca;
+      --green: #7ee7c4; --yellow: #f2cb79; --shadow: 0 20px 80px #0005;
+      font-family: "Cascadia Code", "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { min-height: 100%; }
+    body { margin: 0; background: radial-gradient(circle at 75% -15%, #39224745, transparent 36%), var(--bg); color: var(--text); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
+    button:disabled { cursor: not-allowed; opacity: .4; }
+    header { display: flex; gap: 18px; justify-content: space-between; align-items: center; padding: 22px clamp(18px, 3vw, 44px); border-bottom: 1px solid #ffffff0c; }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .brand-icon { width: 42px; height: 42px; border: 1px solid #bd8aff80; background: linear-gradient(135deg,#4d2c75,#21172d); border-radius: 12px; display: grid; place-items: center; box-shadow: inset 0 0 18px #a784ff20; }
+    .brand-icon svg { width: 25px; height: 25px; }
+    h1 { font-size: clamp(19px, 2.2vw, 23px); margin: 0; letter-spacing: -.7px; }
+    .subhead { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .offline { border: 1px solid #5aa98b50; background: #1c403631; color: #93f3cb; padding: 8px 11px; border-radius: 999px; font-size: 11px; white-space: nowrap; }
+    .offline::before { content: "●"; margin-right: 8px; font-size: 9px; }
+    .workspace { max-width: 1660px; margin: 0 auto; padding: 22px clamp(14px,2.5vw,42px) 44px; display: grid; grid-template-columns: minmax(0,1fr) 348px; gap: 19px; }
+    .main-panel, .panel { border: 1px solid var(--line); background: linear-gradient(160deg,#1a1523,#14111c); border-radius: 19px; box-shadow: var(--shadow); }
+    .main-panel { overflow: hidden; min-width: 0; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding: 15px 17px; }
+    .toolbar-title { font-size: 13px; font-weight: 700; letter-spacing: .1px; }
+    .toolbar-title small { display: block; font-size: 11px; font-weight: 400; color: var(--muted); margin-top: 4px; }
+    .tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .btn { border: 1px solid #463a5c; background: #211b2e; color: #e9e1f4; padding: 9px 12px; border-radius: 10px; font-size: 12px; transition: background .15s, border-color .15s, transform .15s; }
+    .btn:hover:not(:disabled) { background: #30263f; border-color: #785baa; }
+    .btn:active:not(:disabled) { transform: translateY(1px); }
+    .btn.icon-btn { font-size: 17px; line-height: 1; width: 36px; height: 35px; padding: 0; }
+    .btn.primary { background: linear-gradient(130deg,#b484f5,#8f62da); border-color: #b48af0; color: #1a1029; font-weight: 800; }
+    .btn.primary:hover:not(:disabled) { background: linear-gradient(130deg,#c4a1fc,#a575e9); }
+    .btn.selected { border-color: var(--violet); background: #644483; }
+    .canvas-wrap { position: relative; height: clamp(435px,68vh,870px); background: radial-gradient(circle at center,#20192c 0%,#100d18 70%); overflow: hidden; }
+    canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+    canvas.pan { cursor: grab; }
+    canvas.grabbing { cursor: grabbing; }
+    canvas.drag-point { cursor: move; }
+    .empty-drop { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 22px; cursor: pointer; }
+    .drop-content { max-width: 360px; pointer-events: none; }
+    .drop-visual { margin: 0 auto 20px; width: 80px; height: 80px; border-radius: 22px; border: 1px dashed #af84ff8b; background: #a276eb15; display: grid; place-items: center; font-size: 32px; color: #c7a8fd; }
+    .drop-title { font-size: 20px; font-weight: 800; margin-bottom: 9px; }
+    .drop-text { color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .drop-button { display: inline-block; color: var(--violet); margin-top: 17px; font-size: 13px; font-weight: 700; }
+    .drag-over::after { content: "Drop image here"; position: absolute; inset: 10px; border: 2px dashed var(--violet); display: grid; place-items: center; background: #1c1229e8; color: #e9d9ff; font-size: 22px; font-weight: 700; pointer-events: none; border-radius: 15px; }
+    .canvas-hint { position: absolute; left: 14px; bottom: 15px; border: 1px solid #cdb1ff35; background: #0d0b15e5; border-radius: 9px; padding: 9px 11px; color: #d4c8e1; font-size: 11px; pointer-events: none; max-width: calc(100% - 28px); backdrop-filter: blur(12px); }
+    .canvas-hint b { color: var(--violet); }
+    .stage-progress { position: absolute; right: 15px; top: 15px; background: #100d18e3; border: 1px solid #d7a7ff31; padding: 8px 10px; border-radius: 9px; display: flex; gap: 5px; align-items: center; font-size: 11px; color: #ded0ec; pointer-events: none; }
+    .progress-dot { width: 9px; height: 9px; border: 1px solid #82649a; border-radius: 50%; background: #382945; }
+    .progress-dot.done { background: var(--violet); border-color: var(--violet); box-shadow: 0 0 8px #af84ff96; }
+    .footbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 13px 17px; border-top: 1px solid var(--line); color: #958aaa; font-size: 11px; }
+    .steps { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+    .step { background: #211a2c; color: #a397b5; border: 1px solid #312742; padding: 7px 8px; border-radius: 8px; }
+    .step.active { border-color: #9d6fde; color: #dec8ff; background: #4f307851; }
+    .side { display: flex; flex-direction: column; gap: 17px; min-width: 0; }
+    .panel { padding: 19px; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .panel-title { font-size: 15px; font-weight: 800; letter-spacing: -.3px; }
+    .panel-kicker { font-size: 10px; color: var(--violet); text-transform: uppercase; letter-spacing: 1.2px; }
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: block; color: #b5a9c6; font-size: 11px; margin-bottom: 8px; font-weight: 650; }
+    .field-note { font-size: 10px; color: #847891; line-height: 1.6; margin-top: 7px; }
+    select, input[type="number"] { width: 100%; background: #100e17; color: #f5effe; border: 1px solid #4b3b61; border-radius: 10px; padding: 12px 11px; min-height: 43px; font-size: 13px; }
+    input[type="number"]:disabled, select:disabled { opacity: .6; }
+    .double-field { display: grid; grid-template-columns: 1fr 93px; gap: 8px; }
+    input[type="range"] { width: 100%; margin: 2px 0 6px; accent-color: #b886f5; }
+    .range-row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .range-row output { color: #dec9ff; font-size: 14px; font-weight: 700; }
+    .range-meta { display: flex; justify-content: space-between; font-size: 10px; color: #8f809f; }
+    .secondary-action { border: 0; background: none; color: #c5a3ff; padding: 7px 0 0; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+    .result-box { border: 1px solid #744c964c; border-radius: 13px; padding: 16px; background: linear-gradient(145deg,#6e3d9940,#8a357b1b); }
+    .result-label { font-size: 10px; color: #bdb0ca; text-transform: uppercase; letter-spacing: .9px; }
+    .result-big { font-size: clamp(27px,3vw,37px); font-weight: 850; letter-spacing: -1.6px; margin: 8px 0 5px; overflow-wrap: anywhere; }
+    .result-big span { color: #c4a2ff; font-size: .45em; letter-spacing: 0; }
+    .result-sub { color: #bdafcd; font-size: 11px; }
+    .conversion-title { font-size: 11px; font-weight: 800; color: #dbc5f5; margin: 2px 0 10px; }
+    .conversion-grid { display: grid; gap: 6px; }
+    .conversion-line { display: grid; grid-template-columns: 39px 1fr; align-items: center; gap: 9px; font-size: 11px; background: #211b2c; border: 1px solid #382b4b; border-radius: 8px; padding: 9px 10px; }
+    .conversion-line.current { background: #49325e66; border-color: #a77ce5; }
+    .conversion-unit { color: #cfabf9; font-weight: 800; }
+    .conversion-dims { color: #ddd3e8; text-align: right; overflow-wrap: anywhere; }
+    .side-measurements { margin-top: 13px; display: grid; gap: 2px; }
+    .side-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 3px; border-bottom: 1px solid #ffffff12; font-size: 12px; }
+    .side-row:last-child { border-bottom: none; }
+    .side-name { display: flex; align-items: center; gap: 9px; color: #b6abc6; }
+    .swatch { width: 8px; height: 8px; border-radius: 3px; background: #ab81f2; }
+    .side-row:nth-child(even) .swatch { background: #f088ca; }
+    .side-value { font-weight: 750; color: #f6efff; white-space: nowrap; }
+    .known-tag { font-size: 9px; padding: 3px 6px; border: 1px solid #7ce6c454; color: var(--green); border-radius: 6px; margin-left: 3px; }
+    .result-empty { padding: 29px 10px 15px; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .result-empty .big-symbol { display: block; font-size: 31px; color: #8968ae; margin-bottom: 12px; }
+    .warning { display: none; margin-top: 12px; padding: 11px; background: #f3ca7911; border: 1px solid #b48d4f5d; border-radius: 9px; color: #f4dba8; font-size: 11px; line-height: 1.6; }
+    .explain { margin-top: 16px; color: #9f94ac; font-size: 11px; line-height: 1.75; }
+    .explain strong { color: #dac6f7; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 15px; }
+    .actions .btn { padding: 11px 5px; }
+    .status-toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%,20px); background: #29203b; border: 1px solid #b28be9; border-radius: 11px; color: white; box-shadow: 0 15px 40px #0009; font-size: 12px; padding: 12px 17px; opacity: 0; pointer-events: none; transition: opacity .2s,transform .2s; z-index: 100; max-width: min(92vw,500px); text-align: center; }
+    .status-toast.show { opacity: 1; transform: translate(-50%,0); }
+    .small-divider { height: 1px; background: #ffffff0d; margin: 16px 0; }
+    @media (max-width: 1080px) { .workspace { grid-template-columns: minmax(0,1fr) 310px; } }
+    @media (max-width: 880px) { .workspace { grid-template-columns: 1fr; } .side { display: grid; grid-template-columns: 1fr 1fr; align-items: start; } .canvas-wrap { height: clamp(410px,65vh,750px); } }
+    @media (max-width: 600px) { header { padding: 14px 15px; } .offline { font-size: 0; width: 13px; height: 13px; padding: 0; border: 0; background: #64daa3; } .offline::before { content: none; } .workspace { padding: 12px 10px 25px; gap: 12px; } .main-panel, .panel { border-radius: 13px; } .toolbar { padding: 11px; } .toolbar-title small { font-size: 10px; } .tools { gap: 4px; } .btn { padding: 8px; } .btn.icon-btn { width: 32px; height: 32px; } .canvas-wrap { height: 55vh; min-height: 390px; max-height: 680px; } .side { display: flex; gap: 12px; } .panel { padding: 16px; } .footbar { padding: 12px; } .steps { gap: 4px; } .step { padding: 5px 6px; font-size: 10px; } .brand-icon { width: 36px; height: 36px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5l13-2 3 13-14 5z" stroke="#dcbfff" stroke-width="1.4"/><path d="M4 5l8 7 8 4M12 12l5-9M12 12l-6 9" stroke="#c78cee" stroke-dasharray="2 2"/><circle cx="4" cy="5" r="2" fill="#f38bd4"/><circle cx="17" cy="3" r="2" fill="#f38bd4"/><circle cx="20" cy="16" r="2" fill="#f38bd4"/><circle cx="6" cy="21" r="2" fill="#f38bd4"/></svg></div>
+      <div><h1>Surface Measure</h1><p class="subhead">Perspective-aware dimensions from one photo</p></div>
+    </div>
+    <div class="offline" title="Images are processed inside your browser. Nothing is uploaded.">PRIVATE · ON-DEVICE</div>
+  </header>
+
+  <main class="workspace">
+    <section class="main-panel" aria-label="Image measurement canvas">
+      <div class="toolbar">
+        <div class="toolbar-title">IMAGE WORKSPACE <small id="photoName">No image loaded</small></div>
+        <div class="tools">
+          <button class="btn primary" id="uploadBtn">＋ Upload</button>
+          <button class="btn icon-btn" id="zoomOut" title="Zoom out" aria-label="Zoom out">−</button>
+          <button class="btn icon-btn" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+          <button class="btn" id="fitBtn" title="Fit image within workspace">Fit</button>
+          <button class="btn" id="panBtn" title="Pan the image (or hold Space)">Pan</button>
+          <button class="btn" id="undoBtn" title="Remove last point">Undo</button>
+          <button class="btn" id="clearBtn" title="Remove all points">Reset</button>
+        </div>
+      </div>
+
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="canvas" aria-label="Click to place four corners of a real-world rectangle, in order, then drag to adjust"></canvas>
+        <div class="empty-drop" id="emptyDrop" role="button" tabindex="0" aria-label="Choose an image">
+          <div class="drop-content"><div class="drop-visual">▧</div><div class="drop-title">Drop your image here</div><div class="drop-text">Choose a photo with a flat rectangular surface: a wall, floor, screen, book, sign, or table.</div><div class="drop-button">Browse images →</div></div>
+        </div>
+        <div class="stage-progress" id="progress" hidden><span id="pointCount">0 / 4 corners</span><span class="progress-dot"></span><span class="progress-dot"></span><span class="progress-dot"></span><span class="progress-dot"></span></div>
+        <div class="canvas-hint" id="canvasHint" hidden></div>
+      </div>
+
+      <div class="footbar">
+        <div class="steps"><span class="step active" id="step1">01 · Upload</span><span class="step" id="step2">02 · Mark corners</span><span class="step" id="step3">03 · Calibrate</span></div>
+        <span>Scroll to zoom · Drag markers to refine · Space + drag to pan</span>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="panel">
+        <div class="panel-head"><div class="panel-title">Calibration</div><span class="panel-kicker">INPUT</span></div>
+        <div class="field">
+          <label for="knownSide">Side you measured in real life</label>
+          <select id="knownSide"><option value="top">Top (A → B)</option><option value="right">Right (B → C)</option><option value="bottom">Bottom (C → D)</option><option value="left">Left (D → A)</option></select>
+        </div>
+        <div class="field">
+          <label for="length">Actual length of that side</label>
+          <div class="double-field"><input id="length" type="number" min="0.000001" step="any" value="100" inputmode="decimal"><select id="unit" aria-label="Unit"><option value="mm">mm</option><option value="cm" selected>cm</option><option value="m">m</option><option value="in">in</option><option value="ft">ft</option></select></div>
+        </div>
+        <div class="small-divider"></div>
+        <div class="field">
+          <div class="range-row"><label for="fov">Camera horizontal field of view</label><output id="fovValue" for="fov">60°</output></div>
+          <input id="fov" type="range" min="25" max="115" step="1" value="60">
+          <div class="range-meta"><span>Zoomed in · 25°</span><span>Wide · 115°</span></div>
+          <button id="autoFov" class="secondary-action">↗ Try to estimate from perspective</button>
+          <p class="field-note">This is a camera assumption, not an exact measurement. Use the photo's actual camera FOV when you know it. Auto-estimation works only when the perspective is strong enough.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div class="panel-title">Calculated dimensions</div><span class="panel-kicker">OUTPUT</span></div>
+        <div class="field">
+          <label for="outputUnit">Show measurements in</label>
+          <select id="outputUnit"><option value="auto">Same as input</option><option value="mm">Millimeters (mm)</option><option value="cm">Centimeters (cm)</option><option value="m">Meters (m)</option><option value="in">Inches (in)</option><option value="ft">Feet (ft)</option></select>
+          <p class="field-note">Change the display unit without changing the real size of the surface.</p>
+        </div>
+        <div class="result-empty" id="resultEmpty"><span class="big-symbol">◇</span>Add four corners to see your estimated measurements.</div>
+        <div id="results" hidden>
+          <div class="result-box">
+            <div class="result-label">Estimated surface width × height</div>
+            <div class="result-big" id="mainResult">—</div>
+            <div class="result-sub" id="aspectResult">—</div>
+          </div>
+          <div class="side-measurements" id="sideMeasurements"></div>
+          <div class="small-divider"></div>
+          <div class="side-row"><span class="side-name">Surface area</span><span class="side-value" id="areaResult">—</span></div>
+          <div class="side-row"><span class="side-name">Perimeter</span><span class="side-value" id="perimeterResult">—</span></div>
+          <div class="small-divider"></div>
+          <div class="conversion-title">Quick conversions · width × height</div>
+          <div class="conversion-grid" id="conversions"></div>
+          <div class="warning" id="warning"></div>
+          <div class="actions"><button class="btn primary" id="copyBtn">Copy values</button><button class="btn" id="exportBtn">Save image ↧</button></div>
+        </div>
+        <p class="explain"><strong>How it works.</strong> The four corners define a perspective-projected <strong>rectangle</strong>. The tool rectifies its geometry using an assumed camera field of view, then scales it by your known side. Opposite sides are equal in the real world. Measurements are <strong>estimates</strong>, not survey-grade measurements.</p>
+      </section>
+    </aside>
+  </main>
+
+  <input type="file" id="fileInput" accept="image/*" hidden>
+  <div class="status-toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const $ = id => document.getElementById(id);
+      const canvas = $('canvas'), ctx = canvas.getContext('2d'), wrap = $('canvasWrap');
+      const POINT_NAMES = ['A', 'B', 'C', 'D'];
+      const SIDES = ['top', 'right', 'bottom', 'left'];
+      const SIDE_LABELS = ['Top (A–B)', 'Right (B–C)', 'Bottom (C–D)', 'Left (D–A)'];
+      const UNIT_TO_METERS = Object.freeze({ mm: 0.001, cm: 0.01, m: 1, in: 0.0254, ft: 0.3048 });
+      const state = { image: null, points: [], scale: 1, x: 0, y: 0, w: 0, h: 0, panMode: false, space: false, dragging: null, hover: null, last: null, result: null };
+      let toastTimeout, objectURL, previousInputUnit = $('unit').value;
+
+      function displayUnit() { return $('outputUnit').value === 'auto' ? $('unit').value : $('outputUnit').value; }
+      function convert(value, fromUnit, toUnit) { return value * UNIT_TO_METERS[fromUnit] / UNIT_TO_METERS[toUnit]; }
+
+      function toast(msg) {
+        const el = $('toast'); el.textContent = msg; el.classList.add('show');
+        clearTimeout(toastTimeout); toastTimeout = setTimeout(() => el.classList.remove('show'), 3100);
+      }
+      function resizeCanvas() {
+        const rect = wrap.getBoundingClientRect();
+        const oldW = state.w, oldH = state.h;
+        state.w = Math.max(1, rect.width); state.h = Math.max(1, rect.height);
+        const dpr = Math.min(window.devicePixelRatio || 1, 3);
+        canvas.width = Math.round(state.w * dpr); canvas.height = Math.round(state.h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (state.image) { if (!oldW || !oldH) fitImage(); else { state.x += (state.w - oldW) / 2; state.y += (state.h - oldH) / 2; } }
+        draw();
+      }
+      function fitImage() {
+        if (!state.image) return;
+        const iw = state.image.naturalWidth, ih = state.image.naturalHeight;
+        state.scale = Math.min((state.w - 44) / iw, (state.h - 44) / ih);
+        state.x = (state.w - iw * state.scale) / 2;
+        state.y = (state.h - ih * state.scale) / 2;
+        draw();
+      }
+      function toScreen(p) { return { x: state.x + p.x * state.scale, y: state.y + p.y * state.scale }; }
+      function toImage(p) { return { x: (p.x - state.x) / state.scale, y: (p.y - state.y) / state.scale }; }
+      function clampPoint(p) { return { x: Math.max(0, Math.min(state.image.naturalWidth, p.x)), y: Math.max(0, Math.min(state.image.naturalHeight, p.y)) }; }
+      function inImage(p) { return p.x >= 0 && p.y >= 0 && p.x <= state.image.naturalWidth && p.y <= state.image.naturalHeight; }
+      function hitPoint(pos) {
+        for (let i = state.points.length - 1; i >= 0; i--) {
+          const q = toScreen(state.points[i]); if (Math.hypot(q.x - pos.x, q.y - pos.y) <= 19) return i;
+        }
+        return -1;
+      }
+      function drawGrid() {
+        const { w, h } = state; ctx.save(); ctx.strokeStyle = '#bba0e30b'; ctx.lineWidth = 1;
+        for (let x = 0.5; x < w; x += 28) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+        for (let y = 0.5; y < h; y += 28) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+        ctx.restore();
+      }
+      function label(text, x, y, color = '#c8abff') {
+        ctx.save(); ctx.font = '700 12px "Cascadia Code",monospace';
+        const width = ctx.measureText(text).width + 19;
+        x = Math.min(state.w - width/2 - 5, Math.max(width/2 + 5, x));
+        y = Math.min(state.h - 13, Math.max(13, y));
+        ctx.fillStyle = '#0f0b19ed'; ctx.strokeStyle = color + 'b0'; ctx.lineWidth = 1;
+        roundRect(ctx, x-width/2, y-13, width, 26, 8); ctx.fill(); ctx.stroke();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#f8edff'; ctx.fillText(text,x,y+1); ctx.restore();
+      }
+      function roundRect(c,x,y,w,h,r) { c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+      function draw() {
+        ctx.clearRect(0, 0, state.w, state.h); drawGrid();
+        if (!state.image) return;
+        const iw = state.image.naturalWidth * state.scale, ih = state.image.naturalHeight * state.scale;
+        ctx.save(); ctx.shadowColor = '#000a'; ctx.shadowBlur = 25; ctx.fillStyle = '#100e15'; ctx.fillRect(state.x, state.y, iw, ih); ctx.restore();
+        ctx.drawImage(state.image, state.x, state.y, iw, ih);
+        ctx.strokeStyle = '#d5bbf766'; ctx.lineWidth = 1; ctx.strokeRect(state.x, state.y, iw, ih);
+
+        const pts = state.points.map(toScreen);
+        if (pts.length) {
+          ctx.save();
+          ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+          for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x,pts[i].y);
+          if (pts.length === 4) ctx.closePath();
+          ctx.strokeStyle = '#deaeff'; ctx.lineWidth = 2.3; ctx.stroke();
+          if (pts.length === 4) { ctx.fillStyle = '#b069f334'; ctx.fill(); }
+          if (state.hover && pts.length < 4) {
+            ctx.setLineDash([6,5]); ctx.beginPath(); ctx.moveTo(pts[pts.length-1].x,pts[pts.length-1].y); ctx.lineTo(state.hover.x,state.hover.y); ctx.strokeStyle = '#ead1ff98'; ctx.stroke();
+          }
+          ctx.restore();
+        }
+        if (pts.length === 4 && state.result) {
+          const center = { x: pts.reduce((n,p) => n+p.x,0)/4, y: pts.reduce((n,p) => n+p.y,0)/4 };
+          const lengths = [state.result.width,state.result.height,state.result.width,state.result.height];
+          for (let i=0;i<4;i++) {
+            const a=pts[i],b=pts[(i+1)%4];
+            const mid={ x:(a.x+b.x)/2,y:(a.y+b.y)/2 };
+            const dx=mid.x-center.x,dy=mid.y-center.y, mag=Math.max(1,Math.hypot(dx,dy));
+            label(format(lengths[i])+' '+displayUnit(), mid.x+dx/mag*27, mid.y+dy/mag*27, SIDES[i] === $('knownSide').value ? '#75efc2' : '#c59af8');
+          }
+        }
+        for (let i=0;i<pts.length;i++) {
+          const p=pts[i], hot=state.dragging?.type === 'point' && state.dragging.index === i;
+          ctx.save(); ctx.shadowColor = hot ? '#f1a1ee' : '#b18aff'; ctx.shadowBlur = 15;
+          ctx.beginPath(); ctx.arc(p.x,p.y,hot?11:9,0,Math.PI*2); ctx.fillStyle = '#a577ea'; ctx.fill();
+          ctx.shadowBlur=0; ctx.strokeStyle = '#fff'; ctx.lineWidth=2; ctx.stroke();
+          ctx.font = '800 11px "Cascadia Code",sans-serif';ctx.fillStyle='#140a20';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(POINT_NAMES[i],p.x,p.y+.5);
+          ctx.restore();
+        }
+      }
+
+      // A unit square maps to image coordinates through this projective homography.
+      // H1 and H2 represent unit increments along the two real-world edge directions.
+      function squareHomography(pts) {
+        const [p0,p1,p2,p3] = pts;
+        const dx1=p1.x-p2.x, dx2=p3.x-p2.x, dx3=p0.x-p1.x+p2.x-p3.x;
+        const dy1=p1.y-p2.y, dy2=p3.y-p2.y, dy3=p0.y-p1.y+p2.y-p3.y;
+        let g=0,h=0;
+        if (Math.abs(dx3)+Math.abs(dy3)>1e-7) {
+          const den=dx1*dy2-dx2*dy1;
+          if (Math.abs(den)<1e-8) return null;
+          g=(dx3*dy2-dx2*dy3)/den; h=(dx1*dy3-dx3*dy1)/den;
+        }
+        return { a:p1.x-p0.x+g*p1.x, b:p3.x-p0.x+h*p3.x, c:p0.x,
+                 d:p1.y-p0.y+g*p1.y, e:p3.y-p0.y+h*p3.y, f:p0.y, g,h };
+      }
+      function validQuad(pts) {
+        if (pts.length !== 4) return false;
+        let first=0;
+        for (let i=0;i<4;i++) {
+          const a=pts[i],b=pts[(i+1)%4],c=pts[(i+2)%4];
+          const cross=(b.x-a.x)*(c.y-b.y)-(b.y-a.y)*(c.x-b.x);
+          if (Math.abs(cross)<1e-5) return false;
+          if (!first) first=Math.sign(cross);
+          else if (Math.sign(cross)!==first) return false;
+        }
+        const area=Math.abs(pts.reduce((s,p,i)=>s+p.x*pts[(i+1)%4].y-p.y*pts[(i+1)%4].x,0)/2);
+        return area>Math.max(100,state.image.naturalWidth*state.image.naturalHeight*0.00001);
+      }
+      function geometry(fovDeg) {
+        if (!state.image || !validQuad(state.points)) return null;
+        const H=squareHomography(state.points); if (!H) return null;
+        const w=state.image.naturalWidth, height=state.image.naturalHeight;
+        const focal=(w/2)/Math.tan(fovDeg*Math.PI/360),cx=w/2,cy=height/2;
+        const u=[(H.a-cx*H.g)/focal,(H.d-cy*H.g)/focal,H.g];
+        const v=[(H.b-cx*H.h)/focal,(H.e-cy*H.h)/focal,H.h];
+        const un=Math.hypot(...u),vn=Math.hypot(...v);
+        if (!(un>0 && vn>0)) return null;
+        const ratio=vn/un;
+        const orthogonality=Math.abs((u[0]*v[0]+u[1]*v[1]+u[2]*v[2])/(un*vn));
+        return { ratio, orthogonality, H, focal };
+      }
+      function autoFovEstimate() {
+        if (!state.image || !validQuad(state.points)) { toast('Trace four corners first, in order A → B → C → D.'); return; }
+        const H=squareHomography(state.points),cx=state.image.naturalWidth/2,cy=state.image.naturalHeight/2;
+        const cross=(H.a-cx*H.g)*(H.b-cx*H.h)+(H.d-cy*H.g)*(H.e-cy*H.h);
+        const denominator=H.g*H.h;
+        if (Math.abs(denominator)<1e-8) { toast('Not enough perspective to estimate the camera FOV. Set it manually.'); return; }
+        const f2=-cross/denominator;
+        if (!Number.isFinite(f2) || f2<=0) { toast('Cannot estimate a valid FOV. Check corner order or enter your camera FOV manually.'); return; }
+        const estimate=360/Math.PI*Math.atan(cx/Math.sqrt(f2));
+        if (estimate<25 || estimate>115) { toast('Auto-estimate is outside the reliable range. Enter the camera FOV manually.'); return; }
+        $('fov').value=Math.round(estimate); update();
+        toast('Estimated horizontal FOV: '+estimate.toFixed(1)+'°. Treat this as an approximation.');
+      }
+      function format(v) {
+        if (!Number.isFinite(v)) return '—';
+        const abs=Math.abs(v);
+        return v.toLocaleString(undefined,{maximumFractionDigits:abs>=100?1:abs>=10?2:abs>=1?3:5});
+      }
+      function update() {
+        const len=Number($('length').value),fov=Number($('fov').value);
+        $('fovValue').textContent=fov+'°';
+        $('emptyDrop').hidden=!!state.image;
+        $('progress').hidden=!state.image;
+        $('canvasHint').hidden=!state.image;
+        $('pointCount').textContent=state.points.length+' / 4 corners';
+        [...$('progress').querySelectorAll('.progress-dot')].forEach((p,i)=>p.classList.toggle('done',i<state.points.length));
+        $('step1').classList.toggle('active',!state.image);
+        $('step2').classList.toggle('active',!!state.image && state.points.length<4);
+        $('step3').classList.toggle('active',state.points.length===4);
+        $('undoBtn').disabled=!state.points.length;
+        $('clearBtn').disabled=!state.points.length;
+        $('fitBtn').disabled=!state.image;
+        $('panBtn').disabled=!state.image;
+        $('zoomIn').disabled=!state.image;
+        $('zoomOut').disabled=!state.image;
+        $('panBtn').classList.toggle('selected',state.panMode);
+        if (state.image) {
+          $('canvasHint').innerHTML=state.points.length<4
+            ? '<b>Next:</b> '+['click top-left corner A','click top-right corner B','click bottom-right corner C','click bottom-left corner D'][state.points.length]+' · Follow the surface perimeter.'
+            : '<b>Ready:</b> drag A/B/C/D to refine the corners. Edit the known length for live estimates.';
+        }
+        state.result=null;
+        const g=geometry(fov);
+        let error='';
+        if (state.points.length===4 && !g) error='The four corners must make a non-crossing, convex quadrilateral.';
+        else if (state.points.length===4 && !(len>0 && Number.isFinite(len))) error='Enter a real-world side length greater than zero.';
+        if (!error && g) {
+          const horizontal=['top','bottom'].includes($('knownSide').value);
+          const factor=UNIT_TO_METERS[$('unit').value]/UNIT_TO_METERS[displayUnit()];
+          const width=(horizontal?len:len/g.ratio)*factor;
+          const height=(horizontal?len*g.ratio:len)*factor;
+          if (Number.isFinite(width) && Number.isFinite(height) && width>0 && height>0) {
+            state.result={width,height,area:width*height,perimeter:2*(width+height),ratio:g.ratio,orthogonality:g.orthogonality};
+          }
+        }
+        $('results').hidden=!state.result;
+        $('resultEmpty').hidden=!!state.result;
+        if (!state.result) {
+          $('resultEmpty').innerHTML='<span class="big-symbol">◇</span>'+(error||'Add four corners to see your estimated measurements.');
+        } else {
+          const r=state.result,u=displayUnit();
+          $('mainResult').innerHTML=escapeHtml(format(r.width))+' <span>×</span> '+escapeHtml(format(r.height))+' <span>'+u+'</span>';
+          $('aspectResult').textContent='Width : height ≈ '+format(r.width/r.height)+' : 1';
+          $('areaResult').textContent=format(r.area)+' '+u+'²';
+          $('perimeterResult').textContent=format(r.perimeter)+' '+u;
+          $('sideMeasurements').innerHTML=SIDES.map((side,i)=>{
+            const measured=side===$('knownSide').value;
+            return '<div class="side-row"><span class="side-name"><span class="swatch"></span>'+SIDE_LABELS[i]+(measured?' <span class="known-tag">KNOWN</span>':'')+'</span><span class="side-value">'+format(i%2?r.height:r.width)+' '+u+'</span></div>';
+          }).join('');
+          $('conversions').innerHTML=Object.keys(UNIT_TO_METERS).map(other=>{
+            const w=convert(r.width,u,other),h=convert(r.height,u,other);
+            return '<div class="conversion-line'+(other===u?' current':'')+'"><span class="conversion-unit">'+other+'</span><span class="conversion-dims">'+format(w)+' × '+format(h)+' '+other+'</span></div>';
+          }).join('');
+          const note=$('warning');
+          if (r.orthogonality>.12) {
+            note.textContent='⚠ This outline does not perfectly match a projected right-angled rectangle at the selected FOV. The dimensions may be inaccurate. Check your corners and camera FOV.';
+            note.style.display='block';
+          } else note.style.display='none';
+        }
+        draw();
+      }
+      function escapeHtml(str) { return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+      function zoomAt(factor, point) {
+        if (!state.image) return;
+        const oldScale=state.scale;
+        const target=Math.max(.01,Math.min(30,oldScale*factor));
+        const anchor=toImage(point);
+        state.scale=target;
+        state.x=point.x-anchor.x*target; state.y=point.y-anchor.y*target;
+        draw();
+      }
+      function mousePos(e) { const r=canvas.getBoundingClientRect(); return { x:e.clientX-r.left,y:e.clientY-r.top }; }
+      canvas.addEventListener('pointerdown',e=>{
+        if (!state.image) return;
+        const pos=mousePos(e),hit=hitPoint(pos), p=toImage(pos);
+        if (e.button===1 || state.panMode || state.space || (state.points.length===4 && hit<0)) {
+          state.dragging={type:'pan'}; state.last=pos; canvas.classList.add('grabbing');
+        } else if (hit>=0) {
+          state.dragging={type:'point',index:hit}; canvas.classList.add('drag-point');
+        } else if (e.button===0 && state.points.length<4 && inImage(p)) {
+          state.points.push(clampPoint(p)); state.dragging={type:'point',index:state.points.length-1};
+          canvas.classList.add('drag-point'); update();
+        } else return;
+        e.preventDefault(); canvas.setPointerCapture(e.pointerId); draw();
+      });
+      canvas.addEventListener('pointermove',e=>{
+        if (!state.image) return;
+        const pos=mousePos(e);
+        if (state.dragging?.type==='point') {
+          state.points[state.dragging.index]=clampPoint(toImage(pos)); update();
+        } else if (state.dragging?.type==='pan') {
+          state.x+=pos.x-state.last.x;state.y+=pos.y-state.last.y;state.last=pos;draw();
+        } else { state.hover=pos; canvas.style.cursor=hitPoint(pos)>=0?'move':''; draw(); }
+      });
+      function finishDrag() { state.dragging=null;state.last=null;canvas.classList.remove('grabbing','drag-point');canvas.style.cursor='';draw(); }
+      canvas.addEventListener('pointerup',finishDrag);canvas.addEventListener('pointercancel',finishDrag);canvas.addEventListener('lostpointercapture',finishDrag);
+      canvas.addEventListener('wheel',e=>{
+        if (!state.image) return;
+        e.preventDefault();zoomAt(Math.exp(-e.deltaY*.0014),mousePos(e));
+      },{passive:false});
+      document.addEventListener('keydown',e=>{
+        const typing=['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName);
+        if (!typing && e.code==='Space') {e.preventDefault();state.space=true;canvas.classList.add('pan');}
+        if (!typing && ['Backspace','Delete'].includes(e.key) && state.points.length) {e.preventDefault();state.points.pop();update();}
+        if (!typing && (e.key==='+' || e.key==='=')) zoomAt(1.25,{x:state.w/2,y:state.h/2});
+        if (!typing && e.key==='-') zoomAt(.8,{x:state.w/2,y:state.h/2});
+      });
+      document.addEventListener('keyup',e=>{if(e.code==='Space'){state.space=false;canvas.classList.remove('pan');}});
+      window.addEventListener('blur',()=>{state.space=false;canvas.classList.remove('pan');});
+
+      function loadFile(file) {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { toast('Please choose an image file.');return; }
+        const url=URL.createObjectURL(file),img=new Image();
+        img.onload=()=>{
+          if (objectURL) URL.revokeObjectURL(objectURL);
+          objectURL=url;state.image=img;state.points=[];state.hover=null;
+          $('photoName').textContent=file.name+' · '+img.naturalWidth+' × '+img.naturalHeight;
+          fitImage();update();toast('Photo loaded. Click A → B → C → D around the rectangle.');
+        };
+        img.onerror=()=>{URL.revokeObjectURL(url);toast('Could not open that image. Try PNG, JPG, or WebP.');};
+        img.src=url;
+      }
+      $('fileInput').addEventListener('change',e=>{loadFile(e.target.files?.[0]);e.target.value='';});
+      function openPicker(){$('fileInput').click();}
+      $('uploadBtn').addEventListener('click',openPicker);
+      $('emptyDrop').addEventListener('click',openPicker);
+      $('emptyDrop').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPicker();}});
+      let dragDepth=0;
+      wrap.addEventListener('dragenter',e=>{e.preventDefault();dragDepth++;wrap.classList.add('drag-over');});
+      wrap.addEventListener('dragover',e=>e.preventDefault());
+      wrap.addEventListener('dragleave',e=>{e.preventDefault();if(--dragDepth<=0){dragDepth=0;wrap.classList.remove('drag-over');}});
+      wrap.addEventListener('drop',e=>{e.preventDefault();dragDepth=0;wrap.classList.remove('drag-over');loadFile([...e.dataTransfer.files].find(f=>f.type.startsWith('image/')));});
+      $('zoomIn').addEventListener('click',()=>zoomAt(1.3,{x:state.w/2,y:state.h/2}));
+      $('zoomOut').addEventListener('click',()=>zoomAt(1/1.3,{x:state.w/2,y:state.h/2}));
+      $('fitBtn').addEventListener('click',fitImage);
+      $('panBtn').addEventListener('click',()=>{state.panMode=!state.panMode;canvas.classList.toggle('pan',state.panMode);update();});
+      $('undoBtn').addEventListener('click',()=>{state.points.pop();update();});
+      $('clearBtn').addEventListener('click',()=>{state.points=[];update();toast('Corner markers cleared.');});
+      for (const id of ['knownSide','length','outputUnit','fov']) $(id).addEventListener('input',update);
+      $('unit').addEventListener('change',()=>{
+        const newUnit=$('unit').value, lengthField=$('length');
+        if (lengthField.value.trim() && Number.isFinite(Number(lengthField.value))) {
+          const converted=convert(Number(lengthField.value),previousInputUnit,newUnit);
+          lengthField.value=Number(converted.toPrecision(12)).toString();
+        }
+        previousInputUnit=newUnit;
+        update();
+      });
+      $('autoFov').addEventListener('click',autoFovEstimate);
+      $('copyBtn').addEventListener('click',async()=>{
+        const r=state.result;if(!r)return;
+        const u=displayUnit();
+        const lines=['Surface measurements (estimated)','Width: '+format(r.width)+' '+u,'Height: '+format(r.height)+' '+u,
+          'Top: '+format(r.width)+' '+u,'Right: '+format(r.height)+' '+u,'Bottom: '+format(r.width)+' '+u,'Left: '+format(r.height)+' '+u,
+          'Area: '+format(r.area)+' '+u+'²','Perimeter: '+format(r.perimeter)+' '+u,
+          'Known side: '+$('knownSide').value+' = '+$('length').value+' '+$('unit').value,'Assumed horizontal FOV: '+$('fov').value+'°',
+          'Assumption: planar rectangular surface; results are estimates.'];
+        const summary=lines.join('\n');
+        try { await navigator.clipboard.writeText(summary);toast('Measurements copied to clipboard.'); }
+        catch { const field=document.createElement('textarea');field.value=summary;field.style.position='fixed';field.style.opacity='0';document.body.append(field);field.select();const success=document.execCommand('copy');field.remove();toast(success?'Measurements copied.':'Copy unavailable in this browser.'); }
+      });
+      $('exportBtn').addEventListener('click',()=>{
+        if(!state.result)return;
+        const a=document.createElement('a');a.download='surface-measurement.png';a.href=canvas.toDataURL('image/png');a.click();toast('Annotated view downloaded.');
+      });
+      new ResizeObserver(resizeCanvas).observe(wrap);
+      update();
+    })();
+  </script>
+</body>
+</html>
