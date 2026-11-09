@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b13">
+  <title>Nova Nano — Private Browser AI</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b0b13;--surface:#12121f;--surface2:#181827;--hover:#222138;--border:#302b43;--text:#eeebfa;--muted:#9993b0;--accent:#bd84ff;--accent2:#8e5ff2;--pink:#f49bda;--green:#70deb8;--red:#ff8ba2;--radius:16px;font-family:"Cascadia Code",Consolas,ui-monospace,monospace}
+    *{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--bg);color:var(--text);overflow:hidden}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.42;cursor:not-allowed}button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}::selection{background:#7344aa85}
+    .app{display:flex;height:100dvh;min-height:350px;overflow:hidden}.sidebar{width:278px;flex:none;display:flex;flex-direction:column;padding:22px 14px 15px;border-right:1px solid var(--border);background:linear-gradient(165deg,#191429,#100f1c 42%,#0e0e17)}.brand{display:flex;align-items:center;gap:11px;padding:3px 10px 22px}.brand-mark{width:38px;height:38px;border:1px solid #a470ef88;border-radius:12px;background:linear-gradient(140deg,#ac6aff,#5134a6);box-shadow:0 0 28px #9c55fc35;display:grid;place-items:center;color:white;font-size:23px;font-weight:800}.brand strong{font-size:14px;letter-spacing:.09em}.brand small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.sidebar-button{width:100%;background:#211a35;border:1px solid #51446d;border-radius:10px;color:#f2e9ff;padding:13px 14px;display:flex;justify-content:space-between;align-items:center;text-align:left;transition:.15s}.sidebar-button:hover{border-color:var(--accent);background:#2b2147}.sidebar-title{font-size:10px;color:#88819c;text-transform:uppercase;letter-spacing:.14em;padding:27px 12px 11px}.chat-list{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#3c3152 transparent}.chat-row{display:flex;align-items:center;border-radius:9px;position:relative;margin-bottom:5px}.chat-row.active{background:#2d2245}.chat-row:not(.active):hover{background:#201b2d}.chat-choice{background:none;border:0;color:#d8d1ed;text-align:left;padding:12px 33px 12px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;font-size:12px}.chat-delete{position:absolute;right:5px;top:50%;transform:translateY(-50%);background:none;border:0;color:#8f839e;padding:4px 6px;font-size:15px}.chat-delete:hover{color:var(--red)}.sidebar-foot{border-top:1px solid var(--border);padding:15px 7px 0}.sidebar-foot .mini{font-size:11px;color:var(--muted);line-height:1.8}.sidebar-foot .mini strong{color:#ded1fa;font-weight:500}.sidebar-foot .private{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--green);margin-bottom:13px}
+    .main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;background:radial-gradient(ellipse 55% 40% at 49% -10%,#3220484a,transparent),var(--bg)}.topbar{height:68px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #292539;padding:0 clamp(14px,3vw,36px);background:#10101bcd;backdrop-filter:blur(16px);z-index:2}.top-left{min-width:0;display:flex;align-items:center;gap:14px}.top-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:360px}.subline{font-size:10px;color:var(--muted);margin-top:4px}.status-pill{display:inline-flex;gap:7px;align-items:center;border:1px solid #413851;background:#221b2e;padding:8px 11px;border-radius:100px;color:#dbccf0;font-size:10px;white-space:nowrap}.dot{width:7px;height:7px;border-radius:50%;background:#898193;box-shadow:0 0 0 3px #89819320}.dot.loading{background:var(--pink);box-shadow:0 0 0 3px #f49bda22;animation:pulse 1.3s infinite}.dot.ready{background:var(--green);box-shadow:0 0 0 3px #70deb822}.dot.error{background:var(--red)}@keyframes pulse{50%{opacity:.5}}.icon-btn{background:transparent;border:1px solid var(--border);border-radius:10px;color:#d3c8e5;height:35px;min-width:35px;padding:0 10px}.icon-btn:hover{background:var(--hover);border-color:#78629c}.right-tools{display:flex;align-items:center;gap:9px}.mobile-menu{display:none}
+    .notice{margin:12px auto 0;width:min(780px,calc(100% - 32px));background:#251b32;border:1px solid #5a3d6c;border-radius:10px;padding:11px 14px;color:#edd8ff;font-size:11px;display:none}.notice.visible{display:block}.notice button{color:var(--accent);text-decoration:underline;border:0;background:transparent;padding:0 0 0 8px}.messages{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#473b57 transparent;padding:27px 16px 36px}.thread{max-width:800px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;gap:27px}.empty{margin:auto;align-self:center;text-align:center;max-width:650px;padding:40px 8px 80px}.orb{width:76px;height:76px;margin:0 auto 24px;border-radius:23px;display:grid;place-items:center;background:radial-gradient(circle at 25% 20%,#dfadff,#8e5ded 54%,#52318b);box-shadow:0 0 60px #9b59ff4a,inset 0 0 0 1px #ffffff30;font-size:39px;color:#fff;transform:rotate(-7deg)}.orb span{transform:rotate(7deg)}.eyebrow{color:var(--accent);font-size:11px;letter-spacing:.17em;text-transform:uppercase}.empty h1{font-size:clamp(26px,4vw,39px);font-weight:700;letter-spacing:-.05em;margin:11px 0}.empty p{color:var(--muted);line-height:1.7;font-size:13px;margin:0 auto 25px;max-width:500px}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:555px;margin:auto}.suggestion{text-align:left;color:#e0d5f3;background:#171522;border:1px solid #342c48;border-radius:12px;padding:15px;line-height:1.55;font-size:11px;transition:.15s}.suggestion:hover{border-color:#8966b7;transform:translateY(-2px);background:#211a32}.suggestion span{display:block;color:var(--accent);font-size:18px;margin-bottom:8px}.load-box{margin:0 auto 21px;border:1px solid #53406f;background:#20182f;border-radius:13px;padding:13px 16px;max-width:555px;display:flex;gap:14px;align-items:center;text-align:left;justify-content:space-between}.load-box strong{font-size:12px}.load-box p{margin:4px 0 0;font-size:10px}.primary-btn{border:1px solid #c99aff;background:linear-gradient(135deg,#b77bff,#8057df);color:#110d1c;font-weight:800;border-radius:10px;padding:10px 16px;white-space:nowrap}.primary-btn:hover:not(:disabled){filter:brightness(1.1)}
+    .message{display:flex;gap:12px;min-width:0}.avatar{width:30px;height:30px;flex:none;border-radius:10px;background:#412b68;display:grid;place-items:center;font-size:14px;color:#e5c8ff;border:1px solid #705294}.message.user .avatar{background:#2b2939;color:#ddd7ef;border-color:#454057}.message-head{font-size:11px;color:#c8b3e4;margin:3px 0 9px;font-weight:700}.message.user .message-head{color:#b3aebf}.message-body{min-width:0;flex:1}.message-content{font-size:13px;line-height:1.85;color:#e8e2f2;word-break:break-word}.message-content strong{color:white}.message-content code{font-family:inherit;background:#292338;padding:2px 5px;border-radius:4px;font-size:.92em}.message-content pre{background:#11101c;border:1px solid #3a3150;overflow:auto;white-space:pre;border-radius:11px;padding:15px;margin:12px 0;line-height:1.6;scrollbar-width:thin}.message-content pre code{background:none;padding:0}.message-content blockquote{margin:9px 0;padding:4px 12px;border-left:3px solid #a778ef;color:#bfb3d2}.message.user .message-content{background:#211d30;border:1px solid #3a304f;padding:12px 15px;border-radius:3px 13px 13px 13px;width:fit-content;max-width:100%}.message-tools{margin-top:8px;display:flex;gap:9px;align-items:center;color:var(--muted);font-size:10px}.copy-btn{background:none;border:0;padding:3px;color:#9790ac;font-size:10px}.copy-btn:hover{color:var(--accent)}.cursor{display:inline-block;width:7px;height:14px;background:var(--pink);vertical-align:-2px;animation:pulse 1s infinite}.thinking{color:#bb9ed8;font-size:12px;display:inline-flex;gap:4px}.thinking i{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse .9s infinite}.thinking i:nth-child(2){animation-delay:.2s}.thinking i:nth-child(3){animation-delay:.4s}
+    .composer-wrap{flex:none;padding:0 18px 15px;background:linear-gradient(transparent,#0b0b13 28%)}.composer-area{max-width:800px;margin:auto}.loading-progress{display:none;margin-bottom:10px;background:#171323;border:1px solid #4b375f;border-radius:11px;padding:11px 14px}.loading-progress.visible{display:block}.progress-line{display:flex;justify-content:space-between;font-size:10px;color:#dac4ed;gap:14px}.progress-track{height:4px;margin-top:9px;background:#392f49;border-radius:10px;overflow:hidden}.progress-track div{height:100%;width:0;background:linear-gradient(90deg,#935af7,#efa2dd);transition:width .25s}.composer{border:1px solid #4b3a67;background:#1b1829;box-shadow:0 10px 40px #0000004a;border-radius:15px;padding:13px 14px 10px}.composer:focus-within{border-color:#a773e2}.input-row{display:flex;gap:10px;align-items:flex-end}.prompt{width:100%;border:0;outline:0!important;background:transparent;color:var(--text);font-size:13px;min-height:27px;max-height:160px;resize:none;line-height:1.6;padding:2px 0;overflow-y:auto}.prompt::placeholder{color:#837d98}.send{background:linear-gradient(135deg,#b67bff,#8d5fe5);color:#150d24;border:0;border-radius:9px;min-width:37px;height:35px;font-size:18px;font-weight:900}.send:hover:not(:disabled){filter:brightness(1.13)}.stop{background:#48283b;color:#ffc5d1;border:1px solid #a15172}.composer-meta{display:flex;justify-content:space-between;gap:8px;margin-top:11px;font-size:10px;color:#938aa5}.composer-meta kbd{font-family:inherit;border:1px solid #4d405a;border-radius:4px;padding:0 4px}.tag{color:var(--green)}.footer-note{text-align:center;font-size:10px;color:#767087;margin-top:11px}
+    .overlay{position:fixed;inset:0;background:#000000ab;backdrop-filter:blur(5px);z-index:10;display:none;justify-content:center;align-items:center;padding:18px}.overlay.show{display:flex}.modal{background:#171422;border:1px solid #56436c;width:min(520px,100%);border-radius:17px;box-shadow:0 30px 110px #000c;max-height:90dvh;overflow-y:auto;padding:24px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal h2{margin:0;font-size:19px}.modal p{color:var(--muted);line-height:1.65;font-size:11px;margin:9px 0 22px}.field{margin:20px 0}.field label{display:flex;justify-content:space-between;font-size:11px;color:#dfd4eb;margin-bottom:10px}.field label span{color:var(--accent)}.field select,.field textarea{width:100%;background:#0e0e18;border:1px solid #443750;border-radius:9px;color:var(--text);padding:11px;font-size:11px}.field textarea{min-height:94px;resize:vertical;line-height:1.6}.field input[type=range]{width:100%;accent-color:#ab77ed}.field small{display:block;color:#8d849f;margin-top:9px;font-size:10px;line-height:1.5}.modal-actions{display:flex;gap:10px;justify-content:flex-end;border-top:1px solid #382e46;padding-top:17px}.secondary{border:1px solid #4c3f60;background:#262034;color:#ddd1ef;border-radius:9px;padding:10px 13px}.secondary:hover{background:#342944}.backdrop{display:none}
+    @media(max-width:720px){.sidebar{position:absolute;z-index:9;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .2s;box-shadow:12px 0 60px #0006}.sidebar.open{transform:translateX(0)}.backdrop.visible{display:block;position:fixed;inset:0;background:#0009;z-index:8}.mobile-menu{display:block}.topbar{height:59px}.status-pill{font-size:0;padding:10px}.status-pill .dot{margin:0}.top-title{max-width:190px}.right-tools{gap:5px}.topbar .subline{display:none}.messages{padding-top:18px}.thread{gap:22px}.empty{padding:30px 4px 50px}.suggestions{gap:7px}.suggestion{padding:11px}.composer-wrap{padding:0 10px 10px}.footer-note{font-size:9px}.load-box{flex-direction:column;text-align:center;gap:12px}.load-box .primary-btn{width:100%}}
+    @media(max-width:400px){.top-title{max-width:130px}.suggestions{grid-template-columns:1fr}.suggestion:nth-last-child(-n+2){display:none}.brand{padding-bottom:15px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+    /* AnRat desktop theme: square frosted windows, title bars, Explorer, and command dock. */
+    :root{--bg:#111319;--surface:#1b1f27;--surface2:#242b36;--hover:#303949;--border:#596273;--text:#e6eef6;--muted:#aeb8c8;--accent:#a78bfa;--accent2:#8f76da;--pink:#e6b0d6;--green:#7edeb8;--red:#ff9e9e;--radius:0px;font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace}
+    body{background:#111319;color:var(--text);isolation:isolate}
+    body::before{content:"";position:fixed;inset:-18px;z-index:-2;background:#111319 url("https://anrat.link/Images/FullBackground-Night.gif") center bottom/cover no-repeat;filter:blur(9px) brightness(.42) saturate(.82);pointer-events:none}
+    .app{position:relative;z-index:1;gap:36px;padding:12px 15px 18px;background:transparent}
+    .app.explorer-hidden .sidebar{display:none}
+    .sidebar{width:320px;padding:0;background:rgba(21,26,35,.92);border:1px solid #5c687c;box-shadow:8px 10px 0 rgba(0,0,0,.38);backdrop-filter:blur(18px) saturate(1.25);border-radius:0}
+    .sidebar-chrome{height:38px;background:rgba(47,56,71,.7);border-bottom:1px solid #5c687c;display:flex;align-items:center;justify-content:space-between;padding:0 0 0 12px;font-weight:700;font-size:12px;color:#edf2f8;letter-spacing:.035em}
+    .sidebar-chrome span{display:flex;align-items:center;gap:9px}.folder-glyph{color:#f4c65f;font-size:16px}
+    .sidebar-close{height:29px;width:32px;margin-right:4px;border:1px solid transparent;background:transparent;color:#f4a5a5;font-family:Arial;font-size:16px}.sidebar-close:hover{border-color:#ac6674;background:#512934}
+    .brand{padding:15px 12px 14px;border-bottom:1px solid #ffffff19;gap:10px}.brand-mark{width:31px;height:31px;border-radius:0;background:rgba(117,105,139,.24);border:1px solid #b9a6c6;box-shadow:3px 3px 0 #0005;font-size:19px}.brand strong{font-size:12px;letter-spacing:.01em}.brand small{font-size:10px;letter-spacing:0}
+    .explorer-path{padding:12px 12px 5px;font-size:10px;color:#9ca9ba;letter-spacing:.015em}
+    .sidebar-button{margin:10px 12px 0;width:calc(100% - 24px);padding:10px 11px;border-radius:0;border:1px solid #7c8497;background:#232c3b;color:#e9f0fa;box-shadow:3px 3px 0 #0004;font-size:11px}
+    .sidebar-button:hover{background:#344052;border-color:#c3ccdc}.sidebar-button span{font-size:9px;color:#a6b3c8}
+    .sidebar-title{padding:21px 13px 10px;color:#9caabb;letter-spacing:.12em;font-size:10px}
+    .chat-list{padding:0 8px 0 10px}.chat-row{border-radius:0;margin-bottom:3px;border:1px solid transparent}.chat-row.active{background:rgba(116,137,167,.16);border-color:#61718b}.chat-row:not(.active):hover{background:#293343}.chat-choice{padding:10px 29px 10px 9px;font-size:11px;color:#d8e1ec}.chat-delete{color:#9caabb}.chat-delete:hover{color:#ffa1a1}
+    .sidebar-foot{padding:12px;border-top:1px solid #4a5668;background:rgba(15,19,26,.35)}.sidebar-foot .private{color:#8dddb4;font-size:10px}.sidebar-foot .mini{font-size:10px}.sidebar-foot .mini strong{color:#c6d4e6}
+    .main{border:1px solid #596273;box-shadow:5px 6px 0 rgba(0,0,0,.34);background:rgba(20,24,31,.8);backdrop-filter:blur(14px) saturate(1.15)}
+    .topbar{height:40px;min-height:40px;background:rgba(43,49,61,.94);padding:0 0 0 13px;border-bottom:1px solid #596273;backdrop-filter:none}.top-left{gap:7px}.top-title{color:#e6e9ee;font-size:11px;font-weight:700;letter-spacing:0;max-width:none}.topbar .subline{display:none}.mobile-menu{display:block;border-color:transparent!important;width:26px;min-width:26px;height:28px;font-size:15px;color:#c4b5fd}.mobile-menu:hover{background:#41495a}
+    .right-tools{height:100%;gap:0;align-items:center}.right-tools .icon-btn{height:29px;min-width:32px;border:1px solid #ffffff19;border-radius:0;margin-right:4px;color:#cbd5e1;font-size:15px;background:#ffffff08}.right-tools .icon-btn:hover{background:#3a4557;border-color:#91a0b7}
+    .status-pill{border-radius:0;padding:7px 12px;background:rgba(13,16,22,.55);border:1px solid #5b6575;font-size:10px;color:#d7e3ef;margin-right:8px}
+    .file-pathbar{display:flex;align-items:center;gap:12px;min-height:38px;padding:7px 16px;border-bottom:1px solid #4b5567;background:rgba(12,16,23,.75);font-size:11px;white-space:nowrap;overflow:hidden}
+    .file-pathbar .path{color:#c4b5fd}.file-pathbar .sep{color:#727f92}.file-pathbar .active-file{color:#e9f0fa;overflow:hidden;text-overflow:ellipsis}.file-pathbar .location{color:#a5b2c4;margin-left:auto;font-size:10px}
+    .messages{padding:18px 18px 28px;background:linear-gradient(180deg,rgba(16,21,30,.52),transparent 70%);scrollbar-color:#596273 transparent}.thread{max-width:900px;gap:16px}
+    .empty{width:min(680px,100%);max-width:none;margin:auto;padding:54px 24px 32px;border:1px solid #7b899b;border-radius:0;box-shadow:5px 6px 0 #0006;background:rgba(18,23,31,.8);backdrop-filter:blur(16px);position:relative}
+    .empty::before{content:"aqua@desktop: ~/AI/Welcome.txt";position:absolute;top:0;left:0;right:0;height:32px;display:flex;align-items:center;padding:0 12px;text-align:left;font-size:11px;font-weight:700;color:#e6e9ee;background:#2b313d;border-bottom:1px solid #728095}
+    .empty::after{content:"[ NANO / V1 ]";position:absolute;top:9px;right:13px;font-size:10px;letter-spacing:0;color:#bfc8d6;pointer-events:none}
+    .orb{width:62px;height:62px;border:1px solid #b6a1e2;border-radius:0;background:rgba(84,67,112,.46);box-shadow:5px 6px 0 #0005;font-size:31px;transform:none;margin-bottom:18px}.orb span{transform:none}.eyebrow{color:#c4b5fd;font-size:10px}.empty h1{font-size:clamp(22px,3vw,32px);letter-spacing:-.035em;margin:10px 0}.empty p{font-size:11px;color:#bbc7d7}
+    .load-box{border-radius:0;border-color:#77849a;background:rgba(23,29,40,.9);box-shadow:3px 4px 0 #0005}.load-box strong{color:#e7eaf1}.load-box p{color:#aeb8c8}.primary-btn{border-radius:0;background:#303a4b;border:1px solid #99a5bb;color:#e9f0fa;box-shadow:3px 3px 0 #0005;font-weight:700}.primary-btn:hover:not(:disabled){background:#465571;filter:none}
+    .suggestion{border-radius:0;background:rgba(28,34,45,.86);border-color:#5b687a;box-shadow:3px 3px 0 #0004;color:#dce5ee}.suggestion:hover{background:#303d51;border-color:#afc1d8;transform:translate(-1px,-1px)}.suggestion span{color:#c4b5fd;margin-bottom:5px}
+    .message{display:block;position:relative;background:rgba(20,24,31,.68);border:1px solid rgba(156,169,186,.76);box-shadow:4px 5px 0 #0006;backdrop-filter:blur(10px);border-radius:0}.message.user{background:rgba(34,40,53,.74)}
+    .message .avatar{position:absolute;top:7px;left:11px;width:21px;height:21px;background:#2c3442;border:1px solid #71819a;border-radius:0;font-size:12px;color:#c4b5fd}.message.user .avatar{background:#3c4351;border-color:#8794a5;color:#dfe8f1}
+    .message .message-head{margin:0;height:36px;display:flex;align-items:center;padding:0 12px 0 41px;background:rgba(43,49,61,.94);border-bottom:1px solid #687489;color:#e6ebf4;font-size:11px}.message.user .message-head{color:#e3ebf4}
+    .message .message-content{padding:14px 16px 6px;color:#e6eef6;font-size:12px;line-height:1.8}.message.user .message-content{background:none;border:0;padding:14px 16px 6px;max-width:100%;width:auto;border-radius:0}.message .message-content code{border-radius:0;background:#303a49}.message .message-content pre{border-radius:0;background:#11151d;border-color:#596273}
+    .message .message-tools{padding:4px 15px 10px;margin:0;font-size:10px}.copy-btn{color:#a8b6c8}.copy-btn:hover{color:#c4b5fd}
+    .composer-wrap{padding:0 18px 14px;background:transparent}.composer-area{max-width:900px}.composer{border:1px solid #596273;border-radius:0;background:rgba(20,24,31,.94);box-shadow:5px 6px 0 rgba(0,0,0,.34);padding:0;backdrop-filter:blur(14px)}.composer:focus-within{border-color:#b2bfce}.input-row{align-items:center;gap:0;min-height:43px}.prompt-label{padding:0 12px;align-self:stretch;display:flex;align-items:center;flex:none;color:#c4b5fd;background:#161b25;border-right:1px solid #596273;font-size:11px;white-space:nowrap}.prompt{padding:10px 13px;color:#e6eef6;font-size:12px;max-height:145px}.prompt::placeholder{color:#8f9bad}.send{border-radius:0;margin:4px;height:32px;min-width:33px;background:#303a4b;border:1px solid #8894a8;color:#e9f0f8}.send:hover:not(:disabled){background:#42536d;filter:none}.send.stop{background:#4b2e39;color:#ffb8c6}.composer-meta{margin:0;min-height:28px;padding:6px 12px;background:#141820;border-top:1px solid #4c586a;color:#a4afbf;font-size:9px}.composer-meta kbd{border-radius:0;border-color:#5d687a}.footer-note{color:#a2afbf;font-size:9px}.loading-progress{border-radius:0;background:#1b212c;border:1px solid #69778d}.progress-track{border-radius:0;background:#3b4658}.progress-track div{border-radius:0;background:#a78bfa}
+    .notice{border-radius:0;background:#31303f;border:1px solid #a58bc3}.notice button{color:#d8b9ff}
+    .overlay{backdrop-filter:blur(8px)}.modal{border-radius:0;background:rgba(21,26,35,.97);border-color:#78869a;box-shadow:8px 10px 0 #0008;padding:50px 24px 23px;position:relative}.modal-head{position:absolute;top:0;left:0;right:0;height:37px;background:#2b313d;border-bottom:1px solid #78869a;padding:0 8px 0 14px}.modal h2{font-size:12px}.modal .icon-btn{height:29px;border-radius:0}.field select,.field textarea{border-radius:0;background:#111720;border-color:#68778b;color:#e6eef6}.secondary{border-radius:0;background:#303947;border-color:#8793a5;color:#e9f0fa}.field input[type=range]{accent-color:#a78bfa}
+    @media(max-width:970px){.app{gap:13px;padding:9px}.sidebar{width:265px}.sidebar-button span{display:none}.file-pathbar .location{display:none}}
+    @media(max-width:720px){.app{gap:0;padding:0}.sidebar{width:min(315px,90vw);left:0;top:0;bottom:0;z-index:9;box-shadow:10px 0 0 #0006}.main{border:0;box-shadow:none;height:100dvh}.topbar{height:40px;min-height:40px}.top-title{font-size:10px}.topbar .status-pill{font-size:0;padding:8px}.file-pathbar{padding:7px 10px;font-size:10px}.file-pathbar .path{display:none}.file-pathbar .sep{display:none}.messages{padding:15px 11px 25px}.empty{padding:49px 15px 20px}.empty::after{letter-spacing:5px}.prompt-label{font-size:9px;padding:0 7px}.composer-wrap{padding:0 7px 10px}.footer-note{font-size:8px}}
+    @media(prefers-reduced-motion:reduce){body::before{background-image:none}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="backdrop" id="backdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-chrome"><span><span class="folder-glyph">▣</span> EXPLORER</span><button class="sidebar-close" id="closeExplorer" title="Hide Explorer" aria-label="Hide Explorer">×</button></div>
+      <div class="brand"><div class="brand-mark">✦</div><div><strong>NOVA NANO</strong><small>LOCAL AI TERMINAL / V1</small></div></div>
+      <div class="explorer-path">C:/Users/Aqua/Desktop/Tools/AI/:</div>
+      <button class="sidebar-button" id="newChat">＋ New conversation <span>Ctrl K</span></button>
+      <div class="sidebar-title">Conversations</div>
+      <div class="chat-list" id="chatList"></div>
+      <div class="sidebar-foot"><div class="private">● ON-DEVICE INFERENCE</div><div class="mini">ENGINE <strong id="sidebarEngine">Not loaded</strong><br>MODEL <strong id="sidebarModel">SmolLM2 135M</strong><br>DATA <strong>Saved in this browser</strong></div></div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="top-left"><button class="icon-btn mobile-menu" id="openSidebar" title="Show Explorer">▤</button><div><div class="top-title">aqua@desktop: ~/Tools/AI/Nano-LLM.html</div><div class="subline">LOCAL INFERENCE · NO API KEY</div></div></div>
+        <div class="right-tools"><div class="status-pill" title="Current model state"><i class="dot" id="statusDot"></i><span id="statusText">Not loaded</span></div><button class="icon-btn" id="exportChat" title="Export conversation as JSON">⇩</button><button class="icon-btn" id="openSettings" title="Settings">⚙</button></div>
+      </header>
+      <div class="file-pathbar"><span class="path">C:/Users/Aqua/Desktop/AI/</span><span class="sep">›</span><span class="active-file" id="chatTitle">New conversation</span><span class="location">chat.session · private/local</span></div>
+      <div class="notice" id="notice"></div>
+      <section class="messages" id="messages" aria-label="Conversation" aria-live="polite"><div class="thread" id="thread"></div></section>
+      <div class="composer-wrap"><div class="composer-area">
+        <div class="loading-progress" id="loadingProgress"><div class="progress-line"><span id="progressLabel">Loading model…</span><span id="progressPct">0%</span></div><div class="progress-track"><div id="progressBar"></div></div></div>
+        <form class="composer" id="chatForm"><div class="input-row"><span class="prompt-label">aqua@nano:~$</span><textarea class="prompt" id="prompt" rows="1" placeholder="Type your prompt…" aria-label="Your message"></textarea><button type="submit" class="send" id="sendButton" title="Send message">➤</button></div><div class="composer-meta"><span id="inputHint">Ready when you are</span><span><kbd>Enter</kbd> to send · <kbd>Shift Enter</kbd> for line break</span></div></form>
+        <div class="footer-note">Small models make mistakes. The first use downloads model files; later visits usually use your browser cache.</div>
+      </div></div>
+    </main>
+  </div>
+  <div class="overlay" id="settingsOverlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-head"><h2 id="settingsTitle">✦ Model settings</h2><button class="icon-btn" id="closeSettings" aria-label="Close settings">✕</button></div><p>All generation happens on your own GPU or CPU. The model and JavaScript runtime are fetched once over the internet and may be cached by your browser.</p>
+    <div class="field"><label for="modelSelect">Inference model <span id="selectedBackend">WEBGPU</span></label><select id="modelSelect">
+      <option value="SmolLM2-135M-Instruct-q0f16-MLC">Tiny · SmolLM2 135M · GPU (≈360 MB VRAM)</option>
+      <option value="SmolLM2-360M-Instruct-q4f16_1-MLC">Balanced · SmolLM2 360M · GPU (≈376 MB VRAM)</option>
+      <option value="SmolLM2-360M-Instruct-q4f32_1-MLC">Compatible GPU · SmolLM2 360M (≈580 MB VRAM)</option>
+      <option value="CPU-135M-Q4">CPU fallback · SmolLM2 135M 4-bit (slow)</option>
+    </select><small>GPU models require WebGPU; two require the shader-f16 feature. CPU fallback is slower but works without WebGPU. Changing models requires loading again.</small></div>
+    <div class="field"><label for="temperature">Creativity <span id="temperatureLabel">0.7</span></label><input type="range" id="temperature" min="0" max="1.5" step="0.05" value="0.7"><small>Lower = more predictable, higher = more varied.</small></div>
+    <div class="field"><label for="maxTokens">Maximum reply length <span id="tokensLabel">256 tokens</span></label><input type="range" id="maxTokens" min="64" max="1024" step="64" value="256"></div>
+    <div class="field"><label for="systemPrompt">System instructions</label><textarea id="systemPrompt">You are Nova, a friendly, concise assistant running privately in the user's browser. Be helpful and honest. If you don't know something, say so.</textarea></div>
+    <div class="modal-actions"><button class="secondary" id="resetSettings">Reset</button><button class="primary-btn" id="saveSettings">Save settings</button></div>
+  </div></div>
+  <script type="module">
+    // A complete single-file UI. The inference libraries and actual weights are downloaded on demand.
+    const STORAGE = 'nova-nano-chat-v1';
+    const DEFAULTS = { model: 'SmolLM2-135M-Instruct-q0f16-MLC', temperature: 0.7, maxTokens: 256,
+      systemPrompt: "You are Nova, a friendly, concise assistant running privately in the user's browser. Be helpful and honest. If you don't know something, say so." };
+    const MODELS = {
+      'SmolLM2-135M-Instruct-q0f16-MLC': 'SmolLM2 135M · GPU',
+      'SmolLM2-360M-Instruct-q4f16_1-MLC': 'SmolLM2 360M · GPU',
+      'SmolLM2-360M-Instruct-q4f32_1-MLC': 'SmolLM2 360M · GPU compatible',
+      'CPU-135M-Q4': 'SmolLM2 135M · CPU'
+    };
+    const $ = id => document.getElementById(id);
+    const uid = () => (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    const blankChat = () => ({ id: uid(), title: 'New conversation', created: Date.now(), messages: [] });
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(STORAGE)); } catch { saved = null; }
+    const state = { settings: {...DEFAULTS, ...(saved?.settings || {})}, chats: Array.isArray(saved?.chats) ? saved.chats : [], activeId: saved?.activeId || null };
+    state.chats = state.chats.filter(c => c && typeof c.id === 'string' && Array.isArray(c.messages));
+    if (!state.chats.some(c => c.id === state.activeId)) { const c=blankChat(); state.chats.unshift(c); state.activeId=c.id; }
+    if (!(state.settings.model in MODELS)) state.settings.model=DEFAULTS.model;
+    let engine=null, engineModel=null, loadingPromise=null, generating=false, stopRequested=false, runtime=null, cpuPipeline=null, activeRequest=0, started=0;
+    let currentStatus='idle', toastTimer=null, saveTimer=null;
+    const currentChat = () => state.chats.find(c => c.id === state.activeId);
+    const cpuMode = () => state.settings.model === 'CPU-135M-Q4';
+    const persist = () => { try { localStorage.setItem(STORAGE, JSON.stringify(state)); } catch(e) { console.warn('Storage unavailable:',e); } };
+    const scheduleSave = () => { clearTimeout(saveTimer); saveTimer=setTimeout(persist, 300); };
+    const escapeHTML = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function formatText(text){
+      const blocks=[];
+      let s=String(text||'').replace(/```([^\n`]*)\n?([\s\S]*?)```/g,(_,lang,code)=>{ const key=`%%CODE${blocks.length}%%`;blocks.push(`<pre><code>${escapeHTML(code.trimEnd())}</code></pre>`);return key; });
+      s=escapeHTML(s).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*\n]+)\*/g,'<em>$1</em>');
+      s=s.replace(/(^|\n)&gt; (.+)/g,'$1<blockquote>$2</blockquote>').replace(/\n/g,'<br>');
+      blocks.forEach((v,i)=>{ s=s.replace(`%%CODE${i}%%`,v); });
+      return s || '<span class="thinking"><i></i><i></i><i></i></span>';
+    }
+    function showNotice(message,action){
+      const n=$('notice'); n.textContent=message;
+      if(action){ const b=document.createElement('button'); b.textContent=action.label; b.addEventListener('click',action.fn);n.append(b); }
+      n.classList.add('visible');
+    }
+    function hideNotice(){ $('notice').classList.remove('visible'); }
+    function setStatus(status,text){ currentStatus=status; $('statusDot').className='dot '+(status==='idle'?'':status);$('statusText').textContent=text; $('sidebarEngine').textContent=status==='ready'?(cpuMode()?'CPU / WASM':'WebGPU'):status==='loading'?'Loading…':'Not loaded'; }
+    function setProgress(text,percent){
+      $('loadingProgress').classList.add('visible');$('progressLabel').textContent=text;
+      if(Number.isFinite(percent)){$('progressPct').textContent=Math.round(percent)+'%';$('progressBar').style.width=Math.min(100,Math.max(0,percent))+'%';}
+      else {$('progressPct').textContent='…';$('progressBar').style.width='12%';}
+    }
+    function hideProgress(){$('loadingProgress').classList.remove('visible');}
+    function progressCallback(report){
+      if(typeof report==='string'){setProgress(report,null);return;}
+      const p=Number(report?.progress); const percent=Number.isFinite(p)?(p<=1?p*100:p):null;
+      const name=String(report?.text||report?.status||'Downloading and compiling the model…').slice(0,110);
+      setProgress(name,percent);
+    }
+    async function loadModel(){
+      if(engineModel===state.settings.model && (engine||cpuPipeline))return true;
+      if(loadingPromise)return loadingPromise;
+      const target=state.settings.model;
+      hideNotice();setStatus('loading','Loading model');setProgress('Preparing runtime…',null);updateControls();
+      loadingPromise=(async()=>{
+        try{
+          if(target!=='CPU-135M-Q4'){
+            if(!navigator.gpu)throw Error('WebGPU is unavailable in this browser. Choose the CPU fallback model in Settings, or open in a recent Chrome or Edge on HTTPS/localhost.');
+            const adapter=await navigator.gpu.requestAdapter();
+            if(!adapter)throw Error('No WebGPU adapter is available. Try updating your graphics driver or choose the CPU fallback.');
+            if(target.includes('f16') && !adapter.features.has('shader-f16'))throw Error('This GPU lacks shader-f16. Choose the "Compatible GPU" or CPU model in Settings.');
+            if(!runtime){
+              try { runtime=await import('https://esm.run/@mlc-ai/web-llm@0.2.87'); }
+              catch { runtime=await import('https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.87/+esm'); }
+            }
+            if(engine){await engine.unload();engine=null;}
+            cpuPipeline=null;
+            engine=await runtime.CreateMLCEngine(target,{initProgressCallback:progressCallback});
+          }else{
+            if(engine){await engine.unload();engine=null;}
+            if(!cpuPipeline || engineModel!==target){
+              const { pipeline }=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
+              cpuPipeline=await pipeline('text-generation','onnx-community/SmolLM2-135M-Instruct-ONNX-MHA',{
+                device:'wasm',dtype:'q4',progress_callback:progressCallback
+              });
+            }
+          }
+          engineModel=target;
+          setStatus('ready','Model ready');hideProgress();hideNotice();
+          if(!currentChat().messages.length)renderMessages();
+          return true;
+        }catch(err){
+          engineModel=null; if(target!=='CPU-135M-Q4')engine=null;
+          setStatus('error','Load failed');hideProgress();showNotice(`Model failed to load: ${err?.message||err}`,{label:'Open settings',fn:openSettings});
+          console.error('Model initialization failed:',err);return false;
+        }finally{loadingPromise=null;updateControls();}
+      })();
+      return loadingPromise;
+    }
+    function updateControls(){
+      const btn=$('sendButton');
+      btn.classList.toggle('stop',generating);btn.textContent=generating?'■':'➤';btn.title=generating?'Stop generation':'Send message';btn.disabled=!!loadingPromise;
+      $('prompt').disabled=generating;
+      $('inputHint').textContent=generating?'Generating locally…':loadingPromise?'Downloading / preparing model…':currentStatus==='ready'?'Local model ready':'Will load model on first message';
+      $('sidebarModel').textContent=MODELS[state.settings.model];
+    }
+    function renderChatList(){
+      const list=$('chatList');list.replaceChildren();
+      for(const c of state.chats){
+        const row=document.createElement('div');row.className='chat-row'+(c.id===state.activeId?' active':'');
+        const choice=document.createElement('button');choice.className='chat-choice';choice.textContent='◫  '+(c.title||'New conversation');choice.title=c.title;choice.addEventListener('click',()=>switchChat(c.id));
+        const del=document.createElement('button');del.className='chat-delete';del.textContent='×';del.title='Delete conversation';del.setAttribute('aria-label',`Delete ${c.title}`);del.addEventListener('click',()=>deleteChat(c.id));
+        row.append(choice,del);list.append(row);
+      }
+    }
+    function createMessageElement(msg,index){
+      const article=document.createElement('article');article.className='message '+(msg.role==='user'?'user':'assistant');
+      const avatar=document.createElement('div');avatar.className='avatar';avatar.textContent=msg.role==='user'?'U':'✦';
+      const body=document.createElement('div');body.className='message-body';
+      const head=document.createElement('div');head.className='message-head';head.textContent=msg.role==='user'?'You':'Nova Nano';
+      const content=document.createElement('div');content.className='message-content';content.innerHTML=formatText(msg.content);
+      const tools=document.createElement('div');tools.className='message-tools';
+      const copy=document.createElement('button');copy.className='copy-btn';copy.textContent='⧉ Copy';copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(msg.content||'');copy.textContent='✓ Copied';setTimeout(()=>copy.textContent='⧉ Copy',1300);}catch{copy.textContent='Copy unavailable';}});
+      tools.append(copy);const meta=document.createElement('span');meta.textContent=msg.meta||'';tools.append(meta);
+      body.append(head,content,tools);article.append(avatar,body);
+      article.dataset.index=index;
+      return article;
+    }
+    function renderMessages(){
+      const chat=currentChat(); $('chatTitle').textContent=chat.title;
+      const thread=$('thread');thread.replaceChildren();
+      if(!chat.messages.length){
+        const empty=document.createElement('div');empty.className='empty';
+        empty.innerHTML=`<div class="orb"><span>✦</span></div><div class="eyebrow">PRIVATE · SMALL · YOURS</div><h1>A little brain, all yours.</h1><p>Meet Nova Nano: a tiny real language model running directly in your browser. No accounts, no API keys, and no chat requests sent to a server.</p><div class="load-box"><div><strong>✧ ${escapeHTML(MODELS[state.settings.model])}</strong><p>The first run downloads the model. Press load to prepare it now.</p></div><button class="primary-btn" id="loadWelcome">${engineModel===state.settings.model?'✓ Model ready':'↓ Load model'}</button></div><div class="suggestions"><button class="suggestion" data-prompt="Explain how JavaScript promises work in simple terms."><span>⌁</span>Explain a programming concept</button><button class="suggestion" data-prompt="Help me brainstorm a creative cyberpunk game idea."><span>✧</span>Brainstorm something creative</button><button class="suggestion" data-prompt="Write a short, funny story about a tiny robot."><span>◈</span>Write a tiny story</button><button class="suggestion" data-prompt="Teach me the basics of neural networks."><span>⌘</span>Learn about neural networks</button></div>`;
+        thread.append(empty);
+        $('loadWelcome').addEventListener('click',loadModel);
+        empty.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{$('prompt').value=b.dataset.prompt;autoResize();$('prompt').focus();}));
+      }else{chat.messages.forEach((m,i)=>thread.append(createMessageElement(m,i)));}
+      scrollBottom(true);
+    }
+    function updateLastMessage(chat,idx){
+      if(chat.id!==state.activeId)return;
+      const node=$('thread').querySelector(`[data-index="${idx}"]`);
+      if(!node){renderMessages();return;}
+      const msg=chat.messages[idx];node.querySelector('.message-content').innerHTML=formatText(msg.content)+(generating&&msg.role==='assistant'&&msg.content?'<span class="cursor"></span>':'');
+      node.querySelector('.message-tools span').textContent=msg.meta||'';
+      scrollBottom(false);
+    }
+    function scrollBottom(force){const el=$('messages');const near=el.scrollHeight-el.scrollTop-el.clientHeight<180;if(force||near)requestAnimationFrame(()=>el.scrollTop=el.scrollHeight);}
+    function closeSidebar(){$('sidebar').classList.remove('open');$('backdrop').classList.remove('visible');}
+    function switchChat(id){if(generating)stopGeneration();state.activeId=id;closeSidebar();persist();renderChatList();renderMessages();}
+    function newChat(){if(generating)stopGeneration();const c=blankChat();state.chats.unshift(c);state.activeId=c.id;closeSidebar();persist();renderChatList();renderMessages();$('prompt').focus();}
+    function deleteChat(id){if(!confirm('Delete this conversation? This cannot be undone.'))return;if(generating&&state.activeId===id)stopGeneration();state.chats=state.chats.filter(c=>c.id!==id);if(!state.chats.length)state.chats.push(blankChat());if(state.activeId===id)state.activeId=state.chats[0].id;persist();renderChatList();renderMessages();}
+    function autoResize(){$('prompt').style.height='auto';$('prompt').style.height=Math.min(160,$('prompt').scrollHeight)+'px';}
+    async function sendMessage(){
+      const value=$('prompt').value.trim();if(!value||generating||loadingPromise)return;
+      const chat=currentChat();chat.messages.push({role:'user',content:value});
+      if(chat.title==='New conversation')chat.title=value.slice(0,40)+(value.length>40?'…':'');
+      $('prompt').value='';autoResize();renderChatList();renderMessages();persist();
+      const ok=await loadModel();if(!ok)return;
+      const conversation=chat.messages.filter(m=>m.role==='user'||m.role==='assistant').slice(-18).map(m=>({role:m.role,content:m.content}));
+      const messages=[{role:'system',content:state.settings.systemPrompt},...conversation];
+      const answer={role:'assistant',content:'',meta:''};const answerIndex=chat.messages.push(answer)-1;
+      generating=true;stopRequested=false;started=performance.now();const request=++activeRequest;renderMessages();updateControls();
+      try{
+        if(cpuMode()){
+          // CPU generation is not token-streamed here; it is much slower than WebGPU.
+          const result=await cpuPipeline(messages,{max_new_tokens:state.settings.maxTokens,
+            do_sample:state.settings.temperature>0,temperature:Math.max(.01,state.settings.temperature),return_full_text:false});
+          const generated=result?.[0]?.generated_text;
+          answer.content=Array.isArray(generated)?String(generated.at(-1)?.content||''):String(generated??'');
+          if(!stopRequested)updateLastMessage(chat,answerIndex);
+        }else{
+          const stream=await engine.chat.completions.create({messages,temperature:state.settings.temperature,max_tokens:state.settings.maxTokens,stream:true});
+          for await(const part of stream){
+            if(stopRequested||request!==activeRequest)break;
+            answer.content+=part.choices?.[0]?.delta?.content||'';
+            updateLastMessage(chat,answerIndex);
+          }
+        }
+        const duration=Math.max(.1,(performance.now()-started)/1000);
+        answer.meta=stopRequested?'Stopped':`${duration.toFixed(1)} s · local ${cpuMode()?'CPU':'GPU'}`;
+        if(!answer.content.trim())answer.content=stopRequested?'Generation stopped.':'No text was generated. Try again with a different prompt.';
+      }catch(err){
+        if(stopRequested){answer.meta='Stopped';if(!answer.content)answer.content='Generation stopped.';}
+        else{answer.content=answer.content||`I couldn't finish this response: ${err?.message||err}`;answer.meta='Generation error';showNotice(`Generation error: ${err?.message||err}`);console.error(err);}
+      }finally{
+        if(request===activeRequest){generating=false;stopRequested=false;updateControls();}
+        updateLastMessage(chat,answerIndex);persist();
+      }
+    }
+    function stopGeneration(){
+      if(!generating)return;stopRequested=true;
+      if(!cpuMode())try{engine?.interruptGenerate?.();}catch(e){console.warn('Could not interrupt immediately',e);}
+      $('inputHint').textContent=cpuMode()?'Waiting for CPU calculation to finish…':'Stopping…';
+    }
+    function openSettings(){
+      if(generating||loadingPromise){showNotice('Please wait for generation or model loading to finish before changing settings.');return;}
+      $('modelSelect').value=state.settings.model;$('temperature').value=state.settings.temperature;$('maxTokens').value=state.settings.maxTokens;$('systemPrompt').value=state.settings.systemPrompt;
+      updateSettingsLabels();$('settingsOverlay').classList.add('show');
+    }
+    function updateSettingsLabels(){$('temperatureLabel').textContent=Number($('temperature').value).toFixed(2);$('tokensLabel').textContent=$('maxTokens').value+' tokens';$('selectedBackend').textContent=$('modelSelect').value==='CPU-135M-Q4'?'CPU / WASM':'WEBGPU';}
+    function closeSettings(){$('settingsOverlay').classList.remove('show');}
+    function saveSettings(){
+      const old=state.settings.model;
+      state.settings={model:$('modelSelect').value,temperature:Number($('temperature').value),maxTokens:Number($('maxTokens').value),systemPrompt:$('systemPrompt').value.trim()||DEFAULTS.systemPrompt};
+      persist();closeSettings();
+      if(state.settings.model!==old){setStatus('idle','Switch model to load');showNotice('Model changed. Press Load model or send a message to initialize the new model.');}
+      updateControls();if(!currentChat().messages.length)renderMessages();
+    }
+    function downloadChat(){
+      const chat=currentChat();const blob=new Blob([JSON.stringify({app:'Nova Nano',exported:new Date().toISOString(),model:state.settings.model,chat},null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='nova-nano-chat-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+    }
+    $('newChat').addEventListener('click',newChat);$('openSidebar').addEventListener('click',()=>{$('sidebar').classList.add('open');document.querySelector('.app').classList.remove('explorer-hidden');if(matchMedia('(max-width: 720px)').matches)$('backdrop').classList.add('visible');});$('closeExplorer').addEventListener('click',()=>{closeSidebar();document.querySelector('.app').classList.add('explorer-hidden');});$('backdrop').addEventListener('click',closeSidebar);
+    $('openSettings').addEventListener('click',openSettings);$('closeSettings').addEventListener('click',closeSettings);$('settingsOverlay').addEventListener('click',e=>{if(e.target===$('settingsOverlay'))closeSettings();});
+    $('modelSelect').addEventListener('change',updateSettingsLabels);$('temperature').addEventListener('input',updateSettingsLabels);$('maxTokens').addEventListener('input',updateSettingsLabels);
+    $('resetSettings').addEventListener('click',()=>{$('modelSelect').value=DEFAULTS.model;$('temperature').value=DEFAULTS.temperature;$('maxTokens').value=DEFAULTS.maxTokens;$('systemPrompt').value=DEFAULTS.systemPrompt;updateSettingsLabels();});
+    $('saveSettings').addEventListener('click',saveSettings);$('exportChat').addEventListener('click',downloadChat);
+    $('prompt').addEventListener('input',autoResize);$('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();if(generating)stopGeneration();else sendMessage();}});
+    $('chatForm').addEventListener('submit',e=>{e.preventDefault();if(generating)stopGeneration();else sendMessage();});
+    document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();newChat();}if(e.key==='Escape'){closeSettings();closeSidebar();}});
+    if(!navigator.gpu && state.settings.model!=='CPU-135M-Q4')showNotice('This browser does not expose WebGPU. You can switch to the CPU fallback in Settings.',{label:'Choose CPU',fn:()=>{openSettings();$('modelSelect').value='CPU-135M-Q4';updateSettingsLabels();}});
+    setStatus('idle','Not loaded');updateControls();renderChatList();renderMessages();
+  </script>
+</body>
+</html>

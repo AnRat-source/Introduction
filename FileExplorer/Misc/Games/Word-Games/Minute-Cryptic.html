@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#130d1c">
+  <meta name="theme-color" content="#111319">
   <meta name="description" content="A daily cryptic crossword clue, plus unlimited puzzles from the AnRat word games API.">
   <title>Minute Cryptic · AnRat Games</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2321172b'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='40'%3E%F0%9F%94%8E%3C/text%3E%3C/svg%3E">
@@ -25,6 +25,44 @@
     @media(max-width:800px){.game{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}.side .panel-section:nth-child(odd){border-right:1px solid var(--line)}}
     @media(max-width:530px){.shell{width:calc(100% - 20px);padding-top:19px}.masthead{align-items:flex-start}.home{padding:8px 9px;font-size:.66rem}h1{font-size:clamp(2.35rem,10vw,3.4rem)}.intro{font-size:13px}.mode-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.mode-bar .btn{padding:11px 6px;font-size:.66rem}.board{padding:19px 15px 24px}.clue{min-height:90px;font-size:clamp(1.65rem,6.8vw,2.5rem)}.clue-label{margin-top:27px}.answer-form .btn{padding-inline:12px}.key{width:clamp(23px,7.25vw,33px);height:43px;font-size:12px}.key.wide{width:clamp(37px,11vw,46px);font-size:10px}.keyboard-row{gap:3px}.side{display:block}.side .panel-section:nth-child(odd){border-right:0}.panel-section{padding:17px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+
+    /* anrat.link window styling, contained within this single HTML file. */
+    :root{--bg:#111319;--panel:#181d25;--panel2:#242b37;--line:#596273;--text:#e6ebf4;--muted:#aeb8c8;--purple:#a78bfa;--pink:#d4b4ff}
+    body{background:#111319;color:var(--text);font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:linear-gradient(#979fb20b 1px,transparent 1px),linear-gradient(90deg,#979fb20b 1px,transparent 1px);background-size:24px 24px}
+    .shell{position:relative;z-index:1}
+    .masthead{position:relative;padding:44px 16px 14px;border:1px solid #596273;background:#14181fcf;box-shadow:5px 6px 0 #0006}
+    .masthead::before{content:"";position:absolute;top:0;right:0;left:0;height:30px;background:#2b313d;border-bottom:1px solid #596273;pointer-events:none}
+    .masthead::after{content:"aqua@games: ~/minute-cryptic";position:absolute;top:8px;left:12px;font:500 11px "Cascadia Code",Consolas,monospace;color:#e6ebf4;pointer-events:none}
+    .window{border-color:#596273;border-radius:0;background:#181d25e8;box-shadow:5px 6px 0 #0006}
+    .window-bar{background:#2b313d;color:#e6ebf4;border-color:#596273}.window-dots span{border-color:#8895ab;border-radius:1px}
+    .btn,.home{border-color:#596273;border-radius:2px;background:#2a303d;color:#e6ebf4}
+    .btn:hover:not(:disabled),.home:hover{background:#3a4555}.btn.primary{border-color:#a78bfa;background:#a78bfa;color:#161a24}.btn.primary:hover:not(:disabled){background:#c8b9ff}
+    .btn.active{border-color:#a78bfa;color:#e1d8ff;box-shadow:inset 0 0 0 1px #a78bfa}
+    .pill,.letter-cell,.key,.stat,.puzzle-item,.hint-box,.reveal,.field select,.field input,.id-row input{border-radius:2px;border-color:#596273;background:#2c3442}
+    .letter-cell{color:#f0f2ff}.letter-cell:focus{background:#4b4a75;border-color:#a78bfa}.letter-cell.correct{background:#2a503c;border-color:#8ad493}.key:hover:not(:disabled){background:#44506a;border-color:#a78bfa}.key.wide{background:#384257}
+    .panel-section{border-color:#596273}.stat{background:#222936}.puzzle-item.current{background:#3a4058;border-color:#a78bfa}.puzzle-list{scrollbar-color:#64748b transparent}
+    .extras .btn{flex:1}.hint-box{background:#242b37}.reveal{background:#203228;border-color:#68985a}
+    @media(max-width:760px){
+      .shell{width:calc(100% - 12px);padding:6px 0 12px}
+      .masthead{min-height:63px;padding:29px 8px 6px;margin-bottom:6px;align-items:center;gap:6px}
+      .masthead::before{height:24px}.masthead::after{top:6px;font-size:9px}
+      .masthead h1{font-size:clamp(1.38rem,6vw,2rem);line-height:1}
+      .masthead .eyebrow,.masthead .intro{display:none}.home{padding:7px;font-size:.56rem}
+      .mode-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-bottom:4px}.mode-bar .btn{padding:7px 3px;font-size:.57rem}
+      .status{min-height:15px;margin:0 0 4px;font-size:.62rem;line-height:1.2}
+      .game{display:flex;flex-direction:column;gap:10px}.window-bar{min-height:26px;padding:5px 9px;font-size:.53rem}.window-dots span{width:6px;height:6px}
+      .board{padding:7px 8px 10px}.board-labels{font-size:.55rem}.pills{margin:4px 0 0;gap:4px}.pill{padding:2px 5px;font-size:.5rem}
+      .clue-label{margin:6px 0 2px;font-size:.55rem}.clue{min-height:0;max-height:18dvh;overflow:auto;font-size:clamp(1rem,4.1vw,1.5rem);line-height:1.18;letter-spacing:-.025em}
+      .number-hint{margin:4px 0;font-size:.62rem}.answer-form{gap:5px}.answer-grid{min-height:40px;gap:3px;padding:3px 0}.word-block{gap:3px}
+      .letter-cell{height:calc(var(--cell-size,44px)*1.04);min-height:27px;font-size:clamp(.85rem,3.8vw,1.25rem)}
+      .answer-form .btn{min-width:0;width:100%;padding:7px;font-size:.67rem}.grid-help{display:none}
+      .feedback{min-height:16px;margin:5px 0 0;font-size:.65rem;line-height:1.2}
+      .extras{flex-wrap:nowrap;gap:4px;margin:5px 0 0}.extras .btn{min-width:0;padding:6px 3px;font-size:.54rem;white-space:nowrap}
+      .keyboard{display:grid;width:100%;max-width:none;gap:2px;margin:6px auto 0}.keyboard-row{width:100%;gap:2px}.key{flex:1;width:auto;min-width:0;height:clamp(28px,4.8dvh,36px);font-size:.7rem}.key.wide{flex:1.4;width:auto;font-size:.55rem}
+      .hint-box,.reveal{margin-top:8px;padding:8px}.side{display:block}.panel-section{padding:11px}
+    }
+    @media(max-height:620px) and (max-width:760px){.clue{max-height:14dvh;font-size:clamp(.9rem,3.7vw,1.15rem)}.pills{display:none}.letter-cell{height:var(--cell-size,38px)}.key{height:28px}.extras .btn{padding:5px 2px}}
   </style>
 </head>
 <body>
@@ -241,7 +279,7 @@
       const word=document.createElement('div');word.className='word-block';
       for(let i=0;i<length;i++,index++) {
         const at=index,cell=document.createElement('input');
-        cell.type='text';cell.maxLength=1;cell.inputMode='text';cell.autocomplete='off';cell.spellcheck=false;
+        cell.type='text';cell.maxLength=1;cell.inputMode=matchMedia('(pointer:coarse)').matches?'none':'text';cell.autocomplete='off';cell.spellcheck=false;
         cell.className='letter-cell';cell.dataset.index=at;
         cell.setAttribute('autocapitalize','characters');
         cell.setAttribute('aria-label','Letter '+(at+1)+' of '+answerLetters.length);

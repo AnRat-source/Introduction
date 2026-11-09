@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#130d1c">
+  <meta name="theme-color" content="#111319">
   <title>Word Search</title>
   <link rel="icon" type="image/x-icon" href="../../../../assets/word-games-favicon.ico">
   <style>
@@ -73,8 +73,9 @@
     @media (max-width:345px) { h1 { font-size:2rem; } .action { font-size:.49rem; padding:9px 6px; } .grid { gap:1px; } .word-list { grid-auto-columns:minmax(76px,max-content); } .word-item { font-size:.65rem; } }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
   </style>
+  <link rel="stylesheet" href="./game-theme.css">
 </head>
-<body>
+<body data-game="wordsearch">
   <main>
     <header>
       <div><p class="eyebrow">Same word list · infinite rounds</p><h1>Word Search</h1><p>Hunt for hidden words in every direction — forward, backward, vertical, and diagonal.</p></div>

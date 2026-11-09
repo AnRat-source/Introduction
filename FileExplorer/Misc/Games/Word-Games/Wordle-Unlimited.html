@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#160d20">
+  <meta name="theme-color" content="#111319">
   <title>Wordle Unlimited</title>
   <link rel="icon" type="image/x-icon" href="../../../../assets/word-games-favicon.ico">
   <style>
@@ -39,8 +39,9 @@
     .footer { margin:17px 0 0; color:#8e7d99; text-align:center; font-size:.68rem; }
     @media (max-width:480px) { main { width:min(100% - 20px,620px); padding:18px 0 14px; } h1 { font-size:2.4rem; } .new-word { padding:10px 8px; font-size:.59rem; } .status { margin:10px 0; } .board { width:min(100%,330px); gap:5px; } .key { height:47px; border-radius:5px; } .legend { margin:12px 0; } .footer { margin-top:12px; } }
   </style>
+  <link rel="stylesheet" href="./game-theme.css">
 </head>
-<body>
+<body data-game="wordle">
   <main>
     <header><div><p class="eyebrow">Same word list · infinite rounds</p><h1>Wordle<br>Unlimited</h1></div><button class="new-word" id="newWord" type="button">NEW WORD ↻</button></header>
     <p class="status" id="status" role="status" aria-live="polite">Loading the word list…</p>

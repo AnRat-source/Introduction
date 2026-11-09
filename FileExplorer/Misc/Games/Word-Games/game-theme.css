@@ -1,0 +1,430 @@
+/* Shared AnRat desktop-window theme. Keep next to the game HTML files. */
+:root {
+  color-scheme: dark;
+  --bg: #111319;
+  --panel: #181d25;
+  --panel-2: #242b37;
+  --panel-light: #28303d;
+  --ink: #e6ebf4;
+  --text: #e6ebf4;
+  --muted: #aeb8c8;
+  --line: #596273;
+  --purple: #a78bfa;
+  --pink: #d6a5f8;
+  --lime: #a78bfa;
+  --orange: #d6a5f8;
+  --lilac: #a78bfa;
+  --window-border: #596273;
+  --window-title: #2b313d;
+  --window-content: rgba(20, 24, 31, .86);
+  --window-shadow: 5px 6px 0 rgba(0,0,0,.34);
+}
+html { min-width: 280px; background: var(--bg); }
+body {
+  min-width: 280px;
+  color: var(--ink);
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+  background: #111319 !important;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(#979fb20b 1px, transparent 1px), linear-gradient(90deg, #979fb20b 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+body > main, body > .shell { position: relative; z-index: 1; }
+button, select { font-family: inherit; }
+button, .cell, .tile { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+
+/* Main window and its decorative (non-interactive) title bar. */
+body:not([data-game="layers"]):not([data-game="directory"]) main > header,
+body[data-game="directory"] main,
+body[data-game="wordle"] main,
+body[data-game="layers"] .board-card {
+  position: relative;
+  border: 1px solid var(--window-border);
+  border-radius: 0;
+  background: var(--window-content);
+  box-shadow: var(--window-shadow);
+}
+body:not([data-game="layers"]):not([data-game="directory"]):not([data-game="wordle"]) main > header {
+  padding: 43px 18px 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+body:not([data-game="layers"]):not([data-game="directory"]):not([data-game="wordle"]) main > header::before,
+body[data-game="wordle"] main::before,
+body[data-game="directory"] main::before,
+body[data-game="layers"] .board-card::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: rgba(43,49,61,.96);
+  border-bottom: 1px solid var(--window-border);
+  pointer-events: none;
+}
+body:not([data-game="layers"]):not([data-game="directory"]):not([data-game="wordle"]) main > header::after,
+body[data-game="wordle"] main::after,
+body[data-game="directory"] main::after,
+body[data-game="layers"] .board-card::after {
+  position: absolute;
+  content: "aqua@games: ~/word-games";
+  top: 8px;
+  left: 12px;
+  color: #dbe2ed;
+  font: 500 11px/1.3 "Cascadia Code", Consolas, monospace;
+  letter-spacing: .02em;
+  pointer-events: none;
+}
+body[data-game="wordle"] main { padding: 47px 22px 20px; }
+body[data-game="wordle"] main > header { border: 0; background: transparent; box-shadow: none; }
+body[data-game="wordle"] main::before { top: 0; }
+body[data-game="wordle"] main::after { top: 8px; }
+body[data-game="directory"] main::after { content: "aqua@desktop: ~/word-games"; }
+body[data-game="layers"] .board-card::after { content: "aqua@layers: ~/daily"; }
+body[data-game="directory"] { padding: clamp(8px, 2vw, 22px); }
+body[data-game="directory"] main { max-width: 1120px; padding-top: 30px; }
+body[data-game="directory"] main > header { display: none; }
+body[data-game="directory"] .content { padding: clamp(14px, 3vw, 25px); }
+body[data-game="directory"] .content > h1 { color: #e6ebf4; }
+body[data-game="directory"] details,
+body[data-game="directory"] .career,
+body[data-game="directory"] .career-stat,
+body[data-game="directory"] .folder-contents button { border-color: #596273; background: #222936; }
+body[data-game="directory"] details,
+body[data-game="directory"] .icon { border-radius: 0; }
+body[data-game="directory"] .career-head h2,
+body[data-game="directory"] .career-stat strong,
+body[data-game="directory"] summary::before { color: #b5a5ff; }
+body[data-game="directory"] button:hover,
+body[data-game="directory"] button:focus-visible { background: #303a4a; border-color: #a78bfa; }
+
+body:not([data-game="layers"]):not([data-game="directory"]) .game {
+  border-color: var(--window-border);
+  border-radius: 0;
+  background: var(--window-content);
+  box-shadow: var(--window-shadow);
+}
+body:not([data-game="layers"]) h1 { font-weight: 800; letter-spacing: -.055em; }
+body:not([data-game="layers"]) .eyebrow { color: #bcb1ff; }
+body:not([data-game="layers"]) .action,
+body[data-game="wordwheel"] .new-game,
+body[data-game="wordle"] .new-word {
+  border: 1px solid #8175b6;
+  border-radius: 3px;
+  background: #a78bfa;
+  box-shadow: none;
+  color: #141822;
+}
+body:not([data-game="layers"]) .action:hover,
+body[data-game="wordwheel"] .new-game:hover,
+body[data-game="wordle"] .new-word:hover { background: #c4b4ff; }
+body:not([data-game="layers"]) .action.secondary {
+  border-color: #596273;
+  border-radius: 3px;
+  color: #dfe6f1;
+  background: #2a303d;
+}
+body:not([data-game="layers"]) .action.secondary:hover { background: #364052; }
+body:not([data-game="layers"]) .side { background: #161b23; border-color: #4f5a6a; }
+body:not([data-game="layers"]) .board-panel { background: transparent; }
+body:not([data-game="layers"]) .stat,
+body:not([data-game="layers"]) .word-item,
+body:not([data-game="layers"]) .clue-button {
+  border-radius: 2px;
+  border-color: #515d6e;
+  background: #222936;
+}
+body:not([data-game="directory"]) .wordgames-history > div {
+  border-radius: 2px;
+  border-color: #596273;
+  background: #222936;
+}
+body:not([data-game="directory"]) .wordgames-history small { color: #aeb8c8; }
+body:not([data-game="directory"]) .wordgames-history strong { color: #b9adff; }
+body:not([data-game="layers"]) .cell,
+body:not([data-game="layers"]) .tile,
+body[data-game="wordle"] .key,
+body[data-game="crossword"] .key {
+  border-radius: 2px;
+  border-color: #596273;
+  background-color: #2c3442;
+}
+body:not([data-game="layers"]) .cell.selected,
+body:not([data-game="layers"]) .tile.selected,
+body:not([data-game="layers"]) .cell.cursor {
+  background: #a78bfa;
+  color: #18131f;
+  border-color: #d3c8ff;
+}
+body[data-game="wordle"] .tile.correct,
+body[data-game="wordle"] .key.correct,
+body[data-game="wordle"] .tile.present,
+body[data-game="wordle"] .key.present,
+body[data-game="wordle"] .tile.absent,
+body[data-game="wordle"] .key.absent { background: var(--correct); }
+body[data-game="wordle"] .tile.present,
+body[data-game="wordle"] .key.present { background: var(--present); }
+body[data-game="wordle"] .tile.absent,
+body[data-game="wordle"] .key.absent { background: var(--absent); }
+body[data-game="crossword"] .cell.in-word { background: #48536b; }
+body[data-game="crossword"] .cell.correct { background: #3f654b; }
+body[data-game="crossword"] .cell.correct.cursor { background: #a8e776; }
+body[data-game="crossword"] .cell.wrong { background: #753c59; }
+body[data-game="wordwheel"] .cell.used { background: #2c3442; }
+body[data-game="wordwheel"] .cell.found { background: #a78bfa; }
+body[data-game="wordsearch"] .cell.hinted { background: #617a4b; }
+body[data-game="connections"] .tile.selected { background: #a78bfa; }
+body[data-game="connections"] .solved-group { border-radius: 2px; }
+
+/* The first phone viewport contains the playable area. Extra help stays below. */
+@media (max-width: 760px) {
+  /* Detailed saved stats remain available on the game directory page. */
+  body:not([data-game="directory"]) .wordgames-history { display: none; }
+  body:not([data-game="layers"]):not([data-game="directory"]) main {
+    width: calc(100% - 12px);
+    padding: 6px 0 14px;
+    min-height: 100dvh;
+  }
+  body:not([data-game="layers"]):not([data-game="directory"]):not([data-game="wordle"]) main > header {
+    min-height: 67px;
+    padding: 31px 8px 5px;
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+  body:not([data-game="layers"]):not([data-game="directory"]) main > header::before { height: 25px; }
+  body:not([data-game="layers"]):not([data-game="directory"]) main > header::after { top: 6px; font-size: 9px; }
+  body:not([data-game="layers"]):not([data-game="directory"]):not([data-game="wordle"]) h1 { font-size: clamp(1.45rem, 6.6vw, 2rem); line-height: 1.05; }
+  body:not([data-game="layers"]):not([data-game="directory"]) .game { border-radius: 0; }
+  body:not([data-game="layers"]):not([data-game="directory"]) .action,
+  body[data-game="wordwheel"] .new-game { padding: 8px 7px; font-size: .59rem; }
+  body:not([data-game="layers"]):not([data-game="directory"]) .side .guide,
+  body:not([data-game="layers"]):not([data-game="directory"]) .side .tip,
+  body:not([data-game="layers"]):not([data-game="directory"]) .side .source { display: none; }
+  body:not([data-game="layers"]):not([data-game="directory"]) .side { border-color: #4f5a6a; }
+}
+
+/* Wordle: a six-row board and full three-row keyboard fit even on short phones. */
+@media (max-width: 760px) {
+  body[data-game="wordle"] main {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 12px);
+    height: calc(100dvh - 12px);
+    min-height: 0;
+    margin: 6px auto;
+    padding: 31px 8px 7px;
+  }
+  body[data-game="wordle"] main > header { flex: none; min-height: 0; gap: 6px; }
+  body[data-game="wordle"] h1 { font-size: clamp(1.5rem, 7vw, 2.05rem); line-height: .9; }
+  body[data-game="wordle"] .new-word { padding: 7px 6px; font-size: .55rem; }
+  body[data-game="wordle"] .status { flex: none; min-height: 17px; margin: 5px 0; font-size: .7rem; }
+  body[data-game="wordle"] .board {
+    flex: 0 1 auto;
+    aspect-ratio: 5 / 6;
+    min-height: 0;
+    width: min(100%, 340px, calc(83dvh - 228px));
+    gap: clamp(2px, .8vw, 5px);
+    margin: auto;
+  }
+  body[data-game="wordle"] .tile { min-height: 0; font-size: clamp(1rem, 6vw, 1.8rem); }
+  body[data-game="wordle"] .legend { flex: none; gap: 8px; margin: 4px 0; font-size: .55rem; }
+  body[data-game="wordle"] .legend i { width: 8px; height: 8px; }
+  body[data-game="wordle"] .keyboard { flex: none; width: 100%; margin: 0; }
+  body[data-game="wordle"] .key-row { gap: 3px; margin-top: 3px; }
+  body[data-game="wordle"] .key { height: clamp(30px, 5.9dvh, 42px); font-size: clamp(.57rem, 2.5vw, .78rem); }
+  body[data-game="wordle"] .key.wide { font-size: .55rem; }
+  body[data-game="wordle"] .footer { display: none; }
+}
+
+/* Crossword: fit a tall grid, selected clue, toolbar, and touch keyboard. */
+@media (max-width: 760px) {
+  body[data-game="crossword"] .game { display: flex; flex-direction: column; }
+  body[data-game="crossword"] .board-panel { padding: 5px 5px 6px; }
+  body[data-game="crossword"] .board-head { margin-bottom: 3px; font-size: .54rem; }
+  body[data-game="crossword"] .grid-wrap { min-height: 0; }
+  body[data-game="crossword"] .crossword {
+    width: min(100%, calc(var(--columns) * 41px), var(--mobile-max-width, 100%));
+    gap: 1px;
+  }
+  body[data-game="crossword"] .cell { border-radius: 1px; }
+  body[data-game="crossword"] .current-clue { min-height: 38px; margin: 5px 0 4px; padding: 5px 7px; border-radius: 2px; }
+  body[data-game="crossword"] .clue-text { font-size: .71rem; line-height: 1.2; }
+  body[data-game="crossword"] .toolbar { width: 100%; gap: 4px; margin: 0 0 3px; flex-wrap: nowrap; }
+  body[data-game="crossword"] .toolbar .action { flex: 1; padding: 7px 2px; font-size: clamp(.46rem, 1.8vw, .58rem); }
+  body[data-game="crossword"] .keyboard { width: 100%; gap: 2px; margin: 0; }
+  body[data-game="crossword"] .key-row { gap: 2px; }
+  body[data-game="crossword"] .key { max-width: none; height: clamp(27px, 4.75dvh, 36px); font-size: .75rem; }
+  body[data-game="crossword"] .key.wide { max-width: 48px; }
+  body[data-game="crossword"] .message { min-height: 15px; margin: 3px 0 0; font-size: .64rem; }
+  body[data-game="crossword"] .side { padding: 12px 9px; }
+}
+
+/* Word Search: show the grid and a compact horizontal word bank on the same screen. */
+@media (max-width: 760px) {
+  body[data-game="wordsearch"] .game { display: flex; flex-direction: column; }
+  body[data-game="wordsearch"] .board-panel { padding: 6px 5px 2px; }
+  body[data-game="wordsearch"] .board-head { margin: 0 0 4px; font-size: .58rem; }
+  body[data-game="wordsearch"] .grid { width: min(100%, calc(100dvh - 306px)); gap: 1px; }
+  body[data-game="wordsearch"] .cell { border-radius: 1px; }
+  body[data-game="wordsearch"] .board-caption { min-height: 15px; margin: 4px 0 1px; font-size: .64rem; }
+  body[data-game="wordsearch"] .side { padding: 6px 8px 9px; }
+  body[data-game="wordsearch"] .stats { order: -2; gap: 5px; }
+  body[data-game="wordsearch"] .stat { padding: 4px 7px; }
+  body[data-game="wordsearch"] .stat-label { margin: 0; font-size: .51rem; }
+  body[data-game="wordsearch"] .stat strong { font-size: .85rem; }
+  body[data-game="wordsearch"] .progress { order: -1; height: 3px; margin: 4px 0 6px; }
+  body[data-game="wordsearch"] .list-head { margin: 1px 0 4px; }
+  body[data-game="wordsearch"] .list-head h2 { font-size: .8rem; }
+  body[data-game="wordsearch"] .difficulty { max-width: 130px; padding: 4px; font-size: .58rem; border-radius: 2px; }
+  body[data-game="wordsearch"] .word-list {
+    grid-template-rows: repeat(3, minmax(0, auto));
+    grid-auto-columns: minmax(67px,max-content);
+    gap: 3px;
+    padding-bottom: 2px;
+  }
+  body[data-game="wordsearch"] .word-item { padding: 4px 5px; font-size: .62rem; }
+  body[data-game="wordsearch"] .list-scroll-hint { font-size: .5rem; margin: 1px 0 0; }
+}
+
+/* Connections: keep all 16 tiles, actions and mistakes visible before help. */
+@media (max-width: 760px) {
+  body[data-game="connections"] .game { display: flex; flex-direction: column; }
+  body[data-game="connections"] .board-panel { padding: 7px 6px 5px; }
+  body[data-game="connections"] .board-head { font-size: .55rem; }
+  body[data-game="connections"] .puzzle-title { margin: 4px 0 7px; font-size: .9rem; }
+  body[data-game="connections"] .tiles { gap: 4px; }
+  body[data-game="connections"] .tile {
+    min-height: 0;
+    height: clamp(38px, calc((100dvh - 248px) / 4), 72px);
+    padding: 2px;
+    border-radius: 2px;
+    font-size: clamp(.52rem, 2.35vw, .76rem);
+  }
+  body[data-game="connections"] .solved { gap: 4px; margin-bottom: 4px; }
+  body[data-game="connections"] .solved-group { padding: 6px; }
+  body[data-game="connections"] .solved-group strong { font-size: .68rem; }
+  body[data-game="connections"] .solved-group span { font-size: .57rem; }
+  body[data-game="connections"] .controls { margin: 6px 0 4px; gap: 4px; flex-wrap: nowrap; }
+  body[data-game="connections"] .controls .action { flex: 1; padding: 7px 3px; font-size: .54rem; }
+  body[data-game="connections"] .message { min-height: 20px; font-size: .67rem; }
+  body[data-game="connections"] .side { padding: 6px 9px 9px; }
+  body[data-game="connections"] .side h2, body[data-game="connections"] .side .legend { display: none; }
+  body[data-game="connections"] .stats { gap: 6px; }
+  body[data-game="connections"] .stat { padding: 4px 7px; }
+  body[data-game="connections"] .stat-label { font-size: .52rem; }
+  body[data-game="connections"] .stat strong { font-size: .9rem; }
+  body[data-game="connections"] .mistake-row { margin: 6px 0; }
+  body[data-game="connections"] .progress { margin: 4px 0; }
+}
+
+/* Word Wheel: crossword above, swipe wheel below; both remain usable. */
+@media (max-width: 760px) {
+  body[data-game="wordwheel"] .game {
+    height: calc(100dvh - 89px);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  body[data-game="wordwheel"] .board { order: 1; flex: 1 1 auto; min-height: 0; padding: 4px; }
+  body[data-game="wordwheel"] .board-head { margin-bottom: 3px; }
+  body[data-game="wordwheel"] .crossword { flex: none; gap: 1px; }
+  body[data-game="wordwheel"] .cell { border-radius: 1px; }
+  body[data-game="wordwheel"] .complete { margin: 3px 0; font-size: .55rem; }
+  body[data-game="wordwheel"] .side { order: 2; flex: 0 0 auto; padding: 3px 4px 5px; }
+  body[data-game="wordwheel"] .wheel-wrap { width: min(45vw, 180px, 24dvh); margin: 2px auto; }
+  body[data-game="wordwheel"] .letter { width: clamp(30px, 9.5vw, 43px); }
+  body[data-game="wordwheel"] .word { min-height: 20px; padding: 0; font-size: 1rem; }
+  body[data-game="wordwheel"] .message { min-height: 12px; margin: 0; font-size: .56rem; }
+}
+
+/* Layers: same desktop windows, with appropriately sized mini-game overlays. */
+body[data-game="layers"] {
+  --panel: #1b212b;
+  --panel-2: #242b37;
+  --panel-3: #303747;
+  --line: #596273;
+  --text: #e6ebf4;
+  --muted: #aeb8c8;
+  --body: "Cascadia Code", Consolas, monospace;
+  --display: "Cascadia Code", Consolas, monospace;
+  --mono: "Cascadia Code", Consolas, monospace;
+}
+body[data-game="layers"] .site-header { border: 1px solid var(--window-border); background: #1b2029; padding: 12px 15px; box-shadow: var(--window-shadow); }
+body[data-game="layers"] .ambient { display: none; }
+body[data-game="layers"] .intro { padding-top: 31px; }
+body[data-game="layers"] .board-card { padding-top: 30px; background: var(--window-content); border-radius: 0; }
+body[data-game="layers"] .challenge-item,
+body[data-game="layers"] .status-card,
+body[data-game="layers"] .stats-pair > div,
+body[data-game="layers"] .guide-card,
+body[data-game="layers"] .word-tile,
+body[data-game="layers"] .button,
+body[data-game="layers"] .modal,
+body[data-game="layers"] .search-cell,
+body[data-game="layers"] .cross-cell,
+body[data-game="layers"] .key,
+body[data-game="layers"] .letterlock-cell,
+body[data-game="layers"] .anagram-slot,
+body[data-game="layers"] .anagram-letter,
+body[data-game="layers"] .game-button { border-radius: 2px; }
+body[data-game="layers"] .modal { background: #1a202a; border-color: #596273; }
+body[data-game="layers"] .modal-close { background: #303747; border-radius: 2px; }
+body[data-game="layers"] .word-tile { background: #29303b; border-color: #596273; }
+body[data-game="layers"] .word-tile.selected { background: #c4b4ff; }
+body[data-game="layers"] .button.primary, body[data-game="layers"] .game-button.primary { background: #a78bfa; color: #171621; }
+@media (max-width: 760px) {
+  body[data-game="layers"] .shell { width: calc(100% - 12px); }
+  body[data-game="layers"] .site-header { padding: 8px; }
+  body[data-game="layers"] main { padding-top: 6px; }
+  body[data-game="layers"] .board-card { min-height: calc(100dvh - 67px); padding-top: 26px; }
+  body[data-game="layers"] .board-topline { padding-top: 8px; }
+  body[data-game="layers"] .board-heading { padding-top: 5px; padding-bottom: 7px; }
+  body[data-game="layers"] .board-heading h2 { font-size: clamp(1rem, 5vw, 1.35rem); }
+  body[data-game="layers"] .word-board { grid-auto-rows: minmax(0,1fr); }
+  body[data-game="layers"] .board-message { min-height: 24px; margin: 3px 0; font-size: .64rem; }
+  body[data-game="layers"] .board-actions { flex-wrap: nowrap; gap: 4px; padding: 3px 6px 8px; }
+  body[data-game="layers"] .board-actions .button { flex: 1; min-width: 0; padding: 8px 5px; font-size: .55rem; }
+  body[data-game="layers"] .board-actions .button.primary { flex: 1.4; }
+  body[data-game="layers"] .board-footer { padding: 7px; }
+  body[data-game="layers"] .overlay { padding: 5px; }
+  body[data-game="layers"] .modal { width: 100%; max-height: calc(100dvh - 10px); }
+  body[data-game="layers"] .modal-inner { padding: 11px 8px 10px; }
+  body[data-game="layers"] .modal-header h2 { font-size: 1.1rem; margin: 5px 32px 3px 0; }
+  body[data-game="layers"] .modal-header p { font-size: .66rem; line-height: 1.25; }
+  body[data-game="layers"] .modal-divider { margin: 8px 0; }
+  body[data-game="layers"] .mini-keyboard { gap: 3px; margin-top: 7px; }
+  body[data-game="layers"] .key-row { gap: 3px; }
+  body[data-game="layers"] .key { height: clamp(28px, 5dvh, 36px); }
+  body[data-game="layers"] .letterlock-grid { gap: 3px; }
+  body[data-game="layers"] .letterlock-row { gap: 3px; }
+  body[data-game="layers"] .letterlock-cell { width: min(9vw, 39px, 5.6dvh); height: min(9vw,39px,5.6dvh); font-size: 1rem; }
+  body[data-game="layers"] .search-grid { width: min(100%, calc(100dvh - 285px)); gap: 2px; }
+  body[data-game="layers"] .search-clue { margin: 4px auto 7px; }
+  body[data-game="layers"] .crossword-grid { width: min(100%, calc(100dvh - 290px)); }
+  body[data-game="layers"] .crossword-layout { gap: 6px; }
+  body[data-game="layers"] .crossword-clues { max-height: 80px; overflow: auto; }
+  body[data-game="layers"] .crossword-clues button { padding: 3px; margin: 1px 0; font-size: .58rem; }
+  body[data-game="layers"] .crossword-selected { padding: 5px; margin-bottom: 6px; }
+  body[data-game="layers"] .mini-controls { gap: 4px; margin-top: 7px; }
+  body[data-game="layers"] .game-button { padding: 7px 9px; }
+  body[data-game="layers"] .modal-status { min-height: 17px; margin: 5px 0; }
+}
+
+@media (max-height: 620px) and (max-width: 760px) {
+  body[data-game="wordle"] .legend { display: none; }
+  body[data-game="wordle"] .board { width: min(100%, calc(83dvh - 198px)); }
+  body[data-game="wordsearch"] .grid { width: min(100%, calc(100dvh - 245px)); }
+  body[data-game="crossword"] .crossword { width: min(100%, var(--mobile-max-width, 100%)); }
+  body[data-game="connections"] .tile { height: clamp(32px, calc((100dvh - 218px)/4), 55px); }
+}
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#130d1c">
+  <meta name="theme-color" content="#111319">
   <title>Mini Crossword · AnRat Games</title>
   <style>
     :root{color-scheme:dark;--bg:#130d1c;--panel:#21172b;--panel2:#2d203a;--line:#684d7d;--text:#faf5ff;--muted:#c2b2ce;--purple:#d69cff;--pink:#ff98d8;--green:#b3f08a}
@@ -23,6 +23,41 @@
     @media(max-width:760px){.shell{padding:15px 0 25px}.game{grid-template-columns:1fr}.left{padding:14px 12px 10px}.right{padding:19px 15px;border-left:0;border-top:1px solid #624971}.grid{width:min(100%,min(65vh,420px))}.top{margin-bottom:13px}.sub{display:none}.meta{margin-bottom:10px}.focus-clue{margin:13px 0 10px}.keyboard{margin-top:12px}}
     @media(max-width:440px){.top h1{font-size:clamp(1.75rem,8vw,2.3rem)}.eyebrow{display:none}.top-actions{gap:5px}.top-actions .btn{padding:9px 8px;font-size:.58rem}.game{border-radius:14px}.grid{width:100%;gap:2px}.square{font-size:clamp(1.35rem,6.5vw,2.1rem);border-radius:3px}.square .num{top:2px;left:3px}.key{height:40px}.tools .btn{font-size:.6rem}.clue-columns{gap:8px}.clue{padding:8px 7px;font-size:.73rem}.history{gap:4px}.record{padding:7px 5px}.record small{font-size:.49rem}.record strong{font-size:.97rem}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+    /* anrat.link desktop-window theme; inline so this HTML stays standalone. */
+    :root{--bg:#111319;--panel:#181d25;--panel2:#242b37;--line:#596273;--text:#e6ebf4;--muted:#aeb8c8;--purple:#a78bfa;--pink:#d4b4ff}
+    body{background:#111319;color:var(--text);font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:linear-gradient(#979fb20b 1px,transparent 1px),linear-gradient(90deg,#979fb20b 1px,transparent 1px);background-size:24px 24px}
+    .shell{position:relative;z-index:1}
+    .top{position:relative;padding:43px 16px 14px;border:1px solid #596273;background:#14181fcf;box-shadow:5px 6px 0 #0006}
+    .top::before{content:"";position:absolute;top:0;left:0;right:0;height:30px;background:#2b313d;border-bottom:1px solid #596273;pointer-events:none}
+    .top::after{content:"aqua@games: ~/mini-crossword";position:absolute;top:8px;left:12px;color:#e6ebf4;font:500 11px "Cascadia Code",Consolas,monospace;pointer-events:none}
+    .game{border-color:#596273;border-radius:0;background:#181d25e0;box-shadow:5px 6px 0 #0006}
+    .left{background:#181d25}.right{background:#161b23;border-color:#596273}
+    .btn{border-color:#596273;border-radius:2px;background:#2a303d;color:#e6ebf4}.btn:hover{background:#384154}.btn.primary{border-color:#a78bfa;background:#a78bfa;color:#151923}.btn.primary:hover{background:#c8b9ff}
+    .btn.active{border-color:#b7a9ff;color:#e7dfff;box-shadow:inset 0 0 0 1px #b7a9ff}
+    .square,.key,.stat,.clue,.record,.focus-clue{border-radius:2px;border-color:#596273;background:#2c3442}
+    .square.black{background:#101318;border-color:#242b37}.square.selected{background:#48566b;border-color:#a78bfa}.square.cursor{background:#a78bfa;color:#18131f;border-color:#d0c7ff}.square.verified{background:#4d7050;border-color:#a8e776}.square.wrong{background:#753d57;border-color:#e89fba}
+    .key:hover{background:#46536b}.key.wide{background:#39425a;color:#ded5ff}
+    .focus-clue{background:#242b37}.progress{background:#2b3240}.clue.active{background:#41475e;border-color:#a78bfa}.clue.done{background:#2c4934;border-color:#76a77a}
+    .history .record{background:#222936}.stat strong,.record strong,.clue b{color:#bfb3ff}
+    @media(max-width:760px){
+      .shell{width:calc(100% - 12px);padding:6px 0 12px}
+      .top{min-height:65px;padding:30px 9px 6px;margin-bottom:6px;gap:5px}
+      .top::before{height:24px}.top::after{top:6px;font-size:9px}
+      .top h1{font-size:clamp(1.35rem,6vw,1.95rem);line-height:1.05}
+      .top .eyebrow,.top .sub{display:none}.top-actions{gap:4px}.top-actions .btn{padding:7px 6px;font-size:.55rem}
+      .game{display:flex;flex-direction:column;border-radius:0}
+      .left{padding:5px 6px 6px}.meta{margin-bottom:4px;font-size:.57rem}
+      .grid{width:min(100%,calc(100dvh - 293px));gap:2px}
+      .square{font-size:clamp(1rem,5vw,1.8rem)}.square .letter{margin-top:3px}.square .num{font-size:.47rem}
+      .focus-clue{min-height:38px;margin:5px 0 4px;padding:5px 7px;gap:6px}.focus-clue strong{font-size:.58rem}.focus-clue span{font-size:.69rem;line-height:1.2}
+      .tools{flex-wrap:nowrap;gap:3px}.tools .btn{padding:7px 2px;font-size:clamp(.42rem,1.65vw,.57rem)}
+      .keyboard{gap:2px;margin-top:5px}.keyrow{gap:2px}.key{max-width:none;height:clamp(28px,5dvh,36px);font-size:.7rem}.key.wide{max-width:48px}
+      #notice{min-height:15px;margin:3px 0 0;font-size:.64rem}
+      .right{padding:12px 9px;border-left:0;border-top:1px solid #596273}
+    }
+    @media(max-width:380px){.grid{width:min(100%,calc(100dvh - 275px))}.top h1{font-size:1.35rem}.tools .btn{font-size:.45rem}}
   </style>
 </head>
 <body>
