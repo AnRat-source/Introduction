@@ -9,7 +9,7 @@
     :root { color-scheme: dark; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
     * { box-sizing: border-box; }
     body { min-height: 100vh; margin: 0; padding: clamp(18px, 5vw, 64px); background: #111722; color: #dfe7f2; }
-    main { width: min(840px, 100%); margin: 0 auto; border: 1px solid #64748b; background: rgba(19, 26, 37, .96); box-shadow: 8px 8px 0 rgba(0, 0, 0, .35); }
+    main { width: min(960px, 100%); margin: 0 auto; border: 1px solid #64748b; background: rgba(19, 26, 37, .96); box-shadow: 8px 8px 0 rgba(0, 0, 0, .35); }
     header { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 10px 14px; border-bottom: 1px solid #64748b; background: #293447; font-size: 12px; }
     header strong { color: #f5c55b; }
     .path { margin-left: auto; color: #aebbd0; }
@@ -31,6 +31,17 @@
     .name { display: block; color: #edf2f8; font-weight: 700; }
     .description { display: block; margin-top: 3px; color: #9eacbf; font-size: 11px; line-height: 1.35; }
     .empty { padding: 14px; border: 1px dashed #53647b; color: #aebbd0; }
+    .career { margin-top: 22px; padding: 16px; border: 1px solid #75628e; background: linear-gradient(145deg, #2e2543, #182232 62%); }
+    .career-head { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px; }
+    .career-head h2 { margin:0;color:#e9d4ff;font-size:13px;letter-spacing:.08em; }
+    .career-head span { color:#ae9acb;font-size:10px; }
+    .career-stats { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px; }
+    .career-stat { padding:14px;border:1px solid #5a5377;background:#1b1d30;min-width:0; }
+    .career-stat small { display:block;color:#acb3cb;font-size:10px;letter-spacing:.03em; }
+    .career-stat strong { display:block;margin-top:8px;color:#ddaaff;font-size:clamp(19px,4vw,27px);font-variant-numeric:tabular-nums; }
+    .career-note { margin:10px 0 0;color:#aebbd0;font-size:11px; }
+    .game-record { display:block;margin-top:7px;color:#d7aaf5;font-size:10px;line-height:1.5; }
+    @media(max-width:540px){.content{padding:14px}.path{display:none}.career{padding:10px}.career-stats{gap:6px}.career-stat{padding:9px 7px}.career-stat small{font-size:9px}.career-stat strong{font-size:19px}.career-head{align-items:flex-start;flex-direction:column;gap:3px}}
   </style>
 </head>
 <body>
@@ -39,11 +50,43 @@
     <div class="content">
       <h1>I LOVE WORD GAMES</h1>
       <p>NY Times try me.</p>
+      <section class="career" aria-label="Your combined word game statistics">
+        <div class="career-head"><h2>✦ YOUR TOTAL STATS</h2><span>ALL GAMES · SAVED ON THIS DEVICE</span></div>
+        <div class="career-stats">
+          <div class="career-stat"><small>ROUNDS PLAYED</small><strong id="totalPlayed">0</strong></div>
+          <div class="career-stat"><small>ROUNDS WON</small><strong id="totalWins">0</strong></div>
+          <div class="career-stat"><small>WIN RATE</small><strong id="totalRate">0%</strong></div>
+          <div class="career-stat"><small>DAY STREAK <span aria-hidden="true">🔥</span></small><strong id="totalStreak">0</strong></div>
+          <div class="career-stat"><small>BEST STREAK</small><strong id="totalBest">0</strong></div>
+          <div class="career-stat"><small>TIME PLAYED</small><strong id="totalTime">0m</strong></div>
+        </div>
+        <p class="career-note">A streak counts consecutive calendar days with a win in any game. Pressing New Puzzle before finishing a started standalone round counts as a loss.</p>
+      </section>
       <div id="tools" aria-live="polite"><p class="empty">Loading Games</p></div>
     </div>
   </main>
+  <script src="./game-stats.js"></script>
   <script>
     const tools = document.getElementById('tools');
+    const gameIds = { 'Crossword.html': 'crossword', 'Wordle-Unlimited.html': 'wordle', 'Connections.html': 'connections', 'Word-Search.html': 'wordsearch', 'Word-Wheel.html': 'wordwheel', 'layers.html': 'layers' };
+    function refreshTotals() {
+      const total = GameStats.read('overall');
+      document.getElementById('totalPlayed').textContent = total.played.toLocaleString();
+      document.getElementById('totalWins').textContent = total.wins.toLocaleString();
+      document.getElementById('totalRate').textContent = total.winRate + '%';
+      document.getElementById('totalStreak').textContent = total.streak;
+      document.getElementById('totalBest').textContent = total.bestStreak;
+      const mins = Math.floor(total.totalSeconds / 60);
+      document.getElementById('totalTime').textContent = mins >= 60 ? Math.floor(mins / 60) + 'h ' + mins % 60 + 'm' : mins + 'm';
+      tools.querySelectorAll('[data-game-id]').forEach(item => {
+        const stats = GameStats.read(item.dataset.gameId);
+        item.querySelector('.game-record').textContent = `${stats.played} played · ${stats.wins} wins · 🔥 ${stats.streak}-day streak`;
+      });
+    }
+    window.addEventListener('focus', refreshTotals);
+    window.addEventListener('pageshow', refreshTotals);
+    window.addEventListener('storage', refreshTotals);
+    window.addEventListener('wordgames:stats-changed', refreshTotals);
     const toolDetails = {
       'FileExplorer/Misc/Games/Word-Games/Crossword.html': {
         name: 'Crossword',
@@ -65,10 +108,15 @@
         icon: '🔎',
         description: 'Find hidden words in a grid of letters, horizontally, vertically, and diagonally.'
       },
-      'FileExplorer/Misc/Games/Word-Games/-Word-Wheel.html': {
+      'FileExplorer/Misc/Games/Word-Games/Word-Wheel.html': {
         name: 'Word Wheel',
         icon: '🔤',
         description: 'Connect letters in a wheel to form words and complete crossword-style puzzles.'
+      },
+      'FileExplorer/Misc/Games/Word-Games/layers.html': {
+        name: 'Layers',
+        icon: '✳',
+        description: 'Beat four secret mini-challenges to reveal a final Connections puzzle.'
       }
     };
     function findTools(entries) {
@@ -106,35 +154,44 @@
         parent.append(folder);
         return;
       }
+      if (!gameIds[entry.name]) return;
       const item = document.createElement('button');
       const details = toolDetails[entry.path] || {
         name: entry.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
         icon: '▤', description: 'Open this tool.'
       };
-      item.innerHTML = '<span class="icon"></span><span class="tool-copy"><span class="name"></span><span class="description"></span></span>';
+      item.innerHTML = '<span class="icon"></span><span class="tool-copy"><span class="name"></span><span class="description"></span><span class="game-record"></span></span>';
       item.querySelector('.icon').textContent = details.icon;
       item.querySelector('.name').textContent = details.name;
       item.querySelector('.description').textContent = details.description;
+      item.dataset.gameId = gameIds[entry.name];
       item.addEventListener('click', async () => {
         if (/\.href$/i.test(entry.name)) {
           const target = await resolveShortcut(entry.path);
           if (target) openTool(target);
           return;
         }
-        openTool(`../../../../${entry.path}`);
+        openTool(entry.path.startsWith('./') ? entry.path : `../../../../${entry.path}`);
       });
       parent.append(item);
     }
 
+    const localEntries = Object.keys(gameIds).map(name => ({ type: 'file', name, path: './' + name }));
+    function showEntries(entries) {
+      tools.replaceChildren();
+      const list = entries.length ? [...entries] : [...localEntries];
+      // Layers is bundled next to this index, even if the site's file index omits it.
+      if (!list.some(entry => entry.name === 'layers.html')) list.push(localEntries.find(entry => entry.name === 'layers.html'));
+      list.forEach(entry => addEntry(entry, tools));
+      if (!tools.children.length) localEntries.forEach(entry => addEntry(entry, tools));
+      refreshTotals();
+    }
+
     fetch('../../../file-index.json', { cache: 'no-store' })
       .then(response => response.ok ? response.json() : Promise.reject())
-      .then(entries => {
-        tools.replaceChildren();
-        const toolEntries = findTools(entries);
-        if (!toolEntries.length) tools.innerHTML = '<p class="empty">No games are available yet.</p>';
-        toolEntries.forEach(entry => addEntry(entry, tools));
-      })
-      .catch(() => { tools.innerHTML = '<p class="empty">The game index could not be loaded.</p>'; });
+      .then(entries => showEntries(findTools(entries)))
+      .catch(() => showEntries(localEntries));
+    refreshTotals();
   </script>
 </body>
 </html>

@@ -99,7 +99,9 @@
       </aside>
     </section>
   </main>
+  <script src="./game-stats.js"></script>
   <script>
+    GameStats.mount('wordsearch', 'main > header');
     const WORD_API = 'https://api.anrat.link/words?length=4,5,6,7,8,9,10';
     const FALLBACK_WORDS = `ACTOR ANGER BRAIN BROWN CLEAN DANCE GONER GRADE GRAND LANCE MAKER PANEL PETAL PLANE PLANT PLATE PLEAT RAKES RANGE SKATE SPARE SPEAK STAKE STARE STEAK TAKER TAKES TAMER TEAMS TEARS TRAIN PLANET GARDEN MARKET BASKET CANDLE ORANGE CARTON STREAM RAINBOW SPEAKER PAINTER LISTEN SILENT TINSEL MASTER SIMPLE PUZZLE LETTER SEARCH HIDDEN WONDER PURPLE FLOWER WINTER SUMMER SPRING AUTUMN FOREST RIVER OCEAN ISLAND CASTLE ROCKET GALAXY PLANETS SATURN SUNSET SUNRISE SHADOW LIGHTNING THUNDER CLOUDS CLOUD MYSTERY CRYSTAL SPARKLE DRAGON PHOENIX PUZZLES JOURNEY ADVENTURE EXPLORE EXPLORE MAGIC BRIDGE CAMERA BUTTON WINDOW SCREEN COMPUTERS COMPUTER KEYBOARD CODING PROGRAM GAMEPLAY VIOLET LAVENDER PINKISH MAGENTA ENERGY CIRCLE SQUARE TRIANGLE DIAMOND MUSIC MELODY RHYTHM GUITAR PIANO DESIGN CREATE FRIEND FAMILY SCHOOL LESSON LEARN STUDY THINK LOGIC MEMORY BUBBLE BUTTER BREAD FRUIT APPLE BANANA CHERRY LEMON ORCHARD GRAPES PEACH MANGO TIGER ZEBRA PANDA RABBIT FOXES HORSE EAGLE OTTER PENGUIN TURTLE DOLPHIN WHALE SHARK SPACE STARS COMET METEOR SOLAR ROBOT LASER NEBULA ORBIT SIGNAL PLANETARY`.split(/\s+/).filter(word=>/^[A-Z]{4,10}$/.test(word));
     const SETTINGS = { easy:{size:6,count:8,min:4,max:7}, normal:{size:10,count:12,min:4,max:9}, hard:{size:14,count:16,min:5,max:10}, superhard:{size:20,count:20,min:5,max:10} };
@@ -205,6 +207,7 @@
       const settings=SETTINGS[difficultyEl.value];
       const next=makePuzzle(settings);
       if(!next) { setMessage('Could not build a puzzle. Please try again.','error'); return; }
+      if(puzzle&&completedAt===null&&hasInteracted) GameStats.record('wordsearch',false,(Date.now()-startedAt)/1000);
       clearTimeout(hintTimeout); puzzle=next; found=new Set(); bonusFound=new Set(); selected=[]; tapAnchor=null; drag=null; hasInteracted=false;
       startedAt=Date.now(); completedAt=null; infoEl.textContent=`${puzzle.size} × ${puzzle.size} · 8 DIRECTIONS`;
       buildGrid(); buildList(); tick(); setMessage('Drag across letters or tap the first and last letter.');
@@ -231,7 +234,7 @@
       if(entry) {
         if(found.has(entry.word)) setMessage('You already found '+entry.word+'.');
         else { found.add(entry.word); setMessage('Nice — '+entry.word+' found!','success'); updateProgress();
-          if(found.size===puzzle.placed.length){completedAt=Date.now();tick();setMessage('Puzzle complete! All '+found.size+' words found in '+timerEl.textContent+'. 🎉','success');}
+          if(found.size===puzzle.placed.length){completedAt=Date.now();GameStats.record('wordsearch',true,(completedAt-startedAt)/1000);tick();setMessage('Puzzle complete! All '+found.size+' words found in '+timerEl.textContent+'. 🎉','success');}
         }
       } else if(selected.length>1) {
         const letters=selected.map(({r,c})=>puzzle.board[r][c]).join('');

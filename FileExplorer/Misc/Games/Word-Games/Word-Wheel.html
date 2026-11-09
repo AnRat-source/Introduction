@@ -67,7 +67,9 @@
       </section>
     </section>
   </main>
+  <script src="./game-stats.js"></script>
   <script>
+    GameStats.mount('wordwheel', 'main > header');
     const WORD_API = 'https://api.anrat.link/words?length=3,4,5,6,7';
     // This bundled catalogue keeps the game playable before the Worker responds.
     let catalogue = [
@@ -93,7 +95,7 @@
     const complete = document.querySelector('#complete');
     const letterCount = document.querySelector('#letterCount');
     const remainingScore = document.querySelector('#remainingScore');
-    let puzzle, selected = [], found = new Set(), activePointer = false;
+    let puzzle, selected = [], found = new Set(), activePointer = false, hasInteracted = false, roundStartedAt = 0, finishedAt = null;
     let selectionLine, pointerPosition = null;
     const shuffle = list => {
       const result = [...list];
@@ -255,7 +257,9 @@
         message.classList.add('bad');
         return;
       }
+      if(puzzle && finishedAt===null && hasInteracted) GameStats.record('wordwheel',false,(Date.now()-roundStartedAt)/1000);
       puzzle={ sourceLetters:source.letters,letters:shuffle(source.letters.split('')),validWords:new Set(source.words),...layout };
+      roundStartedAt=Date.now(); finishedAt=null; hasInteracted=false;
       found=new Set(); clearSelection(); renderWheel(); renderBoard();
       score.textContent='0 / '+puzzle.placed.length; remainingScore.textContent=puzzle.placed.length;
       letterCount.textContent=puzzle.letters.length+' LETTERS';
@@ -270,7 +274,7 @@
       if(!target) { message.textContent='That word is not in this puzzle.'; message.classList.add('bad'); clearSelection(); return; }
       if(found.has(target.word)) { message.textContent='Already found that one.'; message.classList.add('bad'); clearSelection(); return; }
       found.add(target.word); message.textContent='Nice — '+target.word+' found!'; message.classList.remove('bad'); clearSelection(); renderBoard(); score.textContent=found.size+' / '+puzzle.placed.length; remainingScore.textContent=puzzle.placed.length-found.size;
-      if(found.size===puzzle.placed.length) { complete.innerHTML='<strong>Board cleared!</strong> Generate another random crossword.'; }
+      if(found.size===puzzle.placed.length && finishedAt===null) { finishedAt=Date.now(); GameStats.record('wordwheel',true,(finishedAt-roundStartedAt)/1000); complete.innerHTML='<strong>Board cleared!</strong> Generate another random crossword.'; }
     }
     // Find all API words that can be made from the wheel, including repeated letters.
     function wordsForWheel(letters, index) {
@@ -329,7 +333,7 @@
         if(expanded.length) {
           catalogue = expanded; // Every playable wheel keeps its entire API word set.
           // Refresh the untouched starter round; don't interrupt an active game.
-          if(!puzzle || (found.size===0 && selected.length===0 && !activePointer)) newPuzzle();
+          if(!puzzle || (!hasInteracted && found.size===0 && selected.length===0 && !activePointer)) newPuzzle();
         }
       } catch {
         // The bundled catalogue remains available when the API is offline.
@@ -339,7 +343,7 @@
       const rect=wheel.getBoundingClientRect();
       pointerPosition={x:(event.clientX-rect.left)/rect.width*100,y:(event.clientY-rect.top)/rect.height*100};
     }
-    wheel.addEventListener('pointerdown',event=>{ const target=event.target.closest('.letter'); if(!target || !puzzle) return; clearSelection(); activePointer=true; trackPointer(event); wheel.setPointerCapture(event.pointerId); addLetter(+target.dataset.index); event.preventDefault(); });
+    wheel.addEventListener('pointerdown',event=>{ const target=event.target.closest('.letter'); if(!target || !puzzle || finishedAt!==null) return; hasInteracted=true; clearSelection(); activePointer=true; trackPointer(event); wheel.setPointerCapture(event.pointerId); addLetter(+target.dataset.index); event.preventDefault(); });
     wheel.addEventListener('pointermove',event=>{ if(!activePointer) return; trackPointer(event); const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('.letter'); if(target) addLetter(+target.dataset.index); updateSelection(); });
     wheel.addEventListener('pointerup',()=>{ if(!activePointer) return; activePointer=false; pointerPosition=null; checkWord(); });
     wheel.addEventListener('pointercancel',()=>{ activePointer=false; pointerPosition=null; clearSelection(); });

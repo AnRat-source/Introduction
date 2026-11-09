@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const $ = (s, root = document) => root.querySelector(s);
+  GameStats.mount('layers', '.intro');
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const TYPES = ['letterlock','anagram','crossword','wordsearch'];
@@ -47,7 +48,6 @@
   const lettersOnly = w => /^[A-Z]+$/.test(w);
   const timeFormat = ms => {const s=Math.max(0,Math.floor(ms/1000));return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`};
   const getJSON = (key,defaultValue) => {try{return JSON.parse(localStorage.getItem(key))??defaultValue}catch{return defaultValue}};
-  const dateDiff = (a,b) => Math.round((Date.parse(a+'T12:00:00')-Date.parse(b+'T12:00:00'))/86400000);
   const usesSiteRelay=location.hostname==='terminal.local'||location.hostname.endsWith('.chatgpt.site');
   const apiBase=usesSiteRelay?'/api':'https://api.anrat.link';
   const endpoints = {connections:apiBase+'/connections',crossword:apiBase+'/crossword',words:apiBase+'/words?length=5'};
@@ -153,21 +153,11 @@
     render();
   }
   function save(){if(!state)return;state.order=boardOrder.map(t=>t.word);try{localStorage.setItem(stateKey,JSON.stringify(state))}catch{}}
-  function getStats(){return getJSON('anrat.layers.stats.v2',{played:0,wins:0,streak:0,bestStreak:0,lastDay:null,totalSeconds:0})}
+  function getStats(){return GameStats.read('layers')}
   function completeRound(won){
     if(state.endedAt)return;
     state.endedAt=Date.now();state.won=won;
-    if(roundOffset===0){
-      const stats=getStats();
-      const recordKey=`anrat.layers.recorded:${dayKey}`;
-      if(!localStorage.getItem(recordKey)){
-        stats.played++;if(won)stats.wins++;
-        stats.streak=stats.lastDay===dayKey?stats.streak:stats.lastDay&&dateDiff(dayKey,stats.lastDay)===1?stats.streak+1:1;
-        stats.bestStreak=Math.max(stats.bestStreak,stats.streak);
-        stats.lastDay=dayKey;stats.totalSeconds+=Math.floor((state.endedAt-state.startedAt)/1000);
-        localStorage.setItem('anrat.layers.stats.v2',JSON.stringify(stats));localStorage.setItem(recordKey,'1');
-      }
-    }
+    GameStats.record('layers',won,(state.endedAt-state.startedAt)/1000);
     save();render();sound(won?'win':'error');
     setTimeout(()=>{if(!activeModal)openEnd()},550);
   }
@@ -547,8 +537,8 @@
   }
   function openStats(){
     const stats=getStats(),winRate=stats.played?Math.round(100*stats.wins/stats.played):0;
-    openModal(frame('YOUR JOURNEY','Your stats','Daily progress stays in this browser. Bonus rounds do not affect your streak.',
-      `<div class="stats-grid"><div><span>PLAYED</span><b>${stats.played}</b></div><div><span>WIN RATE</span><b>${winRate}%</b></div><div><span>STREAK</span><b>${stats.streak}</b></div><div><span>BEST STREAK</span><b>${stats.bestStreak}</b></div><div><span>WINS</span><b>${stats.wins}</b></div><div><span>TIME TODAY</span><b style="font-size:20px">${timeFormat((state?.endedAt||Date.now())-(state?.startedAt||Date.now()))}</b></div></div><div class="mini-controls"><button type="button" class="game-button" data-action="share">Copy today's result</button><button type="button" class="game-button primary" data-action="close">Back to puzzle ↗</button></div>`),'stats');
+    openModal(frame('YOUR JOURNEY','Your stats','All finished rounds count. Your streak grows when you win on consecutive days.',
+      `<div class="stats-grid"><div><span>PLAYED</span><b>${stats.played}</b></div><div><span>WIN RATE</span><b>${winRate}%</b></div><div><span>STREAK</span><b>${stats.streak}</b></div><div><span>BEST STREAK</span><b>${stats.bestStreak}</b></div><div><span>WINS</span><b>${stats.wins}</b></div><div><span>THIS ROUND</span><b style="font-size:20px">${timeFormat((state?.endedAt||Date.now())-(state?.startedAt||Date.now()))}</b></div></div><div class="mini-controls"><button type="button" class="game-button" data-action="share">Copy today's result</button><button type="button" class="game-button primary" data-action="close">Back to puzzle ↗</button></div>`),'stats');
   }
   function openEnd(){
     if(!state?.endedAt)return;
