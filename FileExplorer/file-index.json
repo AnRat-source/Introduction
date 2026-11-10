@@ -162,6 +162,11 @@
             "path": "FileExplorer/Misc/Random/secret.html"
           }
         ]
+      },
+      {
+        "type": "file",
+        "name": "index.html",
+        "path": "FileExplorer/Misc/index.html"
       }
     ]
   },
@@ -259,6 +264,11 @@
         "path": "FileExplorer/Tools/index.html"
       }
     ]
+  },
+  {
+    "type": "file",
+    "name": "index.html",
+    "path": "FileExplorer/index.html"
   },
   {
     "type": "file",
