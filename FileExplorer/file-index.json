@@ -25,8 +25,18 @@
         "children": [
           {
             "type": "file",
+            "name": "Evolution-Sandbox.html",
+            "path": "FileExplorer/Misc/Fun/Evolution-Sandbox.html"
+          },
+          {
+            "type": "file",
             "name": "GHOSTLINE-v2.html",
             "path": "FileExplorer/Misc/Fun/GHOSTLINE-v2.html"
+          },
+          {
+            "type": "file",
+            "name": "Gravity-Lab.html",
+            "path": "FileExplorer/Misc/Fun/Gravity-Lab.html"
           },
           {
             "type": "file",
@@ -143,6 +153,11 @@
           },
           {
             "type": "file",
+            "name": "Fractal-Explorer.html",
+            "path": "FileExplorer/Misc/Random/Fractal-Explorer.html"
+          },
+          {
+            "type": "file",
             "name": "secret.html",
             "path": "FileExplorer/Misc/Random/secret.html"
           }
@@ -167,6 +182,32 @@
             "type": "file",
             "name": "Blueprint-Maker-3D.html",
             "path": "FileExplorer/Tools/Diagrams/Blueprint-Maker-3D.html"
+          },
+          {
+            "type": "file",
+            "name": "Terrain-Generator.html",
+            "path": "FileExplorer/Tools/Diagrams/Terrain-Generator.html"
+          }
+        ]
+      },
+      {
+        "type": "directory",
+        "name": "Media",
+        "children": [
+          {
+            "type": "file",
+            "name": "Audio-Editor.html",
+            "path": "FileExplorer/Tools/Media/Audio-Editor.html"
+          },
+          {
+            "type": "file",
+            "name": "Background-Remover.html",
+            "path": "FileExplorer/Tools/Media/Background-Remover.html"
+          },
+          {
+            "type": "file",
+            "name": "Pixel-Art-Studio.html",
+            "path": "FileExplorer/Tools/Media/Pixel-Art-Studio.html"
           }
         ]
       },
@@ -187,6 +228,11 @@
         "children": [
           {
             "type": "file",
+            "name": "Code-Playground.html",
+            "path": "FileExplorer/Tools/Utilities/Code-Playground.html"
+          },
+          {
+            "type": "file",
             "name": "Nano-LLM.html",
             "path": "FileExplorer/Tools/Utilities/Nano-LLM.html"
           },
@@ -199,6 +245,11 @@
             "type": "file",
             "name": "Surface-Measure.html",
             "path": "FileExplorer/Tools/Utilities/Surface-Measure.html"
+          },
+          {
+            "type": "file",
+            "name": "Visual-Node-Programming.html",
+            "path": "FileExplorer/Tools/Utilities/Visual-Node-Programming.html"
           }
         ]
       },
