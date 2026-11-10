@@ -30,6 +30,11 @@
           },
           {
             "type": "file",
+            "name": "Fluid-Lab.html",
+            "path": "FileExplorer/Misc/Fun/Fluid-Lab.html"
+          },
+          {
+            "type": "file",
             "name": "GHOSTLINE-v2.html",
             "path": "FileExplorer/Misc/Fun/GHOSTLINE-v2.html"
           },
@@ -132,8 +137,18 @@
           },
           {
             "type": "file",
+            "name": "Crumb-Zero.html",
+            "path": "FileExplorer/Misc/Games/Crumb-Zero.html"
+          },
+          {
+            "type": "file",
             "name": "Doom.iframe",
             "path": "FileExplorer/Misc/Games/Doom.iframe"
+          },
+          {
+            "type": "file",
+            "name": "Karaoke-Studio.html",
+            "path": "FileExplorer/Misc/Games/Karaoke-Studio.html"
           },
           {
             "type": "file",
@@ -235,6 +250,11 @@
             "type": "file",
             "name": "Code-Playground.html",
             "path": "FileExplorer/Tools/Utilities/Code-Playground.html"
+          },
+          {
+            "type": "file",
+            "name": "HTML-Maker.html",
+            "path": "FileExplorer/Tools/Utilities/HTML-Maker.html"
           },
           {
             "type": "file",
