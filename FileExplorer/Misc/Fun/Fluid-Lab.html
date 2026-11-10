@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#090b17">
+  <title>Fluid Lab — Interactive Water Physics</title>
+  <style>
+    :root{color-scheme:dark;--bg:#090b17;--panel:#111426;--panel2:#171b31;--edge:#292b49;--muted:#8589a9;--text:#f1f0ff;--purple:#b27aff;--cyan:#69dcff;--pink:#fc80db;--round:17px}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:var(--bg)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+    .app{height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(circle at 78% -30%,#281746 0%,transparent 54%),#090b17}
+    .header{height:66px;flex:none;border-bottom:1px solid #24263f;display:flex;align-items:center;gap:12px;padding:0 22px;background:#0c0e1bdd;z-index:5}
+    .logo{width:37px;height:37px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#35245d,#163c5b);box-shadow:inset 0 0 0 1px #6b4c9988;color:var(--cyan)}
+    .logo svg{width:22px;height:22px}.brand{line-height:1.1}.brand strong{display:block;font-size:17px;font-weight:800;letter-spacing:.025em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.16em;font-weight:700;margin-top:4px}
+    .tag{border:1px solid #3c315f;background:#261b42;color:#c5a8ff;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.04em;margin-left:7px}
+    .header-spacer{flex:1}.chip{display:flex;align-items:center;gap:8px;border:1px solid #31334d;background:#15182a;border-radius:11px;padding:9px 12px;color:#bdc1de;font-size:12px;white-space:nowrap}
+    .live-dot{width:7px;height:7px;background:#68e6b1;border-radius:50%;box-shadow:0 0 10px #68e6b1}.icon-btn{width:36px;height:36px;border:1px solid #333551;border-radius:11px;background:#191b31;color:#d5d2f0;display:grid;place-items:center}.icon-btn svg{width:18px;height:18px}.menu-btn{display:none}
+    .workspace{display:flex;min-height:0;flex:1;position:relative}
+    .sidebar{width:284px;flex:none;padding:20px 17px 22px 20px;border-right:1px solid #22253e;background:linear-gradient(180deg,#111325,#0d0f1e);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4b416f transparent;z-index:4}
+    .section-label{display:flex;align-items:center;justify-content:space-between;color:#9193b5;font-size:10px;font-weight:800;letter-spacing:.19em;margin:3px 0 13px}.section-label span:last-child{color:#615d88}
+    .control-card{background:#17192d;border:1px solid #2c2c48;border-radius:var(--round);padding:15px;margin-bottom:18px;box-shadow:inset 0 1px 0 #ffffff05}
+    .control-title{font-size:13px;font-weight:700;margin-bottom:14px}.range-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#b5b7d0;margin-bottom:9px}.value{color:#caa9ff;font-variant-numeric:tabular-nums;font-weight:750}
+    .range-wrap{margin-bottom:18px}.range-wrap:last-child{margin-bottom:0}input[type=range]{width:100%;height:6px;appearance:none;-webkit-appearance:none;background:linear-gradient(90deg,#7755d9,#6ad9fa);border-radius:50px;outline:none;cursor:pointer}input[type=range]::-webkit-slider-thumb{appearance:none;width:17px;height:17px;border:3px solid #e5e2ff;background:#8865e9;border-radius:50%;box-shadow:0 1px 10px #0008}input[type=range]::-moz-range-thumb{width:11px;height:11px;border:3px solid #e5e2ff;background:#8865e9;border-radius:50%}
+    .btn{border:1px solid #393551;border-radius:11px;background:#22233c;color:#eae7ff;font-size:12px;font-weight:750;min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 10px;transition:background .15s,border-color .15s,transform .15s}.btn:hover{background:#302c4d;border-color:#7256a8}.btn:active{transform:scale(.97)}.btn svg{width:16px;height:16px;flex:none}.btn.primary{background:linear-gradient(135deg,#7e4bd6,#a45ace);border-color:#b186f5;color:white}.btn.teal{background:#173946;border-color:#296780;color:#a7eeff}
+    .button-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.button-grid .wide{grid-column:span 2}.tilt-explain{font-size:11px;line-height:1.55;color:#9297b9;margin:11px 1px 0}
+    .hint-card{border:1px solid #302e4f;border-radius:13px;padding:12px 13px;background:linear-gradient(120deg,#241d3c,#151d32);color:#b8b8d5;font-size:11px;line-height:1.6}.hint-card b{color:#e5d5ff}
+    .stage{position:relative;flex:1;min-width:0;min-height:0;margin:15px 15px 15px 0;border:1px solid #3d3b63;border-radius:22px;overflow:hidden;background:radial-gradient(ellipse 58% 54% at 55% 84%,#1b2546 0%,transparent 100%),radial-gradient(ellipse 60% 50% at 88% 5%,#251739 0%,transparent 100%),#0d1020;box-shadow:0 20px 65px #030410b0,inset 0 1px 0 #8f7ac01c}
+    .stage::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(#8896df09 1px,transparent 1px),linear-gradient(90deg,#8896df09 1px,transparent 1px);background-size:35px 35px;mask-image:linear-gradient(to bottom,transparent,#000 18%,#000 90%);z-index:0}
+    .stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent,#55ccff70,#9a71fba0,transparent);z-index:1}
+    #fluid{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab;z-index:1}#fluid.grabbing{cursor:grabbing}#fluid.pouring{cursor:crosshair}#fluid.deleting{cursor:cell}
+    #brushCursor{position:absolute;width:90px;height:90px;border:1px dashed #a3dffd99;background:#6faaff0b;border-radius:50%;pointer-events:none;left:0;top:0;display:none;transform:translate(-50%,-50%);z-index:2;box-shadow:0 0 18px #5d81ff18,inset 0 0 14px #5d81ff18}
+    .stage-top{position:absolute;left:20px;top:19px;right:20px;display:flex;align-items:flex-start;justify-content:space-between;pointer-events:none;z-index:3;gap:12px}
+    .stage-caption{color:#e7e8fc;font-size:14px;font-weight:800;letter-spacing:.01em}.stage-sub{color:#848ba9;font-size:11px;margin-top:5px}.stat-row{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}.stat{background:#14192dbd;border:1px solid #363b56;color:#a9b1d2;padding:6px 9px;border-radius:8px;font-size:10px;font-weight:650}.stat b{color:#b2eaff;font-variant-numeric:tabular-nums}
+    .gravity-panel{pointer-events:auto;display:flex;align-items:center;gap:10px;background:#111526c9;border:1px solid #343952;border-radius:14px;padding:9px 11px;backdrop-filter:blur(12px);box-shadow:0 5px 25px #06081355}
+    .gravity-wheel{width:68px;height:68px;border:1px solid #393d61;background:radial-gradient(circle,#222742 0,#12182b 72%);border-radius:50%;position:relative;touch-action:none;cursor:crosshair;flex:none}
+    .gravity-wheel::before,.gravity-wheel::after{content:"";position:absolute;pointer-events:none;background:#5c65804c}.gravity-wheel::before{width:1px;height:100%;left:50%;top:0}.gravity-wheel::after{height:1px;width:100%;top:50%;left:0}
+    .gravity-wheel .knob{position:absolute;width:15px;height:15px;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:#8ceaff;box-shadow:0 0 0 4px #65c8fd1e,0 0 18px #59d8ff9c;pointer-events:none;z-index:1}
+    .gravity-label{font-size:10px;color:#8993b2;line-height:1.45;letter-spacing:.04em}.gravity-label b{display:block;color:#e2e7ff;font-size:11px;margin-top:4px}.gravity-label button{background:none;border:0;color:#aa9bed;font-size:10px;text-decoration:underline;padding:5px 0 0}.quick-tilt{display:none}
+    .empty-hint{position:absolute;top:49%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#7e86a7;pointer-events:none;display:none;font-size:13px;line-height:1.8;z-index:2}.empty-hint b{color:#c4d9ff}
+    .dock{position:absolute;left:50%;bottom:23px;transform:translateX(-50%);display:flex;gap:8px;padding:8px;border:1px solid #565075;background:#151629e8;border-radius:17px;backdrop-filter:blur(18px);box-shadow:0 9px 32px #030414bb;z-index:4}
+    .tool{min-width:98px;height:51px;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 14px;border:1px solid transparent;border-radius:11px;background:transparent;color:#9ca4c4;font-size:12px;font-weight:800;transition:background .15s,color .15s}.tool svg{width:19px;height:19px}.tool:hover{background:#252940;color:white}.tool.active{background:linear-gradient(135deg,#6940b6,#5644ae);border-color:#9b7adb;color:#fff;box-shadow:0 3px 13px #6d43cb55}.tool[data-tool=pour].active{background:linear-gradient(135deg,#17668b,#305fb5);border-color:#55b9f2}.tool[data-tool=delete].active{background:linear-gradient(135deg,#843b69,#73345d);border-color:#da79ba}
+    .stage-help{position:absolute;right:17px;bottom:19px;font-size:10px;color:#7781a2;pointer-events:none;z-index:3;letter-spacing:.02em}
+    #toast{position:absolute;top:118px;left:50%;transform:translate(-50%,-10px);z-index:8;opacity:0;pointer-events:none;background:#222442ed;border:1px solid #746ba8;border-radius:12px;color:#e6e4ff;font-size:12px;padding:11px 15px;max-width:85%;text-align:center;transition:opacity .2s,transform .2s;box-shadow:0 12px 30px #0009}#toast.visible{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:900px){.sidebar{width:242px;padding:17px 12px}.stage-help{display:none}.tag{display:none}.chip{font-size:11px}}
+    @media(max-width:760px){.header{height:57px;padding:0 13px;gap:9px}.logo{width:34px;height:34px;border-radius:10px}.brand strong{font-size:15px}.brand small{font-size:8px;margin-top:3px}.chip{padding:7px 9px}.menu-btn{display:grid}.sidebar{display:none;position:absolute;top:7px;left:9px;right:9px;bottom:auto;width:auto;max-height:min(73dvh,590px);border:1px solid #534a76;border-radius:18px;z-index:6;overflow-y:auto;background:#111426f7;box-shadow:0 20px 55px #000c;padding:17px}.sidebar.open{display:block}.workspace{position:relative}.stage{margin:8px;border-radius:17px}.stage-top{top:15px;left:13px;right:13px}.stage-caption{font-size:12px}.stage-sub{font-size:10px;max-width:160px;line-height:1.4}.stat-row{margin-top:8px;gap:5px}.stat{font-size:9px;padding:5px 7px}.gravity-panel{padding:6px;gap:5px;border-radius:12px}.gravity-wheel{width:56px;height:56px}.gravity-label{display:none}.quick-tilt{width:29px;height:42px;display:grid;place-items:center;border:1px solid #404466;border-radius:9px;background:#1d2541;color:#97a9d2}.quick-tilt.active{background:#264a61;border-color:#4fcfff;color:#a8f1ff;box-shadow:0 0 14px #2bc8ff35}.quick-tilt svg{width:18px;height:18px}.dock{bottom:max(14px,env(safe-area-inset-bottom));width:calc(100% - 26px);justify-content:space-between;gap:3px;padding:6px;border-radius:14px}.tool{min-width:0;flex:1;height:49px;padding:0 5px;font-size:11px;gap:6px}.tool svg{width:18px;height:18px}.stage-help{display:none}.control-card{margin-bottom:13px}}
+    @media(max-width:360px){.header .chip{display:none}.tool{font-size:10px}.gravity-wheel{width:49px;height:49px}}
+    @media(prefers-reduced-motion:reduce){.btn,.tool,#toast{transition:none}}
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2C9 7 5 10.6 5 15a7 7 0 0 0 14 0c0-4.4-4-8-7-13Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M8.5 15.3a3.7 3.7 0 0 0 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 13V7a2 2 0 0 1 4 0v4-6a2 2 0 0 1 4 0v6-3a2 2 0 0 1 4 0v7c0 4-2.7 6-7 6h-2c-3.3 0-4.8-2-6-4l-2-3a2.1 2.1 0 0 1 3.5-2.2L8 14Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-pour" viewBox="0 0 24 24"><path d="m4 4 9 4-4 9-9-4 4-9Z" transform="translate(3,-1)" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15 14c0 2 3 3 3 5a3 3 0 0 0 6 0c0-2-3-5-3-5" transform="translate(-3,-1)" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-erase" viewBox="0 0 24 24"><path d="m4 15 10-11a3 3 0 0 1 4.3 0l2 2a3 3 0 0 1 0 4.2L11 20H7L3.5 16.5a2 2 0 0 1 .5-1.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9 10 7 7M11 20h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="7" r="2.5" fill="#191b31" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="17" r="2.5" fill="#191b31" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM14 5h4v14h-4z" fill="currentColor"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 11a8 8 0 1 1 1.5 5M4 5v6h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M11 18h2M9 5h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  </svg>
+  <div class="app">
+    <header class="header">
+      <div class="logo"><svg><use href="#i-drop"/></svg></div>
+      <div class="brand"><strong>FLUID LAB</strong><small>INTERACTIVE PHYSICS</small></div>
+      <div class="tag">LIVE SIMULATION</div>
+      <div class="header-spacer"></div>
+      <div class="chip"><span class="live-dot" id="liveDot"></span><span id="headerStatus">Simulation running</span></div>
+      <button class="icon-btn menu-btn" id="menuButton" aria-label="Open settings" title="Settings"><svg><use href="#i-settings"/></svg></button>
+    </header>
+    <main class="workspace">
+      <aside class="sidebar" id="sidebar">
+        <div class="section-label"><span>SIMULATION</span><span>01 / 03</span></div>
+        <div class="control-card">
+          <div class="control-title">Physics properties</div>
+          <div class="range-wrap"><div class="range-row"><span>Gravity strength</span><span class="value" id="gravityValue">100%</span></div><input type="range" min="0" max="200" value="100" id="gravityRange" aria-label="Gravity strength"></div>
+          <div class="range-wrap"><div class="range-row"><span>Viscosity</span><span class="value" id="viscosityValue">25%</span></div><input type="range" min="0" max="100" value="25" id="viscosityRange" aria-label="Viscosity"></div>
+          <div class="range-wrap"><div class="range-row"><span>Brush size</span><span class="value" id="brushValue">52 px</span></div><input type="range" min="18" max="110" value="52" id="brushRange" aria-label="Tool brush size"></div>
+        </div>
+        <div class="section-label"><span>GRAVITY &amp; SENSORS</span><span>02 / 03</span></div>
+        <div class="control-card">
+          <div class="button-grid">
+            <button class="btn primary wide" id="tiltButton"><svg><use href="#i-phone"/></svg><span id="tiltLabel">Enable phone tilt</span></button>
+            <button class="btn" id="calibrateButton">Calibrate tilt</button>
+            <button class="btn" id="downButton">Gravity ↓</button>
+          </div>
+          <p class="tilt-explain" id="sensorInfo">On your phone, enable tilt to rotate gravity by moving your device. A secure (HTTPS) page may be required.</p>
+        </div>
+        <div class="section-label"><span>QUICK ACTIONS</span><span>03 / 03</span></div>
+        <div class="control-card">
+          <div class="button-grid">
+            <button class="btn teal" id="addButton"><svg><use href="#i-drop"/></svg>Add water</button>
+            <button class="btn" id="resetButton"><svg><use href="#i-reset"/></svg>Reset</button>
+            <button class="btn" id="pauseButton"><svg><use href="#i-pause" id="pauseIcon"/></svg><span id="pauseLabel">Pause</span></button>
+            <button class="btn" id="clearButton">Empty tank</button>
+          </div>
+        </div>
+        <div class="hint-card"><b>How to play</b><br>Choose a tool below, then drag on the tank. <b>Grab</b> moves a handful of water, <b>Pour</b> draws a stream, and <b>Delete</b> removes fluid. Drag the gravity dial to turn the whole world sideways.</div>
+      </aside>
+      <section class="stage" id="stage" aria-label="Interactive fluid tank">
+        <canvas id="fluid" aria-label="Fluid simulation canvas"></canvas>
+        <div id="brushCursor"></div>
+        <div class="stage-top">
+          <div>
+            <div class="stage-caption">Water chamber <span style="color:#b1a7d5;font-weight:500">/ 01</span></div>
+            <div class="stage-sub" id="toolHint">Grab and drag a cluster of water</div>
+            <div class="stat-row"><span class="stat">PARTICLES <b id="particleCount">0</b></span><span class="stat">FPS <b id="fpsCount">60</b></span><span class="stat" id="gravityMode">GRAVITY <b>MANUAL</b></span></div>
+          </div>
+          <div class="gravity-panel">
+            <div class="gravity-wheel" id="gravityWheel" role="slider" tabindex="0" aria-label="Gravity direction" aria-valuetext="Down" title="Drag to change gravity direction"><div class="knob" id="gravityKnob"></div></div>
+            <div class="gravity-label">GRAVITY VECTOR<b id="gravityVector">↓ Down</b><button id="miniGravityReset">Reset direction</button></div>
+            <button class="quick-tilt" id="quickTilt" aria-label="Enable phone tilt" aria-pressed="false" title="Toggle phone tilt"><svg><use href="#i-phone"/></svg></button>
+          </div>
+        </div>
+        <div class="empty-hint" id="emptyHint"><b>Empty chamber</b><br>Choose Pour and drag, or tap Add water.</div>
+        <div id="toast" role="status" aria-live="polite"></div>
+        <nav class="dock" aria-label="Simulation tools">
+          <button class="tool active" data-tool="grab" aria-pressed="true"><svg><use href="#i-hand"/></svg>Grab</button>
+          <button class="tool" data-tool="pour" aria-pressed="false"><svg><use href="#i-pour"/></svg>Pour</button>
+          <button class="tool" data-tool="delete" aria-pressed="false"><svg><use href="#i-erase"/></svg>Delete</button>
+        </nav>
+        <div class="stage-help">G to grab · P to pour · E to erase · Space to pause</div>
+      </section>
+    </main>
+  </div>
+  <script>
+  (()=>{
+    'use strict';
+    const $=id=>document.getElementById(id);
+    const canvas=$('fluid'),ctx=canvas.getContext('2d',{alpha:true});
+    const stage=$('stage'),cursor=$('brushCursor'),gravityWheel=$('gravityWheel'),gravityKnob=$('gravityKnob');
+    const isMobile=matchMedia('(max-width:760px), (pointer:coarse)').matches;
+    const maxParticles=isMobile?780:1550;
+    const particles=[];
+    let width=400,height=500,dpr=1,tool='grab',brush=52,viscosity=.25,gravityPower=1;
+    let gravity={x:0,y:1},targetGravity={x:0,y:1},manualGravity={x:0,y:1};
+    let paused=false,tiltEnabled=false,tiltReading=false,orientation={beta:0,gamma:0},neutral=null;
+    let activePointer=null,lastPoint={x:0,y:0},pointer={x:0,y:0},grabbed=[],wheelPointer=null;
+    let lastFrame=performance.now(),accumulator=0,fpsTimer=0,fpsFrames=0,smoothedFPS=60,toastTimer=null,particleId=1,orientationTimeout=null;
+    const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+    const rand=(a,b)=>a+Math.random()*(b-a);
+    const sprite=document.createElement('canvas');sprite.width=sprite.height=40;
+    const sc=sprite.getContext('2d');const grad=sc.createRadialGradient(20,20,0,20,20,20);
+    grad.addColorStop(0,'rgba(178,246,255,.95)');grad.addColorStop(.22,'rgba(96,216,255,.82)');grad.addColorStop(.5,'rgba(52,137,244,.38)');grad.addColorStop(1,'rgba(88,67,232,0)');
+    sc.fillStyle=grad;sc.fillRect(0,0,40,40);
+
+    function toast(message){const el=$('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),2500)}
+    function addParticle(x,y,vx=0,vy=0){
+      if(particles.length>=maxParticles)return false;
+      const px=clamp(x,7,width-7),py=clamp(y,7,height-7);
+      particles.push({id:particleId++,x:px,y:py,oldX:px-vx,oldY:py-vy});return true;
+    }
+    function populate(count){
+      count=Math.min(count,maxParticles-particles.length);if(count<=0)return;
+      const cols=Math.max(5,Math.min(Math.floor((width-32)/10.6),Math.ceil(Math.sqrt(count*2.6))));
+      const rows=Math.ceil(count/cols),spacing=9.4;
+      const startX=clamp(width*.48-cols*spacing*.5,11,Math.max(11,width-cols*spacing-11));
+      const startY=Math.max(22,height-rows*spacing-15);
+      for(let i=0;i<count;i++){
+        const col=i%cols,row=Math.floor(i/cols);
+        addParticle(startX+col*spacing+rand(-.8,.8),startY+row*spacing+rand(-.8,.8),rand(-.2,.2),0);
+      }
+    }
+    function addWaterFromAbove(count){
+      const cols=Math.max(6,Math.min(Math.floor((width-20)/9.5),Math.ceil(Math.sqrt(count*2))));
+      for(let i=0;i<count&&particles.length<maxParticles;i++){
+        const x=width*.5+(i%cols-(cols-1)*.5)*9+rand(-1,1);
+        const y=25+Math.floor(i/cols)*9.2;
+        addParticle(x,y,rand(-.6,.6),rand(.4,1.1));
+      }
+    }
+    function reset(){particles.length=0;grabbed=[];populate(isMobile?270:530);updateStats()}
+    function resize(){
+      const rect=stage.getBoundingClientRect();if(rect.width<1||rect.height<1)return;
+      const prevW=width,prevH=height;width=rect.width;height=rect.height;
+      dpr=Math.min(window.devicePixelRatio||1,isMobile?2:2);
+      canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);canvas.style.width=width+'px';canvas.style.height=height+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      if(prevW&&prevH){for(const p of particles){p.x=clamp(p.x*width/prevW,6,width-6);p.y=clamp(p.y*height/prevH,6,height-6);p.oldX=p.x;p.oldY=p.y;}}
+      updateCursor();
+    }
+    function updateStats(){$('particleCount').textContent=particles.length.toLocaleString();$('emptyHint').style.display=particles.length===0?'block':'none'}
+    function setTool(t){
+      tool=t;grabbed=[];
+      document.querySelectorAll('.tool').forEach(el=>{const active=el.dataset.tool===t;el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active))});
+      canvas.className=t==='pour'?'pouring':t==='delete'?'deleting':'';
+      $('toolHint').textContent={grab:'Grab and drag a cluster of water',pour:'Hold and drag to pour more fluid',delete:'Drag to erase water particles'}[t];
+      updateCursor();
+    }
+    function updateCursor(){cursor.style.width=brush*2+'px';cursor.style.height=brush*2+'px'}
+    function getPointer(e){const rect=canvas.getBoundingClientRect();return{x:clamp(e.clientX-rect.left,0,width),y:clamp(e.clientY-rect.top,0,height)}}
+    function beginGrab(x,y){
+      grabbed=[];
+      for(const p of particles){const dx=p.x-x,dy=p.y-y;if(dx*dx+dy*dy<brush*brush){grabbed.push({p,dx,dy})}}
+    }
+    function erase(x,y){const r2=brush*brush;for(let i=particles.length-1;i>=0;i--){const p=particles[i],dx=p.x-x,dy=p.y-y;if(dx*dx+dy*dy<r2){particles[i]=particles[particles.length-1];particles.pop()}}}
+    function pour(x,y,dx=0,dy=0,count=4){
+      for(let i=0;i<count;i++){
+        const a=Math.random()*Math.PI*2,r=Math.sqrt(Math.random())*Math.min(brush*.35,20);
+        const vx=clamp(dx*.16,-5,5)+rand(-1.4,1.4),vy=clamp(dy*.16,-5,5)+rand(-.3,1.4);
+        if(!addParticle(x+Math.cos(a)*r,y+Math.sin(a)*r,vx,vy))break;
+      }
+    }
+    function beginPointer(e){
+      if(activePointer!==null)return;
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      e.preventDefault();activePointer=e.pointerId;canvas.setPointerCapture(e.pointerId);
+      pointer=lastPoint=getPointer(e);
+      cursor.style.display='block';cursor.style.left=pointer.x+'px';cursor.style.top=pointer.y+'px';
+      if(tool==='grab'){beginGrab(pointer.x,pointer.y);canvas.classList.add('grabbing')}
+      if(tool==='delete')erase(pointer.x,pointer.y);
+      if(tool==='pour')pour(pointer.x,pointer.y,0,0,8);
+      updateStats();
+    }
+    function movePointer(e){
+      const pt=getPointer(e);cursor.style.display='block';cursor.style.left=pt.x+'px';cursor.style.top=pt.y+'px';
+      if(e.pointerId!==activePointer)return;
+      e.preventDefault();lastPoint=pointer;pointer=pt;
+      if(tool==='delete'){
+        const distance=Math.hypot(pointer.x-lastPoint.x,pointer.y-lastPoint.y),steps=Math.max(1,Math.ceil(distance/(brush*.4)));
+        for(let i=1;i<=steps;i++){const t=i/steps;erase(lastPoint.x+(pointer.x-lastPoint.x)*t,lastPoint.y+(pointer.y-lastPoint.y)*t)}
+        updateStats();
+      }
+      if(tool==='pour')pour(pointer.x,pointer.y,pointer.x-lastPoint.x,pointer.y-lastPoint.y,3);
+    }
+    function endPointer(e){if(e.pointerId!==activePointer)return;activePointer=null;grabbed=[];canvas.classList.remove('grabbing');updateStats()}
+    canvas.addEventListener('pointerdown',beginPointer);canvas.addEventListener('pointermove',movePointer);
+    canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);
+    canvas.addEventListener('pointerleave',()=>{if(activePointer===null)cursor.style.display='none'});
+
+    // Position-based water particles. A spatial hash reduces neighbor checks to nearby cells.
+    const radius=19,spacing=9.1,cellSize=radius,restDensity=1.25;
+    const neighborOffsets=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]];
+    function simulate(){
+      const damping=.996-viscosity*.055,gx=gravity.x*.33*gravityPower,gy=gravity.y*.33*gravityPower;
+      for(const p of particles){
+        let vx=clamp((p.x-p.oldX)*damping,-15,15),vy=clamp((p.y-p.oldY)*damping,-15,15);
+        p.oldX=p.x;p.oldY=p.y;p.x+=vx+gx;p.y+=vy+gy;
+      }
+      // Double-density relaxation builds pressure between particles and a cohesive water surface.
+      const grid=new Map();
+      for(let pass=0;pass<2;pass++){
+        grid.clear();
+        for(let i=0;i<particles.length;i++){
+          const p=particles[i],cx=Math.floor(p.x/cellSize),cy=Math.floor(p.y/cellSize),key=cx+','+cy;
+          let bucket=grid.get(key);if(!bucket){bucket=[];grid.set(key,bucket)}bucket.push(i);
+        }
+        for(let i=0;i<particles.length;i++){
+          const p=particles[i],cx=Math.floor(p.x/cellSize),cy=Math.floor(p.y/cellSize);
+          let density=0,nearDensity=0;
+          const candidates=[];
+          for(const [ox,oy] of neighborOffsets){
+            const bucket=grid.get((cx+ox)+','+(cy+oy));if(!bucket)continue;
+            for(const j of bucket){if(i===j)continue;const q=particles[j];
+              let dx=q.x-p.x,dy=q.y-p.y,dist=Math.hypot(dx,dy);if(dist>=radius)continue;
+              if(dist<.001){dx=rand(-.1,.1);dy=rand(-.1,.1);dist=Math.max(.01,Math.hypot(dx,dy))}
+              const t=1-dist/radius;density+=t*t;nearDensity+=t*t*t;
+              candidates.push({q,dx,dy,dist,t});
+            }
+          }
+          const pressure=Math.max(-.10,(density-restDensity)*.35),nearPressure=nearDensity*.72;
+          let shiftX=0,shiftY=0;
+          for(const n of candidates){
+            let displacement=(pressure*n.t+nearPressure*n.t*n.t)*.40;
+            if(n.dist<spacing)displacement+=(spacing-n.dist)*.13;
+            const dx=n.dx/n.dist*displacement,dy=n.dy/n.dist*displacement;
+            n.q.x+=dx*.5;n.q.y+=dy*.5;shiftX-=dx*.5;shiftY-=dy*.5;
+          }
+          p.x+=shiftX;p.y+=shiftY;
+        }
+        for(const p of particles){
+          const r=5;
+          if(p.x<r){const v=p.x-p.oldX;p.x=r;p.oldX=p.x+v*.12}
+          if(p.x>width-r){const v=p.x-p.oldX;p.x=width-r;p.oldX=p.x+v*.12}
+          if(p.y<r){const v=p.y-p.oldY;p.y=r;p.oldY=p.y+v*.08}
+          if(p.y>height-r){const v=p.y-p.oldY;p.y=height-r;p.oldY=p.y+v*.06;p.oldX=p.x-(p.x-p.oldX)*.78}
+        }
+      }
+      if(activePointer!==null&&tool==='grab'&&grabbed.length){
+        for(const item of grabbed){const p=item.p,tx=clamp(pointer.x+item.dx,5,width-5),ty=clamp(pointer.y+item.dy,5,height-5);p.x+=(tx-p.x)*.76;p.y+=(ty-p.y)*.76}
+      }
+      if(activePointer!==null&&tool==='pour')pour(pointer.x,pointer.y,pointer.x-lastPoint.x,pointer.y-lastPoint.y,3);
+    }
+    function render(){
+      ctx.clearRect(0,0,width,height);
+      ctx.save();ctx.globalCompositeOperation='screen';
+      // A soft halo, a saturated body, and bright specular points make the droplets merge visually.
+      ctx.globalAlpha=.85;
+      for(const p of particles)ctx.drawImage(sprite,p.x-15,p.y-15,30,30);
+      ctx.globalAlpha=.58;ctx.fillStyle='#55b9fc';ctx.beginPath();
+      for(const p of particles){ctx.moveTo(p.x+4.6,p.y);ctx.arc(p.x,p.y,4.6,0,Math.PI*2)}ctx.fill();
+      ctx.globalAlpha=.38;ctx.fillStyle='#d7fdff';ctx.beginPath();
+      for(const p of particles){ctx.moveTo(p.x+1.6,p.y-1.6);ctx.arc(p.x-1,p.y-1.8,1.4,0,Math.PI*2)}ctx.fill();
+      ctx.restore();
+    }
+    function frame(now){
+      const dt=Math.min(now-lastFrame,55);lastFrame=now;
+      gravity.x+=(targetGravity.x-gravity.x)*.11;gravity.y+=(targetGravity.y-gravity.y)*.11;
+      if(!paused){accumulator+=dt;let steps=0;while(accumulator>=16.666&&steps<3){simulate();accumulator-=16.666;steps++}if(steps===3)accumulator=0;}
+      render();
+      fpsTimer+=dt;fpsFrames++;if(fpsTimer>=600){smoothedFPS=Math.round(fpsFrames*1000/fpsTimer);fpsTimer=0;fpsFrames=0;$('fpsCount').textContent=smoothedFPS;updateStats()}
+      requestAnimationFrame(frame);
+    }
+
+    function updateDial(){
+      const x=clamp(targetGravity.x,-1,1),y=clamp(targetGravity.y,-1,1),length=Math.max(1,Math.hypot(x,y));
+      gravityKnob.style.left=(50+x/length*Math.min(1,Math.hypot(x,y))*35)+'%';
+      gravityKnob.style.top=(50+y/length*Math.min(1,Math.hypot(x,y))*35)+'%';
+      const angle=Math.atan2(y,x),names=['Right','Down','Left','Up'];
+      const index=(Math.round(angle/(Math.PI/2))+4)%4;
+      $('gravityVector').textContent=['→','↓','←','↑'][index]+' '+names[index];
+      $('gravityMode').innerHTML='GRAVITY <b>'+(tiltEnabled?'TILT':'MANUAL')+'</b>';
+      gravityWheel.setAttribute('aria-valuetext',names[index]);
+    }
+    function setManualGravity(x,y){manualGravity={x:clamp(x,-1.5,1.5),y:clamp(y,-1.5,1.5)};targetGravity={...manualGravity};if(tiltEnabled)disableTilt();updateDial()}
+    function wheelPosition(e){const r=gravityWheel.getBoundingClientRect(),x=(e.clientX-r.left-r.width/2)/(r.width*.35),y=(e.clientY-r.top-r.height/2)/(r.height*.35);const m=Math.hypot(x,y);setManualGravity(m>1?x/m:x,m>1?y/m:y)}
+    gravityWheel.addEventListener('pointerdown',e=>{e.preventDefault();wheelPointer=e.pointerId;gravityWheel.setPointerCapture(e.pointerId);wheelPosition(e)});
+    gravityWheel.addEventListener('pointermove',e=>{if(e.pointerId===wheelPointer)wheelPosition(e)});
+    for(const ev of ['pointerup','pointercancel'])gravityWheel.addEventListener(ev,e=>{if(e.pointerId===wheelPointer)wheelPointer=null});
+    gravityWheel.addEventListener('keydown',e=>{const step=.12;let{x,y}=manualGravity;if(e.key==='ArrowUp')y-=step;else if(e.key==='ArrowDown')y+=step;else if(e.key==='ArrowLeft')x-=step;else if(e.key==='ArrowRight')x+=step;else return;e.preventDefault();setManualGravity(x,y)});
+
+    function onOrientation(e){
+      if(!tiltEnabled||e.beta==null||e.gamma==null)return;
+      tiltReading=true;orientation={beta:e.beta,gamma:e.gamma};
+      // Device axes start in portrait. Rotate the gravity vector to screen coordinates.
+      const beta=neutral?e.beta-neutral.beta:e.beta;
+      const gamma=neutral?e.gamma-neutral.gamma:e.gamma;
+      let gx=clamp(Math.sin(gamma*Math.PI/180)*1.4,-1,1);
+      let gy=neutral?clamp(.85+Math.sin(beta*Math.PI/180)*1.5,-1,1):clamp(Math.sin(beta*Math.PI/180)*1.4,-1,1);
+      const angle=((screen.orientation&&screen.orientation.angle)||window.orientation||0)*Math.PI/180;
+      const c=Math.cos(angle),s=Math.sin(angle);
+      targetGravity={x:clamp(gx*c-gy*s,-1.3,1.3),y:clamp(gx*s+gy*c,-1.3,1.3)};
+      updateDial();$('sensorInfo').textContent='Tilt is active. Move your phone to redirect gravity; Calibrate makes the current position the new down direction.';
+    }
+    function disableTilt(){
+      tiltEnabled=false;tiltReading=false;window.removeEventListener('deviceorientation',onOrientation);
+      clearTimeout(orientationTimeout);$('tiltLabel').textContent='Enable phone tilt';
+      $('quickTilt').classList.remove('active');$('quickTilt').setAttribute('aria-pressed','false');$('quickTilt').setAttribute('aria-label','Enable phone tilt');
+      targetGravity={...manualGravity};$('sensorInfo').textContent='Tilt is off. Use the gravity wheel to change direction manually.';updateDial();
+    }
+    async function toggleTilt(){
+      if(tiltEnabled){disableTilt();return}
+      if(!('DeviceOrientationEvent' in window)){toast('This browser does not support device orientation.');return}
+      try{
+        if(typeof DeviceOrientationEvent.requestPermission==='function'){
+          const permission=await DeviceOrientationEvent.requestPermission();
+          if(permission!=='granted'){toast('Motion sensor permission was not granted.');return}
+        }
+        tiltEnabled=true;tiltReading=false;neutral=null;$('tiltLabel').textContent='Disable phone tilt';
+        $('quickTilt').classList.add('active');$('quickTilt').setAttribute('aria-pressed','true');$('quickTilt').setAttribute('aria-label','Disable phone tilt');
+        $('sensorInfo').textContent='Waiting for motion sensor readings…';window.addEventListener('deviceorientation',onOrientation);
+        updateDial();toast('Tilt enabled. Rotate your device to move the water.');
+        orientationTimeout=setTimeout(()=>{if(tiltEnabled&&!tiltReading){$('sensorInfo').textContent='No sensor data received. Try HTTPS on your phone, allow motion access, or use the gravity wheel.';toast('No motion data. Try opening the page over HTTPS.')}},2400);
+      }catch(err){toast('Tilt access failed: '+(err.message||'sensor blocked'))}
+    }
+    $('tiltButton').addEventListener('click',toggleTilt);
+    $('quickTilt').addEventListener('click',toggleTilt);
+    $('calibrateButton').addEventListener('click',()=>{if(!tiltEnabled||!tiltReading){toast('Enable phone tilt first.');return}neutral={...orientation};toast('Calibrated — your current position is now down.')});
+    function gravityDown(){setManualGravity(0,1);toast('Gravity reset to down.')}
+    $('downButton').addEventListener('click',gravityDown);$('miniGravityReset').addEventListener('click',gravityDown);
+    $('gravityRange').addEventListener('input',e=>{gravityPower=+e.target.value/100;$('gravityValue').textContent=e.target.value+'%'});
+    $('viscosityRange').addEventListener('input',e=>{viscosity=+e.target.value/100;$('viscosityValue').textContent=e.target.value+'%'});
+    $('brushRange').addEventListener('input',e=>{brush=+e.target.value;$('brushValue').textContent=brush+' px';updateCursor()});
+    document.querySelectorAll('.tool').forEach(el=>el.addEventListener('click',()=>setTool(el.dataset.tool)));
+    $('addButton').addEventListener('click',()=>{addWaterFromAbove(isMobile?130:200);updateStats();toast('Added water to the chamber.')});
+    $('resetButton').addEventListener('click',()=>{reset();gravityDown();toast('Chamber reset.')});
+    $('clearButton').addEventListener('click',()=>{particles.length=0;grabbed=[];updateStats();toast('Chamber emptied. Use Pour to refill.')});
+    function togglePause(){paused=!paused;$('pauseLabel').textContent=paused?'Resume':'Pause';$('pauseIcon').setAttribute('href',paused?'#i-play':'#i-pause');$('headerStatus').textContent=paused?'Simulation paused':'Simulation running';$('liveDot').style.background=paused?'#f5ba78':'#68e6b1';$('liveDot').style.boxShadow=paused?'0 0 10px #f5ba78':'0 0 10px #68e6b1';accumulator=0}
+    $('pauseButton').addEventListener('click',togglePause);
+    $('menuButton').addEventListener('click',()=>{const sidebar=$('sidebar'),opened=sidebar.classList.toggle('open');$('menuButton').setAttribute('aria-label',opened?'Close settings':'Open settings')});
+    stage.addEventListener('pointerdown',e=>{if(e.target===canvas&&innerWidth<=760)$('sidebar').classList.remove('open')});
+    window.addEventListener('keydown',e=>{
+      if(e.target instanceof HTMLInputElement||e.target instanceof HTMLButtonElement)return;
+      if(e.code==='Space'){e.preventDefault();togglePause()}
+      if(e.key.toLowerCase()==='g')setTool('grab');
+      if(e.key.toLowerCase()==='p')setTool('pour');
+      if(e.key.toLowerCase()==='e')setTool('delete');
+    });
+    window.addEventListener('resize',resize);
+    new ResizeObserver(resize).observe(stage);
+    resize();reset();setTool('grab');updateDial();requestAnimationFrame(frame);
+  })();
+  </script>
+</body>
+</html>
