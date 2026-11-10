@@ -15,21 +15,34 @@
     .content { padding: 24px; }
     h1 { margin: 0 0 8px; font-size: clamp(21px, 5vw, 32px); }
     p { color: #aebbd0; line-height: 1.6; }
-    #tools { display: grid; gap: 10px; margin-top: 24px; }
+    .toolbar { display: flex; align-items: center; gap: 10px; margin-top: 22px; }
+    #search { min-width: 0; flex: 1; padding: 12px 14px; border: 1px solid #53647b; border-radius: 0; background: #101a29; color: #edf2f8; font: inherit; }
+    #search::placeholder { color: #8999af; }
+    #search:focus-visible { border-color: #f5c55b; outline: 1px solid #f5c55b; }
+    #count { flex: 0 0 auto; font-size: 11px; color: #aebbd0; }
+    #tools { display: grid; gap: 10px; margin-top: 14px; }
     details { border: 1px solid #53647b; background: #182232; }
     summary { display: flex; align-items: center; gap: 10px; padding: 14px; cursor: pointer; font-weight: 700; list-style: none; }
     summary::-webkit-details-marker { display: none; }
     summary::before { content: '›'; color: #f5c55b; font-size: 18px; transition: transform .16s ease; }
     details[open] > summary::before { transform: rotate(90deg); }
     .folder-contents { display: grid; gap: 8px; padding: 0 10px 10px; }
-    button { display: flex; width: 100%; align-items: center; gap: 12px; padding: 14px; border: 1px solid #53647b; background: #182232; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-    button:hover, button:focus-visible { border-color: #f5c55b; background: #253247; outline: none; }
+    .tool-button { display: flex; width: 100%; align-items: center; gap: 12px; padding: 14px; border: 1px solid #53647b; background: #182232; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    .tool-button:hover, .tool-button:focus-visible { border-color: #f5c55b; background: #253247; outline: none; }
     .icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border: 1px solid currentColor; background: rgba(96, 165, 250, .1); color: #60a5fa; font-size: 18px; }
     .folder-icon { color: #f5c55b; background: rgba(245, 197, 91, .1); }
     .tool-copy { min-width: 0; }
     .name { display: block; color: #edf2f8; font-weight: 700; }
     .description { display: block; margin-top: 3px; color: #9eacbf; font-size: 11px; line-height: 1.35; }
     .empty { padding: 14px; border: 1px dashed #53647b; color: #aebbd0; }
+    .notice { margin: 12px 0 0; font-size: 11px; color: #aebbd0; }
+    @media (max-width: 540px) {
+      .content { padding: 16px; }
+      .path { display: none; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      #count { align-self: flex-end; }
+      summary, .tool-button { padding: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -38,32 +51,94 @@
     <div class="content">
       <h1>Tools directory</h1>
       <p>Small utilities, diagrams, and study resources from this site.</p>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search tools..." aria-label="Search tools" autocomplete="off">
+        <span id="count" aria-live="polite"></span>
+      </div>
       <div id="tools" aria-live="polite"><p class="empty">Loading tools…</p></div>
+      <p id="notice" class="notice" role="status" hidden></p>
     </div>
   </main>
   <script>
     const tools = document.getElementById('tools');
+    const search = document.getElementById('search');
+    const count = document.getElementById('count');
+    const notice = document.getElementById('notice');
     const toolDetails = {
-      'FileExplorer/Tools/Diagrams/Blueprint-Maker.html': {
-        name: 'Blueprint Maker', icon: '⌗',
-        description: 'Draw room layouts, measurements, furniture, and notes.'
+      'FileExplorer/Tools/Diagrams/Blueprint-Maker-2D.html': {
+        name: 'Blueprint Maker 2D', icon: '⌗',
+        description: 'Draw floor plans with walls, doors, windows, furniture, and measurements.'
+      },
+      'FileExplorer/Tools/Diagrams/Blueprint-Maker-3D.html': {
+        name: 'Blueprint Maker 3D', icon: '▧',
+        description: 'Import 2D layouts, extrude walls to real heights, and preview textures in 3D.'
+      },
+      'FileExplorer/Tools/Diagrams/Terrain-Generator.html': {
+        name: 'Terrain Generator', icon: '⛰',
+        description: 'Create and explore procedural terrain.'
+      },
+      'FileExplorer/Tools/Media/Audio-Editor.html': {
+        name: 'Audio Editor', icon: '♫',
+        description: 'Edit and work with audio files in your browser.'
+      },
+      'FileExplorer/Tools/Media/Background-Remover.html': {
+        name: 'Background Remover', icon: '◈',
+        description: 'Remove the background from images.'
+      },
+      'FileExplorer/Tools/Media/Pixel-Art-Studio.html': {
+        name: 'Pixel Art Studio', icon: '▦',
+        description: 'Draw and edit pixel art on a grid.'
       },
       'FileExplorer/Tools/Study/ParSci-Notes.href': {
-        name: 'Paranaque Science Notes', icon: '✦',
-        description: 'Open the Paranaque Science study notes site.'
+        name: 'Parañaque Science Notes', icon: '✦',
+        description: 'Open the Parañaque Science study notes site.'
       },
-      'FileExplorer/Tools/Calculate/Surface-Measure.html': {
-        name: 'Perspective Measurement',
-        icon: '📐',
-        description: 'Measure surfaces and distances in photos using perspective calibration.'
+      'FileExplorer/Tools/Utilities/Code-Playground.html': {
+        name: 'Code Playground', icon: '</>',
+        description: 'Experiment with code in an interactive browser workspace.'
+      },
+      'FileExplorer/Tools/Utilities/Nano-LLM.html': {
+        name: 'Nano LLM', icon: '✳',
+        description: 'Explore a tiny JavaScript-based language model and chat interface.'
+      },
+      'FileExplorer/Tools/Utilities/OmniConvert.html': {
+        name: 'OmniConvert', icon: '⇄',
+        description: 'Convert and compress files between popular media formats locally.'
+      },
+      'FileExplorer/Tools/Utilities/Surface-Measure.html': {
+        name: 'Perspective Measurement', icon: '📐',
+        description: 'Calibrate a photo with known distances and measure other lines in perspective.'
+      },
+      'FileExplorer/Tools/Utilities/Visual-Node-Programming.html': {
+        name: 'Visual Node Programming', icon: '◇',
+        description: 'Build visual programming flows with connected nodes.'
       },
     };
     function findTools(entries) {
-      return entries.find(entry => entry.type === 'directory' && entry.name === 'Tools')?.children || [];
+      return Array.isArray(entries)
+        ? (entries.find(entry => entry.type === 'directory' && entry.name === 'Tools')?.children || [])
+        : [];
+    }
+
+    // A self-contained snapshot keeps this page usable when opened via file://,
+    // where browsers often block fetches of neighboring JSON files.
+    function fallbackTools() {
+      const folders = new Map();
+      for (const path of Object.keys(toolDetails)) {
+        const segments = path.split('/');
+        const folder = segments[2];
+        const name = segments[3];
+        if (!folders.has(folder)) folders.set(folder, { type: 'directory', name: folder, children: [] });
+        folders.get(folder).children.push({ type: 'file', name, path });
+      }
+      return [...folders.values()];
     }
 
     async function resolveShortcut(path) {
-      const text = await fetch(`../../${path}`).then(response => response.text());
+      const text = await fetch(`../../${path}`).then(response => {
+        if (!response.ok) throw new Error('Shortcut unavailable');
+        return response.text();
+      });
       const match = text.match(/(?:https?:\/\/)?(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s]*)?/i)?.[0];
       return match && (/^https?:\/\//i.test(match) ? match : `https://${match}`);
     }
@@ -72,8 +147,8 @@
       window.location.assign(source);
     }
 
-    function addEntry(entry, parent) {
-      if (entry.name === 'index.html') return;
+    function addEntry(entry, parent, term = '') {
+      if (entry.type === 'file' && entry.name === 'index.html') return 0;
       if (entry.type === 'directory') {
         const folder = document.createElement('details');
         folder.open = true;
@@ -82,40 +157,73 @@
         summary.querySelector('span:last-child').textContent = entry.name;
         const contents = document.createElement('div');
         contents.className = 'folder-contents';
-        entry.children?.forEach(child => addEntry(child, contents));
+        let visible = 0;
+        entry.children?.forEach(child => { visible += addEntry(child, contents, term); });
+        if (!visible) return 0;
         folder.append(summary, contents);
         parent.append(folder);
-        return;
+        return visible;
       }
-      const item = document.createElement('button');
       const details = toolDetails[entry.path] || {
         name: entry.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
         icon: '▤', description: 'Open this tool.'
       };
+      const searchable = `${details.name} ${details.description} ${entry.name} ${entry.path}`.toLowerCase();
+      if (term && !searchable.includes(term)) return 0;
+      const item = document.createElement('button');
+      item.className = 'tool-button';
+      item.type = 'button';
       item.innerHTML = '<span class="icon"></span><span class="tool-copy"><span class="name"></span><span class="description"></span></span>';
       item.querySelector('.icon').textContent = details.icon;
       item.querySelector('.name').textContent = details.name;
       item.querySelector('.description').textContent = details.description;
       item.addEventListener('click', async () => {
         if (/\.href$/i.test(entry.name)) {
-          const target = await resolveShortcut(entry.path);
-          if (target) openTool(target);
+          try {
+            const target = await resolveShortcut(entry.path);
+            if (!target) throw new Error('Shortcut has no URL');
+            openTool(target);
+          } catch (_) {
+            notice.hidden = false;
+            notice.textContent = 'Could not open this shortcut. Please check that its .href file exists.';
+          }
           return;
         }
         openTool(`../../${entry.path}`);
       });
       parent.append(item);
+      return 1;
     }
 
+    let currentEntries = [];
+    function render() {
+      tools.replaceChildren();
+      const term = search.value.trim().toLowerCase();
+      let total = 0;
+      currentEntries.forEach(entry => { total += addEntry(entry, tools, term); });
+      count.textContent = `${total} tool${total === 1 ? '' : 's'}`;
+      if (!total) {
+        const empty = document.createElement('p');
+        empty.className = 'empty';
+        empty.textContent = term ? 'No tools match your search.' : 'No tools are available yet.';
+        tools.append(empty);
+      }
+    }
+    search.addEventListener('input', render);
+
     fetch('../file-index.json', { cache: 'no-store' })
-      .then(response => response.ok ? response.json() : Promise.reject())
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Index unavailable')))
       .then(entries => {
-        tools.replaceChildren();
-        const toolEntries = findTools(entries);
-        if (!toolEntries.length) tools.innerHTML = '<p class="empty">No tools are available yet.</p>';
-        toolEntries.forEach(entry => addEntry(entry, tools));
+        currentEntries = findTools(entries);
+        if (!currentEntries.length) throw new Error('Tools missing from index');
+        render();
       })
-      .catch(() => { tools.innerHTML = '<p class="empty">The tool index could not be loaded.</p>'; });
+      .catch(() => {
+        currentEntries = fallbackTools();
+        render();
+        notice.hidden = false;
+        notice.textContent = 'Showing the built-in tool list. The file index could not be loaded.';
+      });
   </script>
 </body>
 </html>
