@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11121e">
+  <title>FileExplorer / Directory</title>
+  <style>
+    :root{color-scheme:dark;font-family:"Cascadia Code",Cascadia,Consolas,monospace;--bg:#0d0e18;--panel:#171a2a;--top:#23253c;--line:#48415e;--text:#eeedfa;--muted:#aaa6c3;--accent:#d697ff;--gold:#ffd187}
+    *{box-sizing:border-box}html{min-height:100%;scrollbar-color:#61577c var(--bg)}
+    body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(ellipse at 83% -8%,#43255770,transparent 42%),radial-gradient(ellipse at 0 85%,#1728495a,transparent 38%),var(--bg);padding:clamp(14px,3.5vw,42px)}
+    button,input,a{font:inherit}a{color:inherit;text-decoration:none}button{color:inherit;cursor:pointer}
+    .window{max-width:1110px;margin:0 auto;border:1px solid #6a537f;background:#141626ed;box-shadow:0 25px 75px #0008,8px 8px 0 #09091280;border-radius:9px;overflow:hidden}
+    .titlebar{display:flex;align-items:center;gap:10px;min-height:43px;padding:9px 14px;background:linear-gradient(90deg,#302440,#26283c);border-bottom:1px solid #655070;font-size:12px}
+    .appmark{color:var(--accent);font-weight:800;letter-spacing:.08em;white-space:nowrap}.titlepath{color:#c7b4dd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .lights{margin-left:auto;display:flex;gap:7px}.lights i{width:9px;height:9px;border:1px solid #ab85c6;border-radius:2px;opacity:.85}
+    .top{padding:clamp(20px,3vw,34px);border-bottom:1px solid #494258}
+    .crumbs{display:flex;gap:10px;align-items:center;font-size:12px;color:#baaacc;margin-bottom:17px;flex-wrap:wrap}.crumbs a:hover{color:white}.crumbs .sep{opacity:.45}
+    h1{font-size:clamp(27px,5vw,42px);margin:0 0 8px;letter-spacing:-.055em;line-height:1.15}h1 .accent{color:var(--accent)}
+    .lead{font-size:13px;line-height:1.7;color:var(--muted);margin:0;max-width:650px}
+    .toolbar{display:flex;align-items:center;gap:10px;margin-top:26px;flex-wrap:wrap}
+    .search{min-width:230px;flex:1;display:flex;align-items:center;gap:12px;padding:0 14px;height:43px;border:1px solid #625771;border-radius:5px;background:#0f1120;color:#bca3cf}
+    .search:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px #d697ff1c}.search input{border:0;outline:0;background:none;color:var(--text);width:100%;font-size:12px;min-width:0}.search input::placeholder{color:#89829c}
+    .toolbtn{height:43px;border:1px solid #655772;background:#292339;border-radius:5px;padding:0 13px;font-size:11px;white-space:nowrap}.toolbtn:hover,.toolbtn:focus-visible{border-color:var(--accent);background:#3c2b4c;outline:0}
+    .main{padding:clamp(15px,3vw,32px)}.sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:17px;color:#c7bdd5;text-transform:uppercase;font-weight:800;font-size:11px;letter-spacing:.11em}
+    .status{font-size:11px;color:#9f94b4;text-transform:none;letter-spacing:0;font-weight:400}
+    #entries{display:grid;gap:12px}.folder{border:1px solid #504866;background:#1a1a2c;border-radius:5px;overflow:hidden}.folder[open]{border-color:#78608b}
+    .folderhead{display:flex;align-items:center;gap:12px;padding:14px 15px;list-style:none;cursor:pointer;min-height:76px}.folderhead::-webkit-details-marker{display:none}.folderhead:hover{background:#292239}
+    .folderhead::after{content:'›';font-size:24px;color:#ad98bd;margin-left:3px;transition:transform .15s}.folder[open]>.folderhead::after{transform:rotate(90deg)}
+    .folderhead:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+    .glyph{height:44px;width:44px;flex:0 0 44px;display:grid;place-items:center;border:1px solid #625371;border-radius:4px;background:#272239;color:var(--accent);font-size:23px}
+    .folder .glyph{color:var(--gold);background:#322839;border-color:#765a55}.entrycopy{display:block;flex:1;min-width:0}.entryname{display:block;font-weight:800;font-size:13px;line-height:1.5;overflow-wrap:anywhere}.entrydesc{display:block;font-size:11px;color:var(--muted);line-height:1.45;margin-top:3px}
+    .openfolder{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;padding:9px 12px;font-size:11px;font-weight:700;border:1px solid #795d8a;border-radius:4px;background:#3a2849;color:#f0d6ff}
+    .openfolder:hover,.openfolder:focus-visible{background:#563667;outline:0;border-color:#c388e7}
+    .contents{border-top:1px solid #4d425a;background:#121525;padding:12px 12px 12px 18px;display:grid;gap:8px}
+    .contents .folder{background:#1c1c30}.contents .folderhead{min-height:66px;padding:10px 12px}.contents .glyph{width:38px;height:38px;flex-basis:38px;font-size:18px}
+    .file{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:1px solid #49435c;border-radius:5px;background:#1b1c30;text-align:left;transition:border-color .12s,background .12s}
+    .file:hover,.file:focus-visible{border-color:var(--accent);background:#312440;outline:none}.file .arrow{margin-left:auto;color:#d7a6f0;font-size:16px;flex-shrink:0}
+    .file[data-kind="shortcut"] .glyph{color:#9ae4fb;background:#1e3540;border-color:#365665}
+    .file[data-kind="game"] .glyph{color:#c59cff;background:#332343}.file[data-kind="data"] .glyph{color:#9c9bad}
+    .notice{border:1px dashed #645675;background:#211c2e;padding:20px;font-size:12px;color:#b9adc9;line-height:1.6;border-radius:5px}
+    footer{border-top:1px solid #46405b;padding:15px 25px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#8c829e;font-size:10px}
+    @media(max-width:600px){body{padding:0}.window{min-height:100vh;border:0;border-radius:0;box-shadow:none}.titlebar{padding:10px 13px}.top{padding:21px 17px}.main{padding:17px 12px}.folderhead{padding:12px 10px;gap:9px}.glyph{height:40px;width:40px;flex-basis:40px;font-size:20px}.openfolder{padding:8px;font-size:10px}.contents{padding:9px 8px;gap:7px}.file{padding:10px;gap:9px}.entrydesc{font-size:10px}.lights{display:none}}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  </style>
+</head>
+<body data-scope="misc">
+  <div class="window">
+    <div class="titlebar"><span class="appmark">▣ AQUA.EXPLORER</span><span class="titlepath" id="topPath">/FileExplorer</span><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span></div>
+    <div class="top">
+      <nav class="crumbs" id="crumbs" aria-label="Breadcrumbs"></nav>
+      <h1 id="heading">File<span class="accent">Explorer</span></h1>
+      <p class="lead" id="subtitle">Explore the directories, projects, games, and utilities on this site.</p>
+      <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search files and folders..." autocomplete="off" aria-label="Search directory"></label><button class="toolbtn" id="expand" type="button">Expand all</button><button class="toolbtn" id="refresh" type="button" title="Reload file index">↻ Refresh</button></div>
+    </div>
+    <div class="main"><div class="sectiontitle"><span id="sectionTitle">Directory contents</span><span class="status" id="status">Loading...</span></div><div id="entries" aria-live="polite"><div class="notice">Reading file-index.json...</div></div></div>
+    <footer><span id="footerPath">/FileExplorer</span><span>FILE INDEX • LOCAL DIRECTORY</span></footer>
+  </div>
+  <script id="embedded-index" type="application/json">[{"type":"directory","name":"Links","children":[{"type":"file","name":"Discord.link","path":"FileExplorer/Links/Discord.link"},{"type":"file","name":"Youtube.link","path":"FileExplorer/Links/Youtube.link"}]},{"type":"directory","name":"Misc","children":[{"type":"directory","name":"Fun","children":[{"type":"file","name":"Evolution-Sandbox.html","path":"FileExplorer/Misc/Fun/Evolution-Sandbox.html"},{"type":"file","name":"GHOSTLINE-v2.html","path":"FileExplorer/Misc/Fun/GHOSTLINE-v2.html"},{"type":"file","name":"Gravity-Lab.html","path":"FileExplorer/Misc/Fun/Gravity-Lab.html"},{"type":"file","name":"Magic8Ball.html","path":"FileExplorer/Misc/Fun/Magic8Ball.html"},{"type":"file","name":"MusicPlayer.html","path":"FileExplorer/Misc/Fun/MusicPlayer.html"},{"type":"file","name":"sliders.html","path":"FileExplorer/Misc/Fun/sliders.html"}]},{"type":"directory","name":"Games","children":[{"type":"directory","name":"Word-Games","children":[{"type":"file","name":"Connections.html","path":"FileExplorer/Misc/Games/Word-Games/Connections.html"},{"type":"file","name":"connections.json","path":"FileExplorer/Misc/Games/Word-Games/connections.json"},{"type":"file","name":"Crossword.html","path":"FileExplorer/Misc/Games/Word-Games/Crossword.html"},{"type":"file","name":"crossword.json","path":"FileExplorer/Misc/Games/Word-Games/crossword.json"},{"type":"file","name":"index.html","path":"FileExplorer/Misc/Games/Word-Games/index.html"},{"type":"file","name":"layers.html","path":"FileExplorer/Misc/Games/Word-Games/layers.html"},{"type":"file","name":"Mini-Crossword.html","path":"FileExplorer/Misc/Games/Word-Games/Mini-Crossword.html"},{"type":"file","name":"Minute-Cryptic.html","path":"FileExplorer/Misc/Games/Word-Games/Minute-Cryptic.html"},{"type":"file","name":"README.md","path":"FileExplorer/Misc/Games/Word-Games/README.md"},{"type":"file","name":"Word-Search.html","path":"FileExplorer/Misc/Games/Word-Games/Word-Search.html"},{"type":"file","name":"Word-Wheel.html","path":"FileExplorer/Misc/Games/Word-Games/Word-Wheel.html"},{"type":"file","name":"Wordle-Unlimited.html","path":"FileExplorer/Misc/Games/Word-Games/Wordle-Unlimited.html"},{"type":"file","name":"words.json","path":"FileExplorer/Misc/Games/Word-Games/words.json"}]},{"type":"file","name":"Doom.iframe","path":"FileExplorer/Misc/Games/Doom.iframe"},{"type":"file","name":"Star-Catcher.html","path":"FileExplorer/Misc/Games/Star-Catcher.html"}]},{"type":"directory","name":"Random","children":[{"type":"file","name":"fibonacci-infinite.html","path":"FileExplorer/Misc/Random/fibonacci-infinite.html"},{"type":"file","name":"Fractal-Explorer.html","path":"FileExplorer/Misc/Random/Fractal-Explorer.html"},{"type":"file","name":"secret.html","path":"FileExplorer/Misc/Random/secret.html"}]}]},{"type":"directory","name":"Tools","children":[{"type":"directory","name":"Diagrams","children":[{"type":"file","name":"Blueprint-Maker-2D.html","path":"FileExplorer/Tools/Diagrams/Blueprint-Maker-2D.html"},{"type":"file","name":"Blueprint-Maker-3D.html","path":"FileExplorer/Tools/Diagrams/Blueprint-Maker-3D.html"},{"type":"file","name":"Terrain-Generator.html","path":"FileExplorer/Tools/Diagrams/Terrain-Generator.html"}]},{"type":"directory","name":"Media","children":[{"type":"file","name":"Audio-Editor.html","path":"FileExplorer/Tools/Media/Audio-Editor.html"},{"type":"file","name":"Background-Remover.html","path":"FileExplorer/Tools/Media/Background-Remover.html"},{"type":"file","name":"Pixel-Art-Studio.html","path":"FileExplorer/Tools/Media/Pixel-Art-Studio.html"}]},{"type":"directory","name":"Study","children":[{"type":"file","name":"ParSci-Notes.href","path":"FileExplorer/Tools/Study/ParSci-Notes.href"}]},{"type":"directory","name":"Utilities","children":[{"type":"file","name":"Code-Playground.html","path":"FileExplorer/Tools/Utilities/Code-Playground.html"},{"type":"file","name":"Nano-LLM.html","path":"FileExplorer/Tools/Utilities/Nano-LLM.html"},{"type":"file","name":"OmniConvert.html","path":"FileExplorer/Tools/Utilities/OmniConvert.html"},{"type":"file","name":"Surface-Measure.html","path":"FileExplorer/Tools/Utilities/Surface-Measure.html"},{"type":"file","name":"Visual-Node-Programming.html","path":"FileExplorer/Tools/Utilities/Visual-Node-Programming.html"}]},{"type":"file","name":"index.html","path":"FileExplorer/Tools/index.html"}]},{"type":"file","name":"Portfolio.href","path":"FileExplorer/Portfolio.href"}]</script>
+  <script>
+    (() => {
+      'use strict';
+      const scope = document.body.dataset.scope;
+      const isMisc = scope === 'misc';
+      const prefix = isMisc ? 'FileExplorer/Misc/' : 'FileExplorer/';
+      const indexUrl = isMisc ? '../file-index.json' : './file-index.json';
+      const base = './';
+      const container = document.getElementById('entries');
+      const status = document.getElementById('status');
+      const input = document.getElementById('search');
+      const expand = document.getElementById('expand');
+      let directory = [];
+      let expandedAll = false;
+      let snapshotMode = false;
+
+      document.title = isMisc ? 'Misc / FileExplorer' : 'FileExplorer / Directory';
+      document.getElementById('topPath').textContent = isMisc ? '/FileExplorer/Misc' : '/FileExplorer';
+      document.getElementById('footerPath').textContent = isMisc ? '/FileExplorer/Misc' : '/FileExplorer';
+      document.getElementById('heading').innerHTML = isMisc ? 'Misc<span class="accent">ellaneous</span>' : 'File<span class="accent">Explorer</span>';
+      document.getElementById('subtitle').textContent = isMisc ? 'A collection of games, interactive experiments, and random things worth exploring.' : 'Explore the directories, projects, games, and utilities on this site.';
+      document.getElementById('sectionTitle').textContent = isMisc ? 'Misc / contents' : 'Root / contents';
+      document.getElementById('crumbs').innerHTML = isMisc ? '<a href="../../index.html">HOME</a><span class="sep">/</span><a href="../index.html">FILEEXPLORER</a><span class="sep">/</span><span>MISC</span>' : '<a href="../index.html">HOME</a><span class="sep">/</span><span>FILEEXPLORER</span>';
+
+      const info = {
+        'Misc': ['✧','Games, interactive projects, and miscellaneous experiments.'],
+        'Tools': ['⚙','Useful tools, editors, diagrams, and utilities.'],
+        'Links': ['↗','Shortcuts to other places on the web.'],
+        'Fun': ['✦','Interactive simulations, toys, and experiments.'],
+        'Games': ['♜','Games and challenges to play in your browser.'],
+        'Random': ['✳','Interesting projects that do not fit anywhere else.'],
+        'Word-Games': ['▦','Wordle, crosswords, connections, and more.'],
+        'Gravity-Lab.html': ['◉','N-body gravity simulator with planets and black holes.'],
+        'Evolution-Sandbox.html': ['◈','Explore an evolving digital ecosystem.'],
+        'Fractal-Explorer.html': ['✺','Explore intricate fractal patterns.'],
+        'MusicPlayer.html': ['♫','Listen to and manage music in the browser.'],
+        'Portfolio.href': ['◩','Visit the portfolio website.'],
+        'Star-Catcher.html': ['★','Play Star Catcher.'],
+        'fibonacci-infinite.html': ['∞','An infinitely scrolling Fibonacci sequence.']
+      };
+
+      function kind(entry) {
+        const name = entry.name.toLowerCase();
+        if (/\.(href|link|iframe)$/.test(name)) return 'shortcut';
+        if (/\.(json|md|txt|js|css)$/.test(name)) return 'data';
+        if (/game|wordle|crossword|connections|cryptic|doom|catcher|layers/.test(name)) return 'game';
+        return 'file';
+      }
+      function fullPath(entry, parents) {
+        return entry.path || `${prefix}${[...parents,entry.name].join('/')}`;
+      }
+      function href(entry, parents) {
+        const path = fullPath(entry, parents);
+        const relative = path.startsWith(prefix) ? path.slice(prefix.length) : path.replace(/^FileExplorer\//,'');
+        return base + relative.split('/').map(encodeURIComponent).join('/');
+      }
+      function dirLanding(entry, parents) {
+        if (!isMisc && parents.length === 0 && entry.name === 'Misc') return './Misc/index.html';
+        return entry.children?.some(item => item.type === 'file' && item.name.toLowerCase() === 'index.html')
+          ? base + [...parents,entry.name,'index.html'].map(encodeURIComponent).join('/') : null;
+      }
+      function countFiles(items) { return items.reduce((n,e)=>n+(e.type==='directory'?countFiles(e.children||[]):(e.name==='index.html'?0:1)),0); }
+      function hasMatch(entry, q) { return entry.name.toLowerCase().includes(q) || (entry.children||[]).some(child=>hasMatch(child,q)); }
+      function safeText(tag, className, value) { const node=document.createElement(tag);node.className=className;node.textContent=value;return node; }
+
+      async function openShortcut(entry, parents) {
+        try {
+          const res = await fetch(href(entry,parents));
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const content = await res.text();
+          const hit = content.match(/^\s*URL\s*=\s*(https?:\/\/[^\s"'<>]+)/im) || content.match(/\bsrc\s*=\s*["'](https?:\/\/[^"']+)/i) || content.match(/https?:\/\/[^\s"'<>]+/i);
+          if (!hit) throw new Error('No URL found in shortcut');
+          const url = new URL(hit[1] || hit[0]);
+          if (!['https:','http:'].includes(url.protocol)) throw new Error('Unsupported shortcut');
+          location.assign(url.href);
+        } catch (error) { alert(`Could not open ${entry.name}. ${error.message}`); }
+      }
+      function fileNode(entry, parents) {
+        const details = info[entry.name] || [];
+        const type = kind(entry);
+        const button = document.createElement('button');
+        button.type = 'button'; button.className='file';button.dataset.kind=type;
+        const icon=safeText('span','glyph',details[0] || ({shortcut:'↗',data:'{}',game:'◇',file:'▤'}[type]));
+        const copy=safeText('span','entrycopy','');
+        copy.append(safeText('span','entryname',entry.name.replace(/\.(html|href|link|iframe)$/i,'').replace(/[-_]/g,' ')),safeText('span','entrydesc',details[1] || ({shortcut:'Open external shortcut',data:'Supporting file',game:'Play in browser',file:'Open file'}[type])));
+        button.append(icon,copy,safeText('span','arrow','↗'));
+        button.addEventListener('click',()=>{ if(type==='shortcut') openShortcut(entry,parents);else location.assign(href(entry,parents)); });
+        return button;
+      }
+      function folderNode(entry, parents, q, depth) {
+        const details=info[entry.name]||[];
+        const node=document.createElement('details');node.className='folder';
+        node.open=!!q||expandedAll||(isMisc&&depth===0);
+        const summary=document.createElement('summary');summary.className='folderhead';
+        summary.append(safeText('span','glyph',details[0]||'▰'));
+        const copy=safeText('span','entrycopy','');
+        copy.append(safeText('span','entryname',entry.name),safeText('span','entrydesc',details[1]||`${countFiles(entry.children||[])} files`));
+        summary.append(copy);
+        const landing=dirLanding(entry,parents);
+        if(landing) {
+          const link=document.createElement('a');link.className='openfolder';link.href=landing;link.textContent='OPEN ↗';link.setAttribute('aria-label',`Open ${entry.name} directory`);
+          link.addEventListener('click',e=>e.stopPropagation());summary.append(link);
+        }
+        const children=document.createElement('div');children.className='contents';
+        for(const child of entry.children||[]) {
+          if(child.name==='index.html'||(q&&!hasMatch(child,q))) continue;
+          children.append(renderEntry(child,[...parents,entry.name],q,depth+1));
+        }
+        if(!children.children.length) children.append(safeText('p','notice','No matching files here.'));
+        node.append(summary,children);
+        return node;
+      }
+      function renderEntry(entry,parents,q,depth) { return entry.type==='directory'?folderNode(entry,parents,q,depth):fileNode(entry,parents); }
+      function render() {
+        const q=input.value.trim().toLowerCase();
+        const visible=directory.filter(e=>!q||hasMatch(e,q));
+        container.replaceChildren(...visible.map(entry=>renderEntry(entry,[],q,0)));
+        if(!visible.length) container.append(safeText('div','notice','No matching files or folders found.'));
+        status.textContent=`${countFiles(directory)} files · ${directory.length} top-level items${q?' · filtered':''}${snapshotMode?' · offline snapshot':''}`;
+        expand.textContent=expandedAll?'Collapse all':'Expand all';
+      }
+      async function load() {
+        status.textContent='Loading...';
+        let index;
+        snapshotMode = false;
+        try {
+          const response=await fetch(indexUrl,{cache:'no-store'});
+          if(!response.ok) throw new Error(`HTTP ${response.status}`);
+          index=await response.json();
+          if(!Array.isArray(index)) throw new Error('Unexpected index format');
+        } catch(error) {
+          try {
+            index=JSON.parse(document.getElementById('embedded-index').textContent);
+            snapshotMode=true;
+          } catch (_) {
+            directory=[];
+            status.textContent='Index unavailable';
+            container.replaceChildren(safeText('div','notice',`Could not load ${indexUrl}: ${error.message}`));
+            return;
+          }
+        }
+        directory=isMisc?(index.find(e=>e.type==='directory'&&e.name==='Misc')?.children||[]):index;
+        render();
+      }
+      input.addEventListener('input',render);
+      expand.addEventListener('click',()=>{expandedAll=!expandedAll;render();});
+      document.getElementById('refresh').addEventListener('click',load);
+      load();
+    })();
+  </script>
+</body>
+</html>
