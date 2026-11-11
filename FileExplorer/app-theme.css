@@ -1,0 +1,10 @@
+/* Shared chrome for File Explorer apps: the same desktop-window language as the homepage. */
+:root { color-scheme: dark; --anrat-bg:#111319; --anrat-panel:#181d25; --anrat-panel-raised:#242b37; --anrat-line:#596273; --anrat-text:#e6ebf4; --anrat-lavender:#a78bfa; --anrat-lavender-light:#c4b5fd; }
+html { min-width:280px; background:var(--anrat-bg); }
+body { min-width:280px; color:var(--anrat-text); font-family:"JetBrains Mono","Cascadia Code",Consolas,ui-monospace,monospace; background-color:var(--anrat-bg)!important; background-image:linear-gradient(#979fb20b 1px,transparent 1px),linear-gradient(90deg,#979fb20b 1px,transparent 1px)!important; background-size:24px 24px!important; }
+button, input, select, textarea { font:inherit; max-width:100%; border-color:var(--anrat-line)!important; border-radius:2px!important; }
+button:not(:disabled) { background-color:var(--anrat-panel-raised); color:var(--anrat-text); }
+button:not(:disabled):hover { border-color:var(--anrat-lavender)!important; background-color:#343c4e; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline:2px solid var(--anrat-lavender-light)!important; outline-offset:2px; }
+a { color:var(--anrat-lavender-light); } ::selection { background:#a78bfa80; color:#fff; }
+@media (max-width:760px) { html,body { max-width:100%; overflow-x:hidden; } body { min-width:0; } canvas,svg,img,video { max-width:100%; height:auto; } input,select,textarea { min-width:0; } }

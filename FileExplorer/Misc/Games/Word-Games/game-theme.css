@@ -170,18 +170,18 @@ body[data-game="wordle"] .key.correct,
 body[data-game="wordle"] .tile.present,
 body[data-game="wordle"] .key.present,
 body[data-game="wordle"] .tile.absent,
-body[data-game="wordle"] .key.absent { background: var(--correct); }
+body[data-game="wordle"] .key.absent { background: #8f7bd0; }
 body[data-game="wordle"] .tile.present,
-body[data-game="wordle"] .key.present { background: var(--present); }
+body[data-game="wordle"] .key.present { background: #b49be8; }
 body[data-game="wordle"] .tile.absent,
-body[data-game="wordle"] .key.absent { background: var(--absent); }
-body[data-game="crossword"] .cell.in-word { background: #48536b; }
-body[data-game="crossword"] .cell.correct { background: #3f654b; }
-body[data-game="crossword"] .cell.correct.cursor { background: #a8e776; }
-body[data-game="crossword"] .cell.wrong { background: #753c59; }
+body[data-game="wordle"] .key.absent { background: #353746; }
+body[data-game="crossword"] .cell.in-word { background: #514b72; }
+body[data-game="crossword"] .cell.correct { background: #725b9b; }
+body[data-game="crossword"] .cell.correct.cursor { background: #bca7ef; }
+body[data-game="crossword"] .cell.wrong { background: #664d83; }
 body[data-game="wordwheel"] .cell.used { background: #2c3442; }
 body[data-game="wordwheel"] .cell.found { background: #a78bfa; }
-body[data-game="wordsearch"] .cell.hinted { background: #617a4b; }
+body[data-game="wordsearch"] .cell.hinted { background: #6b5a97; }
 body[data-game="connections"] .tile.selected { background: #a78bfa; }
 body[data-game="connections"] .solved-group { border-radius: 2px; }
 
@@ -428,3 +428,39 @@ body[data-game="layers"] .button.primary, body[data-game="layers"] .game-button.
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+
+/* Final palette and viewport guard for every game, including standalone pages. */
+body[data-game] {
+  --green: #a78bfa;
+  --correct: #8f7bd0;
+  --present: #b49be8;
+  --red: #9a78bd;
+  --orange: #b49be8;
+}
+body[data-game] .success,
+body[data-game] .good,
+body[data-game] .correct { color: #d9ceff; }
+body[data-game] .danger,
+body[data-game] .error,
+body[data-game] .bad,
+body[data-game] .wrong { color: #d9b9f5; }
+body[data-game="crossword"] .cell.in-word { border-color: #9f8cd3; background: #514b72; }
+body[data-game="crossword"] .cell.correct { border-color: #aa98df; background: #725b9b; }
+body[data-game="crossword"] .cell.correct.in-word { background: #8d73b8; }
+body[data-game="crossword"] .cell.correct.cursor { color: #211b31; border-color: #dfd3ff; background: #bca7ef; }
+body[data-game="crossword"] .cell.wrong { border-color: #c29ae1; background: #664d83; }
+body[data-game="mini-crossword"] .square.verified { border-color: #bca7ef; background: #725b9b; }
+body[data-game="mini-crossword"] .square.wrong { border-color: #d0b5e9; background: #664d83; }
+body[data-game="minute-cryptic"] .letter-cell.correct { border-color: #bca7ef; background: #725b9b; color: #f5f1ff; }
+body[data-game="minute-cryptic"] .reveal { border-color: #a78bfa; background: #302747; }
+body[data-game="minute-cryptic"] .reveal p,
+body[data-game="minute-cryptic"] .reveal p strong { color: #e9e2ff; }
+
+@media (max-width: 760px) {
+  html, body { max-width: 100%; overflow-x: hidden; }
+  body[data-game] { min-width: 0; }
+  body[data-game] button,
+  body[data-game] input,
+  body[data-game] select,
+  body[data-game] textarea { max-width: 100%; }
+}

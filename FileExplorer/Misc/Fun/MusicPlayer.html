@@ -26,6 +26,12 @@
         transform: none !important;
     }
     .video-wash { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,9,15,.38), rgba(8,9,15,.73)), radial-gradient(circle at 50% 45%, transparent 22%, rgba(8,9,15,.4) 90%); opacity: 0; }
+    .visualizer { position: absolute; z-index: 0; inset: 0; display: flex; align-items: flex-end; justify-content: center; gap: clamp(3px, .9cqw, 8px); padding: clamp(42px, 10cqh, 94px) clamp(16px, 5cqw, 50px); overflow: hidden; pointer-events: none; }
+    .visualizer-bar { width: min(3.5cqw, 14px); min-width: 3px; height: var(--bar-height, 12%); max-height: 68%; border: 1px solid rgba(255,255,255,.28); border-bottom-color: rgba(255,255,255,.42); border-radius: 999px 999px 4px 4px; background: linear-gradient(180deg, rgba(240,206,255,.38), rgba(154,70,207,.1)); box-shadow: inset 1px 0 rgba(255,255,255,.22), 0 0 16px rgba(202,111,255,.16); backdrop-filter: blur(10px) saturate(165%) contrast(120%); -webkit-backdrop-filter: blur(10px) saturate(165%) contrast(120%); transform: translateX(var(--refraction, 0px)) skewX(-2deg); transform-origin: bottom; transition: height 90ms linear; }
+    .visualizer-bar:nth-child(odd) { background: linear-gradient(180deg, rgba(176,234,255,.31), rgba(124,85,217,.08)); }
+    .visualizer-bar:nth-child(3n) { --refraction: 3px; }
+    .visualizer-bar:nth-child(4n) { --refraction: -3px; }
+    @media (prefers-reduced-motion: reduce) { .visualizer-bar { transition-duration: .01ms; } }
     .volume-control { position: absolute; z-index: 3; bottom: clamp(12px, 3cqh, 24px); left: clamp(12px, 3cqw, 28px); width: 40px; height: 40px; display: flex; align-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.4); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transform: translateY(8px); transition: width .2s ease, background .2s ease, opacity .2s ease, transform .2s ease; }
     .player:hover .volume-control { opacity: 1; pointer-events: auto; transform: translateY(0); }
     .volume-control.expanded, .volume-control:focus-within { width: min(160px, calc(100cqw - 24px)); background: rgba(8,9,15,.66); }
@@ -80,11 +86,13 @@
     .pip-command-hint { position: fixed; z-index: 4; right: 14px; bottom: 14px; left: 14px; display: none; margin: 0; padding: 8px 10px; border: 1px solid rgba(233,195,255,.45); background: rgba(11,12,18,.72); box-shadow: 0 5px 18px rgba(0,0,0,.3); color: var(--lavender); font: 600 clamp(10px, 2cqh, 12px)/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center; }
     body.not-in-pip .pip-command-hint { display: block; }
   </style>
+  <link rel="stylesheet" href="../../app-theme.css">
 </head>
 <body>
   <main class="player" aria-label="Music player">
     <div id="youtube-player" aria-hidden="true"></div>
     <div class="video-wash" aria-hidden="true"></div>
+    <div class="visualizer" id="visualizer" aria-hidden="true"></div>
     <div class="volume-control" id="volume-control">
       <button id="volume-toggle" type="button" aria-label="Adjust volume" aria-expanded="false" data-volume="high">
         <svg class="volume-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h4l5-4v12l-5-4H4z"/><path class="wave wave-low" d="M16 9.5a4 4 0 0 1 0 5"/><path class="wave wave-high" d="M18.5 7a7.5 7.5 0 0 1 0 10"/><path class="mute-mark" d="m16 10 5 5m0-5-5 5"/></svg>
@@ -132,16 +140,42 @@
       const volumeControl = document.getElementById('volume-control');
       const volumeToggle = document.getElementById('volume-toggle');
       const volumeSlider = document.getElementById('volume-slider');
+      const visualizer = document.getElementById('visualizer');
       const playerCard = document.querySelector('.player');
       const supportsDocumentPiP = 'documentPictureInPicture' in window;
       const embeddedInDocumentPiP = new URLSearchParams(window.location.search).has('embedded');
       if (!embeddedInDocumentPiP) document.body.classList.add('not-in-pip');
       let player, ready = false, updateTimer, lastVideoId = '', pipWindow;
+      const visualizerBars = Array.from({ length: 27 }, (_, index) => {
+        const bar = document.createElement('span');
+        bar.className = 'visualizer-bar';
+        bar.style.setProperty('--bar-height', `${12 + ((index * 17) % 23)}%`);
+        visualizer.append(bar);
+        return bar;
+      });
+      const animateVisualizer = timestamp => {
+        const isPlaying = ready && player?.getPlayerState?.() === YT.PlayerState.PLAYING;
+        const playbackTime = isPlaying ? player.getCurrentTime() : timestamp / 1000;
+        visualizerBars.forEach((bar, index) => {
+          const wave = Math.sin(playbackTime * (2.4 + (index % 4) * .35) + index * 1.7);
+          const pulse = Math.sin(playbackTime * .9 + index * .61);
+          const height = isPlaying ? 14 + ((wave + 1) * 18) + ((pulse + 1) * 9) : 7 + ((index * 13) % 12);
+          bar.style.setProperty('--bar-height', `${height}%`);
+        });
+        requestAnimationFrame(animateVisualizer);
+      };
+      requestAnimationFrame(animateVisualizer);
       const formatTime = seconds => { if (!Number.isFinite(seconds) || seconds < 0) return '0:00'; return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`; };
       const setPlaybackButton = isPlaying => { playPause.classList.toggle('is-paused', !isPlaying); playPause.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play'); };
       const setVolumeIcon = value => {
         volumeToggle.dataset.volume = value === 0 ? 'muted' : value < 50 ? 'low' : 'high';
         volumeToggle.setAttribute('aria-label', value === 0 ? 'Volume muted' : `Volume ${value}%`);
+      };
+      const syncPlayerVolume = () => {
+        if (!ready) return;
+        const activeVolume = player.isMuted() ? 0 : Math.round(player.getVolume());
+        if (Number(volumeSlider.value) !== activeVolume) volumeSlider.value = activeVolume;
+        setVolumeIcon(activeVolume);
       };
       const setThumbnail = source => {
         thumbnail.style.opacity = '.5';
@@ -169,6 +203,7 @@
         seek.value = percent;
         seek.style.background = `linear-gradient(to right, var(--lavender) 0%, var(--lavender) ${percent}%, rgba(255,255,255,.25) ${percent}%, rgba(255,255,255,.25) 100%)`;
         elapsed.textContent = formatTime(current); duration.textContent = formatTime(total);
+        syncPlayerVolume();
         const data = player.getVideoData();
         if (data?.video_id && data.video_id !== lastVideoId) {
           lastVideoId = data.video_id; title.textContent = data.title || 'Untitled track'; thumbnail.style.opacity = '.5';
@@ -223,6 +258,7 @@
             onReady: () => {
                 ready = true;
                 player.setVolume(Number(volumeSlider.value));
+                syncPlayerVolume();
                 centerBackgroundVideo();
                 cueRandomFirstTrack();
                 setProgress();
