@@ -149,6 +149,7 @@
   const explorerPreviewUrl = document.getElementById('explorerPreviewUrl');
   const explorerPreviewMinimize = document.getElementById('explorerPreviewMinimize');
   const explorerPreviewRefresh = document.getElementById('explorerPreviewRefresh');
+  const explorerPreviewPopout = document.getElementById('explorerPreviewPopout');
   const explorerPreviewFullscreen = document.getElementById('explorerPreviewFullscreen');
   const explorerPreviewFavicon = document.getElementById('explorerPreviewFavicon');
   const explorerPreviewFaviconButton = document.getElementById('explorerPreviewFaviconButton');
@@ -352,23 +353,31 @@
   }
 
   function openExplorerPreview(source, title, tabId = null, options = {}) {
+    const previewSource = normalizePreviewUrl(source) || source;
+    // The explorer is deliberately unavailable on small screens. Follow preview
+    // links directly there instead of leaving a hidden iframe running behind it.
+    if (mobileLayoutQuery.matches) {
+      window.location.assign(previewSource);
+      return;
+    }
     let tab = tabId
       ? explorerTabs.find(savedTab => savedTab.id === tabId)
-      : explorerTabs.find(savedTab => new URL(savedTab.source, window.location.origin).href === new URL(source, window.location.origin).href);
+      : explorerTabs.find(savedTab => new URL(savedTab.source, window.location.origin).href === new URL(previewSource, window.location.origin).href);
     const urlEditable = options.urlEditable ?? tab?.urlEditable ?? true;
     const customFavicon = options.favicon ?? tab?.customFavicon ?? '';
+    const shouldFullscreen = options.fullscreen === true;
     if (!tab) {
       tab = {
         id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`,
-        source,
+        source: previewSource,
         title,
-        favicon: customFavicon || getPreviewFavicon(source),
+        favicon: customFavicon || getPreviewFavicon(previewSource),
         customFavicon,
         urlEditable
       };
       explorerTabs.push(tab);
     } else {
-      tab.source = source;
+      tab.source = previewSource;
       tab.title = title;
       tab.urlEditable = urlEditable;
       tab.customFavicon = customFavicon;
@@ -378,10 +387,12 @@
     setPreviewMinimized(false);
     setPreviewTitle(title);
     setPreviewUrlEditing(urlEditable);
-    explorerPreviewUrl.value = normalizePreviewUrl(source);
-    setPreviewFavicon(source, customFavicon);
-    explorerPreviewFrame.src = source;
+    explorerPreviewUrl.value = previewSource;
+    setPreviewFavicon(previewSource, customFavicon);
+    explorerPreviewFrame.src = previewSource;
     explorerPreview.hidden = false;
+    explorerPreview.classList.toggle('is-url-fullscreen', shouldFullscreen);
+    updatePreviewFullscreenState();
     renderExplorerTabDock();
     syncPreviewAddress();
     requestAnimationFrame(positionExplorerPreview);
@@ -444,6 +455,12 @@
   explorerPreviewRefresh.addEventListener('click', () => {
     if (explorerPreviewFrame.src && explorerPreviewFrame.src !== 'about:blank') explorerPreviewFrame.src = explorerPreviewFrame.src;
   });
+  explorerPreviewPopout.addEventListener('click', () => {
+    const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
+    const source = activeTab?.source || explorerPreviewFrame.src;
+    if (!source || source === 'about:blank') return;
+    window.open(source, '_blank', 'noopener');
+  });
   explorerPreviewFaviconButton.addEventListener('click', () => {
     if (explorerPreview.classList.contains('is-minimized')) {
       setFileExplorerOpen(true);
@@ -502,7 +519,7 @@
     }
   });
   renderExplorerTabDock();
-  const sharedPreviewUrl = new URL(window.location.origin);
+  const sharedPreviewUrl = new URL(window.location.href);
   const sharedPreviewSource = normalizePreviewUrl(sharedPreviewUrl.searchParams.get('site') || '');
   if (sharedPreviewSource) {
     setFileExplorerOpen(true);
@@ -512,12 +529,9 @@
     });
     let sharedPreviewTitle = sharedPreviewSource;
     try { sharedPreviewTitle = savedTab?.title || new URL(sharedPreviewSource).hostname || sharedPreviewSource; } catch { /* source is normalized */ }
-    openExplorerPreview(sharedPreviewSource, sharedPreviewTitle, savedTab?.id || null);
-    if (sharedPreviewUrl.searchParams.get('fullscreen') === 'true') {
-      explorerPreview.classList.add('is-url-fullscreen');
-      updatePreviewFullscreenState();
-      syncPreviewAddress();
-    }
+    openExplorerPreview(sharedPreviewSource, sharedPreviewTitle, savedTab?.id || null, {
+      fullscreen: sharedPreviewUrl.searchParams.get('fullscreen') === 'true'
+    });
   }
   function positionDesktopWindows() {
     if (fileExplorer.classList.contains('is-open')) {
