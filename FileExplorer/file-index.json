@@ -147,11 +147,6 @@
           },
           {
             "type": "file",
-            "name": "Karaoke-Studio.html",
-            "path": "FileExplorer/Misc/Games/Karaoke-Studio.html"
-          },
-          {
-            "type": "file",
             "name": "Star-Catcher.html",
             "path": "FileExplorer/Misc/Games/Star-Catcher.html"
           }
