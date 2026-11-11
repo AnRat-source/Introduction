@@ -155,6 +155,7 @@
   const explorerPreviewFaviconButton = document.getElementById('explorerPreviewFaviconButton');
   const explorerTabDock = document.getElementById('explorerTabDock');
   const explorerTabStorageKey = 'anrat-explorer-tabs';
+  const previewFallbackFavicon = new URL('assets/WebPage.ico', window.location.origin).href;
   let explorerTabs = [];
   let activeExplorerTabId = null;
   let explorerTreeId = 0;
@@ -217,15 +218,10 @@
     syncPreviewAddress();
   }
 
-  function getPreviewFavicon(source) {
-    try {
-      const previewUrl = new URL(source, window.location.origin);
-      return previewUrl.origin === window.location.origin
-        ? new URL('favicon.ico', window.location.origin).href
-        : `https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(previewUrl.origin)}`;
-    } catch {
-      return 'favicon.ico';
-    }
+  function getPreviewFavicon() {
+    // A favicon declared in the preview document replaces this after it loads.
+    // Do not use the portfolio's own favicon for unrelated browser tabs.
+    return previewFallbackFavicon;
   }
 
   function saveExplorerTabs() {
@@ -243,7 +239,7 @@
       tabButton.innerHTML = `<img width="23" height="23" alt=""><span class="explorer-tab-tooltip"></span><span class="explorer-tab-close" aria-hidden="true">×</span>`;
       const tabFavicon = tabButton.querySelector('img');
       tabFavicon.style.cssText = 'display:block;width:23px;height:23px;min-width:23px;min-height:23px;max-width:23px;max-height:23px;object-fit:contain;object-position:center;';
-      tabFavicon.addEventListener('error', () => { tabFavicon.src = 'favicon.ico'; }, { once: true });
+      tabFavicon.addEventListener('error', () => { tabFavicon.src = previewFallbackFavicon; }, { once: true });
       tabFavicon.src = tab.favicon;
       tabButton.querySelector('.explorer-tab-tooltip').textContent = tab.title;
       tabButton.addEventListener('click', event => {
@@ -504,7 +500,7 @@
       if (loadedTitle) setPreviewTitle(loadedTitle);
       const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
       if (activeTab?.customFavicon) return;
-      const icon = previewDocument.querySelector('link[rel~="icon"]')?.getAttribute('href');
+      const icon = previewDocument.querySelector('link[rel~="icon" i], link[rel="shortcut icon" i]')?.getAttribute('href');
       if (icon) {
         const favicon = new URL(icon, explorerPreviewFrame.contentWindow.location.href).href;
         explorerPreviewFavicon.src = favicon;
@@ -714,7 +710,7 @@
         if (!response.ok || !linkMatch) throw new Error('No valid iframe URL');
         const iframeSource = normalizeKnownLink(/^https?:\/\//i.test(linkMatch) ? linkMatch : `https://${linkMatch}`);
         const urlEditable = lines[1]?.trim() === 'URLEditingEnabled=True';
-        const faviconValue = lines[2]?.match(/^\s*favicon\s*=\s*(\S+)\s*$/i)?.[1] || '';
+        const faviconValue = lines.find(line => /^\s*favicon\s*=\s*(\S+)\s*$/i.test(line))?.match(/^\s*favicon\s*=\s*(\S+)\s*$/i)?.[1] || '';
         let favicon = '';
         if (faviconValue) {
           try { favicon = new URL(faviconValue, new URL(filePath, window.location.href)).href; } catch { /* use the normal fallback */ }
