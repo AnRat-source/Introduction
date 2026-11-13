@@ -85,8 +85,36 @@ button:not(.cookie):not(.anomaly):active:not(:disabled){transform:translate(2px,
 .modal-body .muted{font-size:11px}.foot{font-size:10px}
 .lights i,.led{border-radius:0}.cookie-copy{font-size:11px}.combo{border-radius:0;font-size:14px}
 @media(max-width:760px){body{font-size:14px}.top{padding:12px}.brand{font-size:21px}.windowbar{font-size:10px}.card-name{font-size:14px}.card-desc{font-size:11px}.chapter{font-size:19px}.status strong{font-size:14px}.status .k{font-size:9px}.panel-heading h2{font-size:18px}.tab{font-size:10px}.modal-body h2{font-size:21px}}
+/* COOKIE MODULES, IMPACT FRAMES AND THE RARE TIMELINE FRACTURE */
+.upgrade-orbit{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:visible}
+.upgrade-node{position:absolute;box-sizing:border-box;display:grid;place-items:center;width:25px;height:25px;padding:1px;border:2px solid #8a64b5!important;background:#201329!important;box-shadow:2px 2px 0 #080511!important;pointer-events:auto;transform:translate(-50%,-50%);opacity:0;animation:moduleMaterialize .36s steps(5,end) forwards;--node-glow:#cc87ff}
+.upgrade-node .pixel-icon{width:18px;height:18px;filter:drop-shadow(0 0 3px var(--node-glow))}
+.upgrade-node.tap{border-color:#f6be72!important;--node-glow:#ffc76d}.upgrade-node.all{border-color:#bb84ed!important;--node-glow:#bf82ff}.upgrade-node.unit{border-color:#75d9df!important;--node-glow:#70faf6}.upgrade-node.crit{border-color:#f17dac!important;--node-glow:#ff68a6}.upgrade-node.relic{border-color:#8ef6be!important;--node-glow:#7bf6c0;background:#17302f!important}
+.upgrade-node:hover{z-index:7!important;filter:brightness(1.4);scale:1.18}.upgrade-node.fired{animation:nodeFired .34s steps(5,end) forwards}.upgrade-node:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.worker-node{border-color:#57c6e0!important;background:#0d2432!important}.module-count{position:absolute;left:65%;top:74%;font:900 8px var(--mono);color:white;background:#643b8f;border:1px solid #bcb1fa;min-width:13px;height:11px;line-height:9px;pointer-events:none}
+.card.installed{border-color:#5aa7bd!important;background:#162531!important;cursor:pointer}.card.installed .buy-label,.card.installed .cost{color:#9aefdd!important}.card.installed:hover{background:#1e3640!important}
+.module-beam{position:absolute;z-index:3;pointer-events:none;width:7px;height:7px;background:#7ef5ff;box-shadow:0 0 0 2px #182345,0 0 10px #aefcff;animation:moduleBeam .62s steps(13,end) forwards}
+.cookie.punch{animation:cookiePunch .28s steps(6,end) both}.cookie.reforming{animation:cookieReform .78s steps(8,end) both}.cookie.shattering{visibility:hidden!important}
+.cookie-art{filter:drop-shadow(0 8px 0 #542533) drop-shadow(0 14px 24px #000b) drop-shadow(0 0 19px var(--cookie-glow,#ff9e7b))}
+.cookie:hover .cookie-art{filter:brightness(1.18) drop-shadow(0 8px 0 #542533) drop-shadow(0 14px 24px #000b) drop-shadow(0 0 25px var(--cookie-glow,#ffb176))}
+.hit-pulse{position:absolute;z-index:3;width:240px;height:240px;border:4px dashed var(--cookie-glow,#ff8dc4);pointer-events:none;transform:translate(-50%,-50%) scale(.7);animation:impactPulse .34s steps(7,end) both;box-shadow:inset 0 0 0 2px #fff4}
+.hit-cross{position:absolute;z-index:6;width:9px;height:9px;background:#fffdde;box-shadow:0 -10px #fff3b0,0 10px #fff3b0,-10px 0 #fff3b0,10px 0 #fff3b0;pointer-events:none;animation:hitFlash .26s steps(4,end) both}
+.cookie-shard{position:absolute;z-index:7;pointer-events:none;image-rendering:pixelated;background-repeat:no-repeat;animation:shardFly .95s cubic-bezier(.12,.62,.6,1) forwards;transform-origin:center}
+.flavor-label{position:absolute;left:50%;top:5px;transform:translateX(-50%);white-space:nowrap;color:#ffd8a4;font:900 10px var(--mono);letter-spacing:0;text-shadow:0 0 7px #fc8aad;opacity:.76;pointer-events:none}
+.mini-stats{flex-wrap:wrap}.mini-stats span{white-space:nowrap}
+.combo{font-size:13px;max-width:calc(100% - 12px);text-align:right;white-space:nowrap;transform:none;z-index:6;text-shadow:0 0 10px #ff76c5}
+.heart.fracturing{filter:contrast(1.15);animation:fractureShake .54s steps(5,end)}
+@keyframes cookiePunch{0%{transform:scale(1) rotate(0)}16%{transform:scale(.89,.83) rotate(-5deg)}34%{transform:scale(.79,.75) rotate(4deg)}54%{transform:scale(1.12,1.09) rotate(-3deg)}75%{transform:scale(.98) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes cookieReform{0%{opacity:0;transform:scale(.12) rotate(35deg);filter:brightness(4)}30%{opacity:1;transform:scale(1.32) rotate(-6deg);filter:brightness(2)}60%{transform:scale(.87) rotate(3deg);filter:brightness(1.4)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes impactPulse{0%{opacity:.92;transform:translate(-50%,-50%) scale(.68)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.38)}}
+@keyframes hitFlash{0%{opacity:1;transform:scale(1.3)}100%{opacity:0;transform:scale(3)}}
+@keyframes shardFly{0%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}100%{opacity:0;transform:translate(var(--vx),var(--vy)) rotate(var(--rotation)) scale(.5)}}
+@keyframes nodeFired{0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}45%{opacity:1;transform:translate(-50%,-50%) scale(1.38);filter:brightness(1.8)}}
+@keyframes moduleMaterialize{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes moduleBeam{0%{opacity:1;transform:translate(0,0) scale(1)}65%{opacity:1}100%{opacity:0;transform:translate(var(--beam-x),var(--beam-y)) scale(.4)}}
+@keyframes fractureShake{0%,100%{transform:translate(0)}20%{transform:translate(-7px,3px)}40%{transform:translate(6px,-4px)}60%{transform:translate(-5px,-5px)}80%{transform:translate(6px,4px)}}
+@media(max-width:760px){.upgrade-node{width:22px;height:22px}.upgrade-node .pixel-icon{width:16px;height:16px}.flavor-label{font-size:9px}.hit-pulse{width:205px;height:205px}.mini-stats{gap:7px}}
 </style>
-  <link rel="stylesheet" href="../../app-theme.css">
 </head>
 <body>
 <header class="top">
@@ -98,7 +126,7 @@ button:not(.cookie):not(.anomaly):active:not(:disabled){transform:translate(2px,
     <div class="status"><div><div class="k">CRUMBS</div><strong id="top-crumbs">0</strong></div></div>
     <div class="status"><div><div class="k">PER SECOND</div><strong class="alt" id="top-cps">0</strong></div></div>
     <div class="status"><div><div class="k">ECHOES</div><strong class="purple" id="top-echoes">0</strong></div></div>
-    <div class="status"><div><div class="k">ACHIEVEMENTS</div><strong class="alt" id="top-achievements">0/24</strong></div></div>
+    <div class="status"><div><div class="k">ACHIEVEMENTS</div><strong class="alt" id="top-achievements">0/25</strong></div></div>
     <div class="status ticker"><span class="blink">●</span> <span class="ticker-text" id="ticker">SYSTEM READY · INITIATE FIRST BATCH</span></div>
   </div>
 </header>
@@ -110,15 +138,15 @@ button:not(.cookie):not(.anomaly):active:not(:disabled){transform:translate(2px,
         <div class="eyebrow" id="chapter-no">CHAPTER 00 · AWAKENING</div>
         <div class="chapter" id="chapter-title">The First Crumb</div>
         <div class="hint" id="chapter-hint">Everything begins with a very small hunger.</div>
-        <div class="heart" id="heart"><div class="halo"></div><div class="orbit"></div><div class="orbit o2"></div>
+        <div class="heart" id="heart"><div class="halo"></div><div class="orbit"></div><div class="orbit o2"></div><div class="upgrade-orbit" id="upgrade-orbit" aria-label="Installed cookie modules"></div>
           <button class="cookie" id="cookie" aria-label="Bake crumbs by clicking or pressing Space"><canvas id="cookie-art" class="cookie-art" width="64" height="64" aria-hidden="true"></canvas></button>
           <button class="anomaly" id="anomaly" aria-label="Collect rare anomaly" title="Catch the anomaly!"></button>
-          <div class="combo" id="combo">COMBO ×1</div><div class="cookie-copy">TAP TO BAKE / SPACE</div>
+          <div class="combo" id="combo">COMBO ×1</div><div class="flavor-label" id="flavor-label">ORIGIN · GOLDEN</div><div class="cookie-copy">TAP TO BAKE / SPACE</div>
         </div>
         <div class="heat-label"><span>OVEN HEAT / OVERDRIVE CHARGE</span><span id="heat-number">0%</span></div>
         <div class="meter"><div class="fill" id="heat-fill"></div></div>
         <button class="overdrive" id="overdrive" disabled>⚡ OVERDRIVE · CHARGE 100% TO IGNITE</button>
-        <div class="mini-stats"><span>BAKED EVER <b id="lifetime">0</b></span><span>CLICKS <b id="clicks">0</b></span><span>BEST COMBO <b id="bestcombo">0</b></span></div>
+        <div class="mini-stats"><span>BAKED EVER <b id="lifetime">0</b></span><span>CLICKS <b id="clicks">0</b></span><span>BEST COMBO <b id="bestcombo">0</b></span><span>FRACTURES <b id="breaks">0</b></span></div>
       </div>
     </section>
     <section class="window system-window" aria-label="Production and upgrades">
@@ -221,12 +249,31 @@ function drawCookieArt(){
   }}
   // Tiny eight-point crest engraved into the dough.
   for(let n=-4;n<=4;n++){px(31+n,25,n===0?'#fff2bc':'#98593f');px(31,25+n,n===0?'#fff2bc':'#98593f');}
+  const flavor=COOKIE_VARIANTS[s.cookieVariant]||COOKIE_VARIANTS[0];
+  if(s.cookieVariant){const image=g.getImageData(0,0,64,64),data=image.data;for(let i=0;i<data.length;i+=4){
+    if(data[i+3]===0)continue;let red=data[i],green=data[i+1],blue=data[i+2];
+    // Recolor the baked dough, leaving the dark chocolate chips distinct.
+    if(red>green*1.1&&green>blue*1.12&&red>110){let luminosity=(red+green+blue)/3,t=Math.max(0,Math.min(1,(luminosity-87)/146));for(let k=0;k<3;k++)data[i+k]=Math.round(flavor.dark[k]*(1-t)+flavor.light[k]*t);}
+  }g.putImageData(image,0,0);}
+  // Purchased research becomes actual luminous inlays in the cookie crust.
+  UPGRADES.forEach((u,i)=>{if(!has(u.id))return;let a=i*Math.PI*2/UPGRADES.length-Math.PI/2,x=Math.round(31.5+Math.cos(a)*23),y=Math.round(31.2+Math.sin(a)*23);let e=u.effect,ink=e.tap?'#ffe4a1':e.crit?'#ff76b8':e.unit!==undefined?'#82f5fb':'#c39bff';px(x,y,'#321e39');px(x+1,y,ink);px(x,y+1,ink);px(x+1,y+1,'#fff4e8');});
+  RELICS.forEach((r,i)=>{if(!relic(r.id))return;let a=i*Math.PI*2/RELICS.length-Math.PI/2,x=Math.round(31.5+Math.cos(a)*14),y=Math.round(31.2+Math.sin(a)*14);px(x,y,'#fff');px(x+1,y,'#8df8c4');px(x,y+1,'#8df8c4');});
+  $('#cookie').style.setProperty('--cookie-glow',flavor.glow);$('#flavor-label').textContent=flavor.name.toUpperCase();$('#flavor-label').style.color=flavor.glow;
 }
 function anomalySprite(){const c=document.createElement('canvas');c.width=c.height=24;const g=c.getContext('2d');g.imageSmoothingEnabled=false;for(let y=0;y<24;y++)for(let x=0;x<24;x++){
   const r=Math.hypot(x-11.5,y-11.5);if(r>10.4)continue;let color=r>9?'#ddfbff':r>7?'#5bdbef':r>5?'#844ad5':r>3?'#bd85ff':'#f7ffff';if(((x*5+y*7)%11)<2&&r<8)color='#ffffff';g.fillStyle=color;g.fillRect(x,y,1,1);
 }g.fillStyle='#fff';for(let i=-3;i<=3;i++){g.fillRect(11+i,11,1,1);g.fillRect(11,11+i,1,1);}return c.toDataURL('image/png');}
 function initializePixelArt(){drawCookieArt();$('.brand-mark').innerHTML=pixelMarkup('✦');$('.prestige-icon').innerHTML=pixelMarkup('◈');$('#anomaly').style.backgroundImage=`url("${anomalySprite()}")`;}
 const SAVE_KEY = 'crumb_zero_v1_save';
+const COOKIE_VARIANTS = [
+  {name:'Golden Origin',dark:[159,85,48],light:[255,222,139],glow:'#ffbb7a'},
+  {name:'Nebula Berry',dark:[92,44,138],light:[237,179,255],glow:'#c985ff'},
+  {name:'Blue Stardust',dark:[35,94,138],light:[180,242,255],glow:'#65e6ff'},
+  {name:'Cherry Eclipse',dark:[151,41,76],light:[255,179,216],glow:'#ff68b1'},
+  {name:'Emerald Memory',dark:[36,113,82],light:[193,255,192],glow:'#82ffba'},
+  {name:'Moonlight Frost',dark:[75,84,135],light:[230,235,255],glow:'#b6c5ff'},
+  {name:'Void Amethyst',dark:[44,27,82],light:[180,137,235],glow:'#ae78ff'}
+];
 const RATE = 1.15;
 const UNITS = [
   {id:'finger',name:'Clockwork Fingers',icon:'✋',cost:15,cps:.15,desc:'Tiny brass hands knead whatever you give them.',reveal:0},
@@ -383,7 +430,8 @@ const ACHIEVEMENTS = [
   {id:'echo10',name:'Ten Echoes',desc:'Earn 10 total Echoes.',test:s=>s.totalEchoes>=10},
   {id:'relic',name:'Something Endures',desc:'Buy a permanent relic.',test:s=>Object.keys(s.relics).length>=1},
   {id:'witness',name:'The Oven Knows',desc:'Discover the witness.',test:s=>getChapter(s)>=8},
-  {id:'last',name:'One Last Ingredient',desc:'Discover the final transmission.',test:s=>getChapter(s)>=12}
+  {id:'last',name:'One Last Ingredient',desc:'Discover the final transmission.',test:s=>getChapter(s)>=12},
+  {id:'fracture',name:'An Oven Can Break',desc:'Witness a 1-in-10,000 cookie fracture.',test:s=>s.cookieBreaks>=1}
 ];
 const TICKER = [
   'REMINDER: THE OUTSIDE HAS BEEN DECOMMISSIONED',
@@ -399,10 +447,10 @@ const TICKER = [
   'ERROR: YOU HAVE BEEN HERE BEFORE',
   'THE RECIPE WAS NEVER ABOUT FOOD'
 ];
-const freshState = () => ({crumbs:0,lifetime:0,runBaked:0,clicks:0,bestCombo:0,heat:0,units:Array(UNITS.length).fill(0),upgrades:{},relics:{},echoes:0,totalEchoes:0,reboots:0,choices:{},missionsClaimed:0,achievements:[],anomalyClicks:0,sound:true,particles:true,shake:true,overdriveUntil:0,boostUntil:0,lastSaved:Date.now(),endingSeen:false});
+const freshState = () => ({crumbs:0,lifetime:0,runBaked:0,clicks:0,bestCombo:0,heat:0,units:Array(UNITS.length).fill(0),upgrades:{},relics:{},echoes:0,totalEchoes:0,reboots:0,choices:{},missionsClaimed:0,achievements:[],anomalyClicks:0,cookieVariant:0,cookieBreaks:0,sound:true,particles:true,shake:true,overdriveUntil:0,boostUntil:0,lastSaved:Date.now(),endingSeen:false});
 let s=freshState();let batch='1',shopTab='units',sideTab='missions',combo=0,lastClickTime=0;
-let eventAt=Date.now()+32000,eventUntil=0,frameMark=performance.now(),statMark=0,shopMark=0,saveMark=0,tickerMark=0,achievementMark=0;
-let audioCtx=null,modalOnClose=null,choiceQueue=[],openedChoice=false,endingPrompted=false,reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let eventAt=Date.now()+32000,eventUntil=0,frameMark=performance.now(),statMark=0,shopMark=0,saveMark=0,tickerMark=0,achievementMark=0,moduleMark=0;
+let audioCtx=null,modalOnClose=null,choiceQueue=[],openedChoice=false,endingPrompted=false,reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches,breaking=false;
 function format(n,precision=2){if(!Number.isFinite(n))return '∞';if(Math.abs(n)<1000){let d=precision===0?0:Math.abs(n)<10?2:Math.abs(n)<100?1:0;return n.toLocaleString('en-US',{maximumFractionDigits:d});}let suffix=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];let tier=Math.floor(Math.log10(Math.abs(n))/3);let val=n/Math.pow(1000,tier);if(val>=999.5){tier++;val=n/Math.pow(1000,tier);}return val.toFixed(val>=100?0:val>=10?1:2).replace(/\.0+$/,'')+(suffix[tier]||'e'+tier*3);}
 function fmtInt(n){return Math.floor(n).toLocaleString('en-US');}
 function getChapter(st=s){let i=STORY.length-1;while(i>0&&st.lifetime<STORY[i].threshold)i--;return i;}
@@ -421,10 +469,67 @@ function floatText(x,y,t,critical=false){if(!s.particles||reduceMotion)return;le
 function burst(x,y,count=14,colors=['#ffc76d','#ff69b9','#af7cff','#65f4ee']){if(!s.particles||reduceMotion)return;for(let i=0;i<count;i++){let p=document.createElement('i');p.className='particle';let a=Math.random()*Math.PI*2,d=28+Math.random()*105;p.style.cssText=`left:${x}px;top:${y}px;--sz:${3+Math.random()*7}px;--col:${colors[i%colors.length]};--dur:${.38+Math.random()*.45}s;--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d}px`;document.body.append(p);setTimeout(()=>p.remove(),900);}}
 function toast(title,detail='',type='pink'){let n=document.createElement('div');n.className='toast '+type;n.innerHTML=`<b>${escapeHtml(title)}</b><div>${escapeHtml(detail)}</div>`;$('#toasts').append(n);while($('#toasts').children.length>4)$('#toasts').firstElementChild.remove();setTimeout(()=>n.remove(),4300);}
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function clickCookie(ev){if($('#modal-backdrop').classList.contains('visible'))return;let now=Date.now();combo=(now-lastClickTime<1350)?Math.min(100,combo+1):1;lastClickTime=now;s.bestCombo=Math.max(s.bestCombo,combo);s.clicks++;s.heat=Math.min(100,s.heat+3.2);let crit=Math.random()<effects().crit;let amount=clickPower()*(1+Math.min(.8,(combo-1)*.016))*(crit?10:1);addCrumbs(amount);let box=$('#cookie').getBoundingClientRect(),x=ev&&ev.clientX?ev.clientX:box.left+box.width/2,y=ev&&ev.clientY?ev.clientY:box.top+box.height/2;floatText(x,y,`${crit?'✦ CRITICAL ': '+'}${format(amount)}`,crit);burst(x,y,crit?27:7);audio(205+Math.min(combo,50)*7+(crit?220:0),crit?'rare':'click',crit?.08:.023);$('#cookie').classList.add('pressed');setTimeout(()=>$('#cookie').classList.remove('pressed'),75);if(s.shake&&crit&&!reduceMotion){document.body.classList.remove('shake');void document.body.offsetWidth;document.body.classList.add('shake');setTimeout(()=>document.body.classList.remove('shake'),200);}refreshStats();}
-function buyUnit(i){let n=buyCount(i),cost=unitCost(i,n);if(n<=0||s.crumbs+1e-7<cost){audio(110,'bass',.015);return;}s.crumbs=Math.max(0,s.crumbs-cost);s.units[i]+=n;audio(530+20*i,'rare',.038);if(n>=10)toast('PRODUCTION EXPANDED',`${n} × ${UNITS[i].name}`, 'gold');renderShop();refreshStats();}
-function buyUpgrade(id){let u=UPGRADES.find(q=>q.id===id);if(!u||has(id)||!u.when(s)||s.crumbs<u.cost)return;s.crumbs-=u.cost;s.upgrades[id]=1;chord();toast('RESEARCH COMPLETE',u.name,'cyan');renderShop();refreshStats();}
-function buyRelic(id){let r=RELICS.find(q=>q.id===id);if(!r||relic(id)||s.echoes<r.cost)return;s.echoes-=r.cost;s.relics[id]=1;chord();toast('MEMORY MADE PERMANENT',r.name,'cyan');renderSide();refreshStats();save();}
+const moduleCooldowns=new Map();
+function renderCookieModules(){
+  const heart=$('#heart'),ring=$('#upgrade-orbit');if(!heart||!ring)return;
+  const outer=Math.max(112,Math.min(158,heart.clientWidth/2-18,heart.clientHeight/2-21));
+  const inner=Math.max($('#cookie').clientWidth/2+13,outer-24);
+  let nodes=[];
+  UPGRADES.forEach((u,i)=>{if(!has(u.id))return;let affinity=u.effect.tap?'tap':u.effect.crit?'crit':u.effect.unit!==undefined?'unit':'all';nodes.push({id:u.id,index:i,total:UPGRADES.length,icon:u.icon,name:u.name,desc:u.desc,affinity,kind:'upgrade',radius:outer});});
+  RELICS.forEach((r,i)=>{if(relic(r.id))nodes.push({id:r.id,index:i,total:RELICS.length,icon:r.icon,name:r.name,desc:r.desc,affinity:'relic',kind:'relic',radius:outer-15});});
+  UNITS.forEach((u,i)=>{if(s.units[i]>0)nodes.push({id:String(i),index:i,total:UNITS.length,icon:u.icon,name:u.name,desc:u.desc,affinity:'unit',kind:'unit',radius:inner,count:s.units[i]});});
+  ring.innerHTML=nodes.map(n=>{let a=(n.index/n.total)*Math.PI*2-Math.PI/2+(n.kind==='unit'?.21:n.kind==='relic'?.10:0),x=heart.clientWidth/2+Math.cos(a)*n.radius,y=heart.clientHeight/2+Math.sin(a)*n.radius;return `<button type="button" class="upgrade-node ${n.affinity} ${n.kind==='unit'?'worker-node':''}" data-module-kind="${n.kind}" data-module-id="${n.id}" style="left:${x}px;top:${y}px;--beam-x:${heart.clientWidth/2-x}px;--beam-y:${heart.clientHeight/2-y}px" title="${escapeHtml(n.name+' · '+n.desc+(n.count?' · OWNED '+n.count:''))}" aria-label="${escapeHtml(n.name+' · '+n.desc)}">${pixelMarkup(n.icon)}${n.count?`<span class="module-count">${format(n.count,0)}</span>`:''}</button>`;}).join('');
+}
+function animatePassiveModules(){if(reduceMotion||document.hidden||!s.particles)return;let available=$$('.upgrade-node.worker-node');if(!available.length)return;let node=available[Math.floor(Math.random()*available.length)];node.classList.remove('fired');void node.offsetWidth;node.classList.add('fired');setTimeout(()=>node.classList.remove('fired'),360);let n=node.getBoundingClientRect(),h=$('#heart').getBoundingClientRect();let pixel=document.createElement('i');pixel.className='module-beam';pixel.style.cssText=`left:${n.left+n.width/2-h.left}px;top:${n.top+n.height/2-h.top}px;--beam-x:${h.width/2-(n.left+n.width/2-h.left)}px;--beam-y:${h.height/2-(n.top+n.height/2-h.top)}px`;$('#heart').append(pixel);setTimeout(()=>pixel.remove(),630);}
+function punchCookie(x,y,critical=false){
+  const cookie=$('#cookie'),heart=$('#heart'),rect=heart.getBoundingClientRect(),cRect=cookie.getBoundingClientRect();
+  if(!reduceMotion){cookie.classList.remove('punch');void cookie.offsetWidth;cookie.classList.add('punch');setTimeout(()=>cookie.classList.remove('punch'),295);
+    const pulse=document.createElement('i');pulse.className='hit-pulse';pulse.style.left=(cRect.left+cRect.width/2-rect.left)+'px';pulse.style.top=(cRect.top+cRect.height/2-rect.top)+'px';heart.append(pulse);setTimeout(()=>pulse.remove(),400);
+    const cross=document.createElement('i');cross.className='hit-cross';cross.style.left=(x-rect.left)+'px';cross.style.top=(y-rect.top)+'px';heart.append(cross);setTimeout(()=>cross.remove(),300);
+    const modules=$$('.upgrade-node');for(let k=0;k<Math.min(6,modules.length);k++){let node=modules[(s.clicks+k*3)%modules.length];node.classList.remove('fired');void node.offsetWidth;node.classList.add('fired');setTimeout(()=>node.classList.remove('fired'),360);}
+  }
+  if(critical)burst(x,y,35,['#ffffff','#f17ac8','#ffd079','#72ffff']);
+}
+function triggerCookieBreak(){
+  if(breaking)return;breaking=true;const cookie=$('#cookie'),heart=$('#heart'),rect=cookie.getBoundingClientRect(),parent=heart.getBoundingClientRect();
+  cookie.classList.remove('punch','reforming');cookie.classList.add('shattering');heart.classList.add('fracturing');
+  const art=$('#cookie-art').toDataURL('image/png');
+  if(!reduceMotion){const count=6,w=rect.width/count,h=rect.height/count;for(let row=0;row<count;row++)for(let col=0;col<count;col++){
+    if((col-2.5)**2+(row-2.5)**2>10.5)continue;
+    const shard=document.createElement('i');shard.className='cookie-shard';const a=Math.atan2(row-2.5,col-2.5),speed=90+Math.random()*190;
+    shard.style.cssText=`left:${rect.left-parent.left+col*w}px;top:${rect.top-parent.top+row*h}px;width:${w+1}px;height:${h+1}px;background-image:url("${art}");background-size:${rect.width}px ${rect.height}px;background-position:-${col*w}px -${row*h}px;--vx:${Math.cos(a)*speed}px;--vy:${Math.sin(a)*speed-85}px;--rotation:${-280+Math.random()*560}deg`;
+    heart.append(shard);setTimeout(()=>shard.remove(),1100);
+  }}
+  audio(112,'bass',.12);setTimeout(()=>audio(70,'bass',.08),110);
+  setTimeout(()=>{
+    s.cookieVariant=(s.cookieVariant+1+Math.floor(Math.random()*(COOKIE_VARIANTS.length-1)))%COOKIE_VARIANTS.length;
+    s.cookieBreaks++;const bonus=Math.max(100,clickPower()*100,cps()*45);addCrumbs(bonus);drawCookieArt();
+    cookie.classList.remove('shattering');heart.classList.remove('fracturing');cookie.classList.add('reforming');
+    const center=cookie.getBoundingClientRect();burst(center.left+center.width/2,center.top+center.height/2,100,[COOKIE_VARIANTS[s.cookieVariant].glow,'#fff','#ffc96f']);
+    chord();toast('COOKIE FRACTURED',`${COOKIE_VARIANTS[s.cookieVariant].name} emerged · +${format(bonus)} crumbs`,'cyan');checkAchievements();$('#breaks').textContent=fmtInt(s.cookieBreaks);refreshStats();save();
+    setTimeout(()=>{cookie.classList.remove('reforming');breaking=false;},800);
+  },950);
+}
+function clickCookie(ev){
+  if($('#modal-backdrop').classList.contains('visible')||breaking)return;
+  let now=Date.now();combo=(now-lastClickTime<1350)?combo+1:1;lastClickTime=now;s.bestCombo=Math.max(s.bestCombo,combo);s.clicks++;s.heat=Math.min(100,s.heat+3.2);
+  let crit=Math.random()<effects().crit,amount=clickPower()*(1+(combo-1)*.016)*(crit?10:1);addCrumbs(amount);
+  let box=$('#cookie').getBoundingClientRect(),x=ev&&ev.clientX?ev.clientX:box.left+box.width/2,y=ev&&ev.clientY?ev.clientY:box.top+box.height/2;
+  floatText(x,y,`${crit?'✦ CRITICAL ': '+'}${format(amount)}`,crit);burst(x,y,crit?27:10);audio(205+Math.min(combo,50)*7+(crit?220:0),crit?'rare':'click',crit?.08:.023);punchCookie(x,y,crit);
+  if(s.shake&&crit&&!reduceMotion){document.body.classList.remove('shake');void document.body.offsetWidth;document.body.classList.add('shake');setTimeout(()=>document.body.classList.remove('shake'),200);}
+  // One exact independent shatter roll per successful cookie click.
+  if(Math.random()<1/10000)triggerCookieBreak();refreshStats();
+}
+function activateInstalledModule(kind,id,event){
+  const def=kind==='relic'?RELICS.find(r=>r.id===id):kind==='unit'?UNITS[Number(id)]:UPGRADES.find(u=>u.id===id);if(!def||(kind==='relic'?!relic(id):kind==='unit'?!s.units[Number(id)]:!has(id)))return;
+  const key=kind+':'+id,now=Date.now();if(now-(moduleCooldowns.get(key)||0)<3000)return;moduleCooldowns.set(key,now);
+  const cookie=$('#cookie').getBoundingClientRect(),x=event?.clientX||cookie.left+cookie.width/2,y=event?.clientY||cookie.top+cookie.height/2;
+  let gain=kind==='unit'?Math.max(1,def.cps*s.units[Number(id)]*effects().unit[Number(id)]*effects().all*2):Math.max(1,clickPower()*.25);addCrumbs(gain);s.heat=Math.min(100,s.heat+1);punchCookie(x,y);floatText(x,y,'SYNC +'+format(gain));burst(x,y,16,[kind==='relic'?'#85f6be':'#cc8bff','#ffe9bc']);audio(740,'rare',.032);
+  toast('MODULE SYNCHRONIZED',`${def.name} · ${def.desc}`,'cyan');refreshStats();
+}
+function buyUnit(i){let n=buyCount(i),cost=unitCost(i,n);if(n<=0||s.crumbs+1e-7<cost){audio(110,'bass',.015);return;}s.crumbs=Math.max(0,s.crumbs-cost);s.units[i]+=n;audio(530+20*i,'rare',.038);if(n>=10)toast('PRODUCTION EXPANDED',`${n} × ${UNITS[i].name}`, 'gold');renderCookieModules();renderShop();refreshStats();}
+function buyUpgrade(id){let u=UPGRADES.find(q=>q.id===id);if(!u||has(id)||!u.when(s)||s.crumbs<u.cost)return;s.crumbs-=u.cost;s.upgrades[id]=1;chord();toast('RESEARCH COMPLETE',u.name,'cyan');renderCookieModules();drawCookieArt();renderShop();refreshStats();}
+function buyRelic(id){let r=RELICS.find(q=>q.id===id);if(!r||relic(id)||s.echoes<r.cost)return;s.echoes-=r.cost;s.relics[id]=1;chord();toast('MEMORY MADE PERMANENT',r.name,'cyan');renderCookieModules();drawCookieArt();renderSide();refreshStats();save();}
 function activateOverdrive(){if(s.heat<100||isOverdrive())return;s.heat=0;s.overdriveUntil=Date.now()+20000;chord();toast('⚡ OVEN OVERDRIVE','20 seconds of extreme production. Keep clicking!', 'gold');burst(innerWidth*.5,innerHeight*.4,90);refreshStats();}
 function anomalyShow(){eventUntil=Date.now()+13500;let heart=$('#heart').getBoundingClientRect(),x=12+Math.random()*67,y=9+Math.random()*60;let n=$('#anomaly');n.style.left=x+'%';n.style.top=y+'%';n.classList.add('visible');toast('UNSTABLE ANOMALY','Catch the glowing signal before it vanishes!','cyan');audio(870,'rare',.07);}
 function anomalyCatch(){if(!eventUntil)return;eventUntil=0;$('#anomaly').classList.remove('visible');eventAt=Date.now()+22000+Math.random()*31000;s.anomalyClicks++;let amount=Math.max(250,cps()*38,clickPower()*75)*effects().anomaly;addCrumbs(amount);s.boostUntil=Math.max(s.boostUntil,Date.now()+25000);s.heat=Math.min(100,s.heat+35);let box=$('#anomaly').getBoundingClientRect();burst(box.x+32,box.y+32,70,['#a8ffff','#fff','#ed8aff','#ffc877']);chord();toast('ANOMALY CAPTURED',`+${format(amount)} crumbs · Production ×2 for 25s`,'cyan');refreshStats();}
@@ -448,18 +553,22 @@ function showEnding(){if(getChapter()<12)return;const mercy=Object.values(s.choi
   'You offer your own timeline as its fuel. Enough heat to build another century of shelter; enough time for Mara and the Oven to search for a better rule together. “You were never a replaceable ingredient,” Mara says.',
   'The room changes. There are windows now. The worlds beyond them are fragile and alive. You choose to stay with them—and to keep the door unlocked.'
 ];s.endingSeen=true;save();openModal({tag:'ENDING UNLOCKED · THE LAST INGREDIENT',title,content:`${paragraphs.map(p=>`<p>${escapeHtml(p)}</p>`).join('')}<p class="story-quote">THE END IS NOT A COMMAND. YOU MAY KEEP BAKING.</p>`,actions:[{label:'RETURN TO THE OVEN',kind:'primary'}]});}
-function renderShop(){let list=$('#shop-list');$('#shop-tools').classList.toggle('hidden',shopTab!=='units');$$('[data-shop-tab]').forEach(b=>b.classList.toggle('on',b.dataset.shopTab===shopTab));$$('[data-batch]').forEach(b=>b.classList.toggle('on',b.dataset.batch===batch));
+let visualSnapshot='';
+function renderShop(){
+  const currentSnapshot=JSON.stringify([s.units,s.upgrades,s.relics,s.cookieVariant]);
+  if(currentSnapshot!==visualSnapshot){visualSnapshot=currentSnapshot;renderCookieModules();drawCookieArt();}
+  let list=$('#shop-list');$('#shop-tools').classList.toggle('hidden',shopTab!=='units');$$('[data-shop-tab]').forEach(b=>b.classList.toggle('on',b.dataset.shopTab===shopTab));$$('[data-batch]').forEach(b=>b.classList.toggle('on',b.dataset.batch===batch));
   if(shopTab==='units'){
     let shown=UNITS.map((u,i)=>({u,i})).filter(({u,i})=>i<3||s.lifetime>=u.reveal||s.units[i]>0);
     list.innerHTML=shown.map(({u,i})=>{let n=buyCount(i),cost=n>0?unitCost(i,n):unitCost(i,1),afford=n>0&&s.crumbs+1e-6>=cost,owned=s.units[i],e=effects(),yieldVal=u.cps*e.unit[i]*e.all;return `<button class="card ${afford?'afford':''}" data-buy-unit="${i}" ${!afford?'disabled':''} title="${escapeHtml(u.desc)}"><span class="card-icon">${pixelMarkup(u.icon)}</span><span class="card-main"><span class="card-name">${escapeHtml(u.name)}</span><span class="card-desc">${escapeHtml(u.desc)}</span><span class="card-meta"><span class="cost">◈ ${n===0?'NEXT '+format(cost):format(cost)}</span><span>+${format(yieldVal)}/s each</span></span></span><span class="card-right"><span class="owned">${fmtInt(owned)}</span><span class="buy-label">${afford?'BUY '+n:'NO FUNDS'}</span></span></button>`;}).join('');
     $('#shop-count').textContent=`${shown.length} / ${UNITS.length} DISCOVERED`;$('#production-tip').textContent='Each purchase costs 15% more than the last.';
   }else if(shopTab==='upgrades'){
-    let available=UPGRADES.filter(u=>!has(u.id)&&u.when(s));let mystery=UPGRADES.filter(u=>!has(u.id)&&!u.when(s)).slice(0,4);
-    list.innerHTML=available.map(u=>{let afford=s.crumbs>=u.cost;return `<button class="card ${afford?'afford':''}" data-buy-upgrade="${u.id}" ${!afford?'disabled':''}><span class="card-icon">${pixelMarkup(u.icon)}</span><span class="card-main"><span class="card-name">${escapeHtml(u.name)}</span><span class="card-desc">${escapeHtml(u.desc)}</span><span class="card-meta"><span class="cost">◈ ${format(u.cost)}</span></span></span><span class="card-right"><span class="buy-label">${afford?'RESEARCH':'LOCKED'}</span></span></button>`;}).join('')+mystery.map(()=>`<div class="card locked"><span class="card-icon">${pixelMarkup('◇')}</span><span class="card-main"><span class="card-name">CLASSIFIED RESEARCH</span><span class="card-desc">Advance production to decrypt this file.</span></span><span class="card-right">···</span></div>`).join('')+(!available.length&&!mystery.length?'<div class="empty">All research complete. You have read every forbidden file.</div>':'');
+    let available=UPGRADES.filter(u=>!has(u.id)&&u.when(s)),owned=UPGRADES.filter(u=>has(u.id)),mystery=UPGRADES.filter(u=>!has(u.id)&&!u.when(s)).slice(0,4);
+    list.innerHTML=available.map(u=>{let afford=s.crumbs>=u.cost;return `<button class="card ${afford?'afford':''}" data-buy-upgrade="${u.id}" ${!afford?'disabled':''}><span class="card-icon">${pixelMarkup(u.icon)}</span><span class="card-main"><span class="card-name">${escapeHtml(u.name)}</span><span class="card-desc">${escapeHtml(u.desc)}</span><span class="card-meta"><span class="cost">◈ ${format(u.cost)}</span></span></span><span class="card-right"><span class="buy-label">${afford?'RESEARCH':'LOCKED'}</span></span></button>`;}).join('')+owned.map(u=>`<button class="card installed" data-inspect-upgrade="${u.id}" title="Click to sync with the cookie (3s cooldown)"><span class="card-icon">${pixelMarkup(u.icon)}</span><span class="card-main"><span class="card-name">${escapeHtml(u.name)}</span><span class="card-desc">${escapeHtml(u.desc)}</span><span class="card-meta"><span class="cost">INSTALLED ON COOKIE · CLICK TO SYNC</span></span></span><span class="card-right"><span class="buy-label">ACTIVE ✓</span></span></button>`).join('')+mystery.map(()=>`<div class="card locked"><span class="card-icon">${pixelMarkup('◇')}</span><span class="card-main"><span class="card-name">CLASSIFIED RESEARCH</span><span class="card-desc">Advance production to decrypt this file.</span></span><span class="card-right">···</span></div>`).join('');
     $('#shop-count').textContent=`${Object.keys(s.upgrades).length} / ${UPGRADES.length} RESEARCHED`;$('#production-tip').textContent='Research upgrades reset when timelines fold.';
   }else{
     let totalUnits=s.units.reduce((a,b)=>a+b,0),e=effects(),pass=UNITS.reduce((a,u,i)=>a+s.units[i]*u.cps*e.unit[i],0);
-    let rows=[['Lifetime crumbs',format(s.lifetime)],['Current timeline',format(s.runBaked)],['Manual clicks',fmtInt(s.clicks)],['Best combo',`×${fmtInt(s.bestCombo)}`],['Owned generators',fmtInt(totalUnits)],['Base production',`${format(pass)}/s`],['Global multiplier',`×${e.all.toFixed(2)}`],['Tap strength',`+${format(clickPower())}`],['Critical click chance',`${(e.crit*100).toFixed(1)}%`],['Research completed',`${Object.keys(s.upgrades).length}/${UPGRADES.length}`],['Timeline folds',fmtInt(s.reboots)],['Lifetime Echoes',fmtInt(s.totalEchoes)],['Captured anomalies',fmtInt(s.anomalyClicks)],['Permanent relics',`${Object.keys(s.relics).length}/${RELICS.length}`]];
+    let rows=[['Lifetime crumbs',format(s.lifetime)],['Current timeline',format(s.runBaked)],['Manual clicks',fmtInt(s.clicks)],['Best combo',`×${fmtInt(s.bestCombo)}`],['Cookie fractures',fmtInt(s.cookieBreaks)],['Current cookie flavor',COOKIE_VARIANTS[s.cookieVariant].name],['Owned generators',fmtInt(totalUnits)],['Base production',`${format(pass)}/s`],['Global multiplier',`×${e.all.toFixed(2)}`],['Tap strength',`+${format(clickPower())}`],['Critical click chance',`${(e.crit*100).toFixed(1)}%`],['Research completed',`${Object.keys(s.upgrades).length}/${UPGRADES.length}`],['Timeline folds',fmtInt(s.reboots)],['Lifetime Echoes',fmtInt(s.totalEchoes)],['Captured anomalies',fmtInt(s.anomalyClicks)],['Permanent relics',`${Object.keys(s.relics).length}/${RELICS.length}`]];
     list.innerHTML=`<div style="padding:7px"><div class="eyebrow">THE SYSTEM REMEMBERS EVERYTHING</div>${rows.map(([k,v])=>`<div class="setting-row"><span>${escapeHtml(k)}</span><strong style="font:700 12px var(--mono);color:var(--gold)">${escapeHtml(v)}</strong></div>`).join('')}</div>`;
     $('#shop-count').textContent='LIFETIME ACCOUNTING';$('#production-tip').textContent='Some numbers are impossible to erase.';
   }
@@ -482,7 +591,22 @@ function showStoryMap(){let html=`<p>Thirteen transmissions tell the story of a 
 function showGuide(){openModal({tag:'EMPLOYEE HANDBOOK',title:'How to Bake Reality',content:`<p>Welcome to your first shift. The recipe is simple. The consequences are not.</p><div class="mission"><div class="index">01 · THE LOOP</div><p><b>Click the cosmic cookie</b> or press <b>Space</b> to bake. Fast clicks build combos and heat. Buy generators to produce crumbs automatically. Research amplifies your production.</p></div><div class="mission" style="margin-top:8px"><div class="index">02 · THE CHAOS</div><p>Fill the heat bar for a <b>20-second Overdrive</b>. Catch glowing anomalies for instant crumbs and production boosts. Critical clicks explode with extra rewards.</p></div><div class="mission" style="margin-top:8px"><div class="index">03 · THE STORY</div><p>Reaching lifetime production milestones uncovers <b>13 transmissions</b>. Choose between different philosophies. Directives earn bonuses. Achievements always give +1%.</p></div><div class="mission" style="margin-top:8px"><div class="index">04 · THE LONG GAME</div><p>Once you bake <b>1 million crumbs in one timeline</b>, you can fold it for Echoes. Each lifetime Echo adds +10% to production and click power. Spend Echoes on <b>permanent relics</b>.</p></div><p class="muted">Your game saves in this browser automatically. Export a backup in Settings if you clear browser data. The game works entirely offline, with no external assets or services.</p>`});}
 function showSettings(){let content=`<div class="setting-row"><span>Sound effects</span><button class="toggle ${s.sound?'on':''}" data-setting="sound">${s.sound?'ON':'OFF'}</button></div><div class="setting-row"><span>Particles and floating numbers</span><button class="toggle ${s.particles?'on':''}" data-setting="particles">${s.particles?'ON':'OFF'}</button></div><div class="setting-row"><span>Critical-click screen shake</span><button class="toggle ${s.shake?'on':''}" data-setting="shake">${s.shake?'ON':'OFF'}</button></div><p class="muted">Your save is stored locally in this browser. Export it if you want to move it to another device.</p><div class="modal-actions"><button id="export-save">↧ EXPORT SAVE</button><button id="import-save">↥ IMPORT SAVE</button></div><div class="danger-zone"><button id="reset-save" class="small-button" style="color:var(--red)">RESET ALL PROGRESS</button></div>`;openModal({tag:'LOCAL CONFIGURATION',title:'Settings & Saves',content,actions:[]});}
 function exportSave(){save();let raw=localStorage.getItem(SAVE_KEY);let blob=new Blob([raw],{type:'application/json'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='crumb-zero-save.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('SAVE EXPORTED','Keep your .json file somewhere safe.','cyan');}
-function validateSave(input){if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Not a valid save.');let result=freshState();for(let field of ['crumbs','lifetime','runBaked','clicks','bestCombo','heat','echoes','totalEchoes','reboots','missionsClaimed','anomalyClicks','lastSaved']){let n=Number(input[field]);if(Number.isFinite(n)&&n>=0)result[field]=Math.min(n,1e300);}result.heat=Math.min(100,result.heat);result.missionsClaimed=Math.min(MISSIONS.length,Math.floor(result.missionsClaimed));result.units=UNITS.map((_,i)=>{let n=Number(input.units?.[i]);return Number.isFinite(n)&&n>=0?Math.min(100000,Math.floor(n)):0;});for(let field of ['upgrades','relics']){let defs=field==='upgrades'?UPGRADES:RELICS;result[field]={};for(let d of defs)if(input[field]&&Object.prototype.hasOwnProperty.call(input[field],d.id)&&input[field][d.id])result[field][d.id]=1;}result.achievements=Array.isArray(input.achievements)?[...new Set(input.achievements.filter(x=>ACHIEVEMENTS.some(a=>a.id===x)))]:[];result.choices={};for(let key of Object.keys(CHOICES)){if(input.choices?.[key]==='mercy'||input.choices?.[key]==='order')result.choices[key]=input.choices[key];}for(let key of ['sound','particles','shake','endingSeen'])if(typeof input[key]==='boolean')result[key]=input[key];result.overdriveUntil=0;result.boostUntil=0;result.totalEchoes=Math.max(result.totalEchoes,result.echoes);return result;}
+function validateSave(input){
+  if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Not a valid save.');
+  let result=freshState();
+  for(let field of ['crumbs','lifetime','runBaked','clicks','bestCombo','heat','echoes','totalEchoes','reboots','missionsClaimed','anomalyClicks','lastSaved','cookieBreaks']){
+    let n=Number(input[field]);if(Number.isFinite(n)&&n>=0)result[field]=Math.min(n,1e300);
+  }
+  result.cookieBreaks=Math.floor(result.cookieBreaks);
+  let variant=Number(input.cookieVariant);if(Number.isInteger(variant)&&variant>=0&&variant<COOKIE_VARIANTS.length)result.cookieVariant=variant;
+  result.heat=Math.min(100,result.heat);result.missionsClaimed=Math.min(MISSIONS.length,Math.floor(result.missionsClaimed));
+  result.units=UNITS.map((_,i)=>{let n=Number(input.units?.[i]);return Number.isFinite(n)&&n>=0?Math.min(100000,Math.floor(n)):0;});
+  for(let field of ['upgrades','relics']){let defs=field==='upgrades'?UPGRADES:RELICS;result[field]={};for(let d of defs)if(input[field]&&Object.prototype.hasOwnProperty.call(input[field],d.id)&&input[field][d.id])result[field][d.id]=1;}
+  result.achievements=Array.isArray(input.achievements)?[...new Set(input.achievements.filter(x=>ACHIEVEMENTS.some(a=>a.id===x)))]:[];
+  result.choices={};for(let key of Object.keys(CHOICES)){if(input.choices?.[key]==='mercy'||input.choices?.[key]==='order')result.choices[key]=input.choices[key];}
+  for(let key of ['sound','particles','shake','endingSeen'])if(typeof input[key]==='boolean')result[key]=input[key];
+  result.overdriveUntil=0;result.boostUntil=0;result.totalEchoes=Math.max(result.totalEchoes,result.echoes);return result;
+}
 function importSave(){let input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.onchange=()=>{let file=input.files?.[0];if(!file)return;if(file.size>200000){toast('IMPORT FAILED','Save files must be under 200 KB.');return;}file.text().then(text=>{try{let value=JSON.parse(text);let validated=validateSave(value);openModal({tag:'RESTORE PROGRESS',title:'Replace This Universe?',content:'<p>Importing this save will replace your current progress. Your existing data will be lost unless you exported a backup.</p>',actions:[{label:'CANCEL',kind:'close'},{label:'RESTORE SAVE',kind:'primary',run:()=>{s=validated;combo=0;lastKnownChapter=getChapter();eventAt=Date.now()+32000;eventUntil=0;$('#anomaly').classList.remove('visible');checkAchievements();save();renderShop();renderSide();refreshStats();toast('SAVE RESTORED','Welcome back to the oven.','cyan');}}]});}catch(err){toast('IMPORT FAILED',String(err.message||'Invalid JSON file.'));}});};input.click();}
 function resetSave(){openModal({tag:'DESTRUCTIVE OPERATION',title:'Erase Every Timeline?',content:'<p>This will permanently erase all crumbs, upgrades, relics, Echoes, choices, and achievements saved in this browser. This cannot be undone.</p><p class="story-quote">EVEN THE OVEN CANNOT REMEMBER WHAT YOU DELETE.</p>',actions:[{label:'CANCEL',kind:'close'},{label:'ERASE EVERYTHING',kind:'danger',run:()=>{s=freshState();combo=0;lastKnownChapter=0;eventUntil=0;eventAt=Date.now()+32000;$('#anomaly').classList.remove('visible');save();renderShop();renderSide();refreshStats();toast('A NEW BEGINNING','There is only an oven.');}}]});}
 function save(){try{s.lastSaved=Date.now();localStorage.setItem(SAVE_KEY,JSON.stringify(s));}catch(e){if(!storageWarned){toast('SAVE UNAVAILABLE','Browser storage is blocked. Export your save manually.');storageWarned=true;}}}
@@ -494,24 +618,27 @@ function attachControls(){
   $('#sound-btn').addEventListener('click',()=>{s.sound=!s.sound;updateSoundButton();if(s.sound)chord();save();});
   $$('.tab[data-shop-tab]').forEach(b=>b.addEventListener('click',()=>{shopTab=b.dataset.shopTab;renderShop();}));$$('.tab[data-side-tab]').forEach(b=>b.addEventListener('click',()=>{sideTab=b.dataset.sideTab;renderSide();}));
   $$('.batch button').forEach(b=>b.addEventListener('click',()=>{batch=b.dataset.batch;renderShop();}));
-  $('#shop-list').addEventListener('click',ev=>{let u=ev.target.closest('[data-buy-unit]'),up=ev.target.closest('[data-buy-upgrade]');if(u)buyUnit(Number(u.dataset.buyUnit));else if(up)buyUpgrade(up.dataset.buyUpgrade);});
+  $('#shop-list').addEventListener('click',ev=>{let u=ev.target.closest('[data-buy-unit]'),up=ev.target.closest('[data-buy-upgrade]'),installed=ev.target.closest('[data-inspect-upgrade]');if(u)buyUnit(Number(u.dataset.buyUnit));else if(up)buyUpgrade(up.dataset.buyUpgrade);else if(installed)activateInstalledModule('upgrade',installed.dataset.inspectUpgrade,ev);});
+  $('#upgrade-orbit').addEventListener('click',ev=>{let n=ev.target.closest('[data-module-id]');if(n)activateInstalledModule(n.dataset.moduleKind,n.dataset.moduleId,ev);});
   $('#side-list').addEventListener('click',ev=>{let claim=ev.target.closest('#claim-mission'),relic=ev.target.closest('[data-buy-relic]'),story=ev.target.closest('[data-story]');if(claim)claimMission();else if(relic)buyRelic(relic.dataset.buyRelic);else if(story)readStory(Number(story.dataset.story));});
   $('#modal-body').addEventListener('click',ev=>{let setting=ev.target.closest('[data-setting]');if(setting){let key=setting.dataset.setting;s[key]=!s[key];setting.textContent=s[key]?'ON':'OFF';setting.classList.toggle('on',s[key]);save();if(key==='sound')updateSoundButton();return;}if(ev.target.closest('#export-save'))exportSave();else if(ev.target.closest('#import-save'))importSave();else if(ev.target.closest('#reset-save'))resetSave();else if(ev.target.closest('#ending-action'))showEnding();else {let item=ev.target.closest('[data-modal-story]');if(item&&!item.disabled)readStory(Number(item.dataset.modalStory));}});
   $('#modal-close').addEventListener('click',closeModal);$('#modal-backdrop').addEventListener('click',ev=>{if(ev.target===$('#modal-backdrop'))closeModal();});
   document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&$('#modal-backdrop').classList.contains('visible')){closeModal();return;}if(ev.code==='Space'&&!ev.repeat&&!$('#modal-backdrop').classList.contains('visible')&&!['INPUT','TEXTAREA','BUTTON','SELECT'].includes(document.activeElement?.tagName)){ev.preventDefault();clickCookie(null);}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){save();}else{let delta=Math.max(0,(Date.now()-s.lastSaved)/1000);if(delta>3&&s.units.some(n=>n>0)){let amount=cps()*Math.min(delta,28800)*effects().offline;addCrumbs(amount);toast('OVEN NEVER SLEEPS',`+${format(amount)} crumbs while away`,'cyan');}frameMark=performance.now();save();}});
   window.addEventListener('pagehide',save);
+  window.addEventListener('resize',()=>renderCookieModules());
 }
 function updateSoundButton(){$('#sound-btn').textContent=s.sound?'♫ SOUND ON':'♫ MUTED';$('#sound-btn').classList.toggle('active',s.sound);}
 function tick(t){let dt=Math.min(.15,Math.max(0,(t-frameMark)/1000));frameMark=t;if(!document.hidden){addCrumbs(cps()*dt);let now=Date.now();if(eventUntil&&now>eventUntil){eventUntil=0;$('#anomaly').classList.remove('visible');eventAt=now+24000+Math.random()*32000;}if(!eventUntil&&now>eventAt){anomalyShow();}if(now-lastClickTime>1700)combo=0;
-    if(t-statMark>120){refreshStats();statMark=t;}
+    if(t-statMark>120){refreshStats();$('#breaks').textContent=fmtInt(s.cookieBreaks);statMark=t;}
     if(t-shopMark>750){renderShop();renderSide();checkStory();shopMark=t;}
+    if(t-moduleMark>850){if(cps()>0)animatePassiveModules();moduleMark=t;}
     if(t-achievementMark>1150){checkAchievements();achievementMark=t;}
     if(t-tickerMark>6500){let list=TICKER.filter(q=>q!==$('#ticker').textContent);$('#ticker').textContent=list[Math.floor(Math.random()*list.length)];tickerMark=t;}
     if(t-saveMark>10000){save();saveMark=t;}
     if(getChapter()>=12&&!s.endingSeen&&!endingPrompted&&!$('#modal-backdrop').classList.contains('visible')){endingPrompted=true;setTimeout(showEnding,1500);}
   }requestAnimationFrame(tick);}
-initializePixelArt();load();attachControls();checkAchievements();updateSoundButton();renderShop();renderSide();refreshStats();requestAnimationFrame(tick);
+load();initializePixelArt();attachControls();checkAchievements();updateSoundButton();renderCookieModules();$('#breaks').textContent=fmtInt(s.cookieBreaks);renderShop();renderSide();refreshStats();requestAnimationFrame(tick);
 if(pendingOffline>0)setTimeout(()=>toast('WHILE YOU WERE AWAY',`The oven baked +${format(pendingOffline)} crumbs. Welcome back.`,'cyan'),900);
 setTimeout(()=>{if(s.clicks===0&&s.lifetime===0)toast('WELCOME, EMPLOYEE #0001','Tap the glowing cookie to begin your shift.');},1300);
 </script>
