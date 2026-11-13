@@ -791,36 +791,33 @@
       })
     });
 
-  function getBackgroundImages() {
-    const elements = Array.from(document.querySelectorAll('*'));
-    const urls = [];
-
-    elements.forEach(el => {
-      const bg = getComputedStyle(el).backgroundImage;
-      if (bg && bg !== 'none' && bg.includes('url(')) {
-        const matches = bg.match(/url\(["']?([^"')]+)["']?\)/g);
-        if (matches) {
-          matches.forEach(url => {
-            const cleanUrl = url.replace(/url\(["']?/, '').replace(/["']?\)/, '');
-            urls.push(cleanUrl);
-          });
-        }
-      }
-    });
-
-    return urls;
+  function getActiveBackgroundImage() {
+    const configuredBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--full-background-image')
+      .trim();
+    const match = configuredBackground.match(/^url\(["']?(.+?)["']?\)$/i);
+    return match?.[1] || '';
   }
 
-  // Wait for all images (including CSS backgrounds)
+  // Wait only for visible content and the currently selected day/night background.
+  // A broken optional asset must never hold the page at the loading screen.
   async function waitForAllImages() {
     const imgElements = Array.from(document.images).map(img => img.src);
-    const bgImages = getBackgroundImages();
-    const allUrls = [...imgElements, ...bgImages];
+    const activeBackground = getActiveBackgroundImage();
+    const allUrls = [...new Set([...imgElements, activeBackground].filter(Boolean))];
 
     await Promise.all(allUrls.map(src => {
       return new Promise(resolve => {
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeout);
+          resolve();
+        };
         const img = new Image();
-        img.onload = img.onerror = resolve;
+        const timeout = setTimeout(finish, 8000);
+        img.onload = img.onerror = finish;
         img.src = src;
       });
     }));
