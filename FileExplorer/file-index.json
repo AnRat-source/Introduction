@@ -147,6 +147,11 @@
           },
           {
             "type": "file",
+            "name": "Karaoke.iframe",
+            "path": "FileExplorer/Misc/Games/Karaoke.iframe"
+          },
+          {
+            "type": "file",
             "name": "Star-Catcher.html",
             "path": "FileExplorer/Misc/Games/Star-Catcher.html"
           }
