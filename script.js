@@ -451,7 +451,7 @@
   explorerPreviewRefresh.addEventListener('click', () => {
     if (explorerPreviewFrame.src && explorerPreviewFrame.src !== 'about:blank') explorerPreviewFrame.src = explorerPreviewFrame.src;
   });
-  explorerPreviewPopout.addEventListener('click', () => {
+  explorerPreviewPopout?.addEventListener('click', () => {
     const activeTab = explorerTabs.find(tab => tab.id === activeExplorerTabId);
     const source = activeTab?.source || explorerPreviewFrame.src;
     if (!source || source === 'about:blank') return;
