@@ -27,7 +27,7 @@
     }
     .video-wash { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,9,15,.38), rgba(8,9,15,.73)), radial-gradient(circle at 50% 45%, transparent 22%, rgba(8,9,15,.4) 90%); opacity: 0; }
     .visualizer { position: absolute; z-index: 0; inset: 0; display: flex; align-items: flex-end; justify-content: center; gap: clamp(3px, .9cqw, 8px); padding: clamp(42px, 10cqh, 94px) clamp(16px, 5cqw, 50px); overflow: hidden; pointer-events: none; }
-    .visualizer-bar { width: min(3.5cqw, 14px); min-width: 3px; height: var(--bar-height, 12%); max-height: 68%; border: 1px solid rgba(255,255,255,.28); border-bottom-color: rgba(255,255,255,.42); border-radius: 999px 999px 4px 4px; background: linear-gradient(180deg, rgba(240,206,255,.38), rgba(154,70,207,.1)); box-shadow: inset 1px 0 rgba(255,255,255,.22), 0 0 16px rgba(202,111,255,.16); backdrop-filter: blur(10px) saturate(165%) contrast(120%); -webkit-backdrop-filter: blur(10px) saturate(165%) contrast(120%); transform: translateX(var(--refraction, 0px)) skewX(-2deg); transform-origin: bottom; transition: height 90ms linear; }
+    .visualizer-bar { width: min(3.5cqw, 14px); min-width: 3px; height: var(--bar-height, 12%); max-height: 68%; border: 1px solid rgba(255,255,255,.28); border-bottom-color: rgba(255,255,255,.42); border-radius: 999px 999px 4px 4px; background: linear-gradient(180deg, rgba(240,206,255,.2), rgba(155, 70, 207, 0.1)); box-shadow: inset 1px 0 rgba(255,255,255,.2), 0 0 16px rgba(202,111,255,.1); backdrop-filter: blur(10px) saturate(165%) contrast(120%); -webkit-backdrop-filter: blur(10px) saturate(165%) contrast(120%); transform: translateX(var(--refraction, 0px)) skewX(-2deg); transform-origin: bottom; transition: height 90ms linear; }
     .visualizer-bar:nth-child(odd) { background: linear-gradient(180deg, rgba(176,234,255,.31), rgba(124,85,217,.08)); }
     .visualizer-bar:nth-child(3n) { --refraction: 3px; }
     .visualizer-bar:nth-child(4n) { --refraction: -3px; }
@@ -146,22 +146,30 @@
       const embeddedInDocumentPiP = new URLSearchParams(window.location.search).has('embedded');
       if (!embeddedInDocumentPiP) document.body.classList.add('not-in-pip');
       let player, ready = false, updateTimer, lastVideoId = '', pipWindow;
-      const visualizerBars = Array.from({ length: 27 }, (_, index) => {
+      const visualizerBars = Array.from({ length: 8 }, (_, index) => {
         const bar = document.createElement('span');
         bar.className = 'visualizer-bar';
         bar.style.setProperty('--bar-height', `${12 + ((index * 17) % 23)}%`);
         visualizer.append(bar);
         return bar;
       });
+      const visualizerSpeed = 3; // 1 = normal, 2 = double, 3 = triple
+
       const animateVisualizer = timestamp => {
         const isPlaying = ready && player?.getPlayerState?.() === YT.PlayerState.PLAYING;
         const playbackTime = isPlaying ? player.getCurrentTime() : timestamp / 1000;
+
         visualizerBars.forEach((bar, index) => {
-          const wave = Math.sin(playbackTime * (2.4 + (index % 4) * .35) + index * 1.7);
-          const pulse = Math.sin(playbackTime * .9 + index * .61);
-          const height = isPlaying ? 14 + ((wave + 1) * 18) + ((pulse + 1) * 9) : 7 + ((index * 13) % 12);
+          const wave = Math.sin(playbackTime * visualizerSpeed * (2.4 + (index % 4) * .35) + index * 1.7);
+          const pulse = Math.sin(playbackTime * visualizerSpeed * .9 + index * .61);
+
+          const height = isPlaying
+            ? 14 + ((wave + 1) * 18) + ((pulse + 1) * 9)
+            : 7 + ((index * 13) % 12);
+
           bar.style.setProperty('--bar-height', `${height}%`);
         });
+
         requestAnimationFrame(animateVisualizer);
       };
       requestAnimationFrame(animateVisualizer);
