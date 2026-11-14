@@ -154,6 +154,11 @@
             "type": "file",
             "name": "Star-Catcher.html",
             "path": "FileExplorer/Misc/Games/Star-Catcher.html"
+          },
+          {
+            "type": "file",
+            "name": "startrail-the-last-webring-v2.html",
+            "path": "FileExplorer/Misc/Games/startrail-the-last-webring-v2.html"
           }
         ]
       },
