@@ -592,6 +592,22 @@
     return icons[extension] || ['tree-generic', 'fa-file-lines'];
   }
 
+  async function getHtmlPreviewOptions(filePath) {
+    try {
+      const response = await fetch(filePath);
+      if (!response.ok) return {};
+      const documentHead = new DOMParser().parseFromString(await response.text(), 'text/html');
+      const setting = documentHead
+        .querySelector('meta[name="anrat-explorer-fullscreen" i]')
+        ?.getAttribute('content')
+        ?.trim()
+        .toLowerCase();
+      return { fullscreen: ['1', 'true', 'yes'].includes(setting) };
+    } catch {
+      return {};
+    }
+  }
+
   function makeExplorerTree(entries, depth = 0) {
     const fragment = document.createDocumentFragment();
     entries.forEach(entry => {
@@ -698,7 +714,7 @@
       fileExplorerStatus.textContent = `Opening ${fileName} in preview…`;
 
       if (previewFile.classList.contains('tree-html')) {
-        openExplorerPreview(filePath, fileName);
+        openExplorerPreview(filePath, fileName, null, await getHtmlPreviewOptions(filePath));
         return;
       }
 
