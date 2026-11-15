@@ -268,9 +268,62 @@
       function setTool(tool) { state.tool = tool; canvas.style.cursor = tool === 'pan' ? 'grab' : 'crosshair'; state.selected = null; $$('.tool[data-tool]').forEach(button => button.classList.toggle('active', button.dataset.tool === tool)); setStatus(`${tool === 'select' ? 'Select or move an object' : tool === 'furniture' ? 'Click to place furniture' : `Drawing ${tool}`}`); render(); }
       function addObject(obj) { pushHistory(); state.objects.push(obj); state.selected = obj; setStatus(`${objectLabel(obj)} added`); render(); }
       function hitObject(p) { return [...state.objects].reverse().find(obj => { const local = localPoint(p, obj), b = bounds(obj); if (['line','door','window'].includes(obj.type)) { const d = Math.abs((obj.y2 - obj.y) * local.x - (obj.x2 - obj.x) * local.y + obj.x2 * obj.y - obj.y2 * obj.x) / (Math.hypot(obj.y2 - obj.y, obj.x2 - obj.x)||1); return d < (obj.type==='line'?10:20) && local.x >= b.x - 20 && local.x <= b.x + b.w + 20 && local.y >= b.y - 20 && local.y <= b.y + b.h + 20; } return local.x >= b.x - 6 && local.x <= b.x + b.w + 6 && local.y >= b.y - 6 && local.y <= b.y + b.h + 6; }); }
-      const wallSegments = () => { const result=[]; for(const obj of state.objects) { const rot = p => rotatePoint(p,objectCenter(obj),obj.rotation||0); if(obj.type==='line')result.push([rot({x:obj.x,y:obj.y}),rot({x:obj.x2,y:obj.y2})]); else if(obj.type==='room'){const b=bounds(obj),pts=[{x:b.x,y:b.y},{x:b.x+b.w,y:b.y},{x:b.x+b.w,y:b.y+b.h},{x:b.x,y:b.y+b.h}].map(rot);for(let i=0;i<4;i++)result.push([pts[i],pts[(i+1)%4]])} } return result };
-      const openingAt = (p,type,widthPx) => { let best=null; for(const [a,b] of wallSegments()){const length=Math.hypot(b.x-a.x,b.y-a.y);if(length<15)continue;const ux=(b.x-a.x)/length,uy=(b.y-a.y)/length,t=Math.max(0,Math.min(length,(p.x-a.x)*ux+(p.y-a.y)*uy)),d=Math.hypot(p.x-a.x-ux*t,p.y-a.y-uy*t);if(!best||d<best.distance)best={a,length,ux,uy,t,distance:d}}if(!best||best.distance>35)return null;const span=Math.min(widthPx||(type==='door'?45:60),best.length-2);if(span<8)return null;const begin=Math.max(0,Math.min(best.length-span,best.t-span/2));return {x:best.a.x+best.ux*begin,y:best.a.y+best.uy*begin,x2:best.a.x+best.ux*(begin+span),y2:best.a.y+best.uy*(begin+span)}};
-      const placeOpening = (p,type) => {const at=openingAt(p,type);if(!at)return toast('Tap an existing wall or room edge to place an opening.');addObject({type,...at,label:type.toUpperCase(),height3d:type==='door'?2.1:1.2,sillHeight:type==='door'?0:.9,color:inkColor.value,weight:+lineWeight.value})};
+      // Rebuild wall edges from *loaded or newly drawn* objects. A rectangle is
+      // also a usable wall outline (previously only line/room objects were recognized).
+      const wallSegments = () => {
+        const segments = [];
+        for (const obj of state.objects) {
+          if (!['line', 'room', 'rect'].includes(obj.type)) continue;
+          const center = objectCenter(obj);
+          const rotate = p => rotatePoint(p, center, obj.rotation || 0);
+          if (obj.type === 'line') {
+            if (![obj.x, obj.y, obj.x2, obj.y2].every(Number.isFinite)) continue;
+            segments.push([rotate({ x: obj.x, y: obj.y }), rotate({ x: obj.x2, y: obj.y2 })]);
+          } else {
+            const b = bounds(obj);
+            const corners = [
+              { x: b.x, y: b.y },
+              { x: b.x + b.w, y: b.y },
+              { x: b.x + b.w, y: b.y + b.h },
+              { x: b.x, y: b.y + b.h }
+            ].map(rotate);
+            for (let i = 0; i < 4; i++) segments.push([corners[i], corners[(i + 1) % 4]]);
+          }
+        }
+        return segments;
+      };
+      // The magnet radius is in *screen pixels*, not world units, so saved
+      // plans still accept clicks/taps even when the Fit tool zooms far out.
+      const openingAt = (p, type, widthPx, tolerancePx = 24) => {
+        let best = null;
+        for (const [a, b] of wallSegments()) {
+          const length = Math.hypot(b.x - a.x, b.y - a.y);
+          if (length < 15) continue;
+          const ux = (b.x - a.x) / length, uy = (b.y - a.y) / length;
+          const t = Math.max(0, Math.min(length, (p.x - a.x) * ux + (p.y - a.y) * uy));
+          const distance = Math.hypot(p.x - a.x - ux * t, p.y - a.y - uy * t);
+          if (!best || distance < best.distance) best = { a, length, ux, uy, t, distance };
+        }
+        if (!best || best.distance > tolerancePx / state.displayZoom) return null;
+        const span = Math.min(widthPx || (type === 'door' ? 45 : 60), best.length - 2);
+        if (span < 8) return null;
+        const begin = Math.max(0, Math.min(best.length - span, best.t - span / 2));
+        return {
+          x: best.a.x + best.ux * begin,
+          y: best.a.y + best.uy * begin,
+          x2: best.a.x + best.ux * (begin + span),
+          y2: best.a.y + best.uy * (begin + span)
+        };
+      };
+      const placeOpening = (p, type, tolerancePx = 24) => {
+        const at = openingAt(p, type, undefined, tolerancePx);
+        if (!at) {
+          setStatus('No wall nearby · click a wall line, room edge, or rectangle edge');
+          return toast('Click closer to a wall, room edge, or rectangle edge.');
+        }
+        addObject({ type, ...at, label: type.toUpperCase(), height3d: type === 'door' ? 2.1 : 1.2,
+          sillHeight: type === 'door' ? 0 : .9, color: inkColor.value, weight: +lineWeight.value });
+      };
       const touchDistance = () => { const [a, b] = [...state.touchPointers.values()]; return Math.hypot(a.x-b.x, a.y-b.y); };
       const touchCenter = () => { const [a, b] = [...state.touchPointers.values()]; return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; };
       let lastMove = null;
@@ -310,8 +363,12 @@
         }
         const p=point(event);
         if(['door','window'].includes(state.tool)) {
-          if(event.pointerType==='touch'){state.pendingOpening={p,type:state.tool};return;}
-          placeOpening(p,state.tool);return;
+          // Hit-test in unsnapped world coordinates. Snapping here could move
+          // taps away from diagonal/rotated walls on older drafts.
+          const wallPoint=screenToWorld(event.clientX,event.clientY);
+          const tolerance=event.pointerType==='touch'?32:24;
+          if(event.pointerType==='touch'){state.pendingOpening={p:wallPoint,type:state.tool,tolerance};return;}
+          placeOpening(wallPoint,state.tool,tolerance);return;
         }
         if(state.tool==='furniture') {
           if(!state.furniture)state.furniture=furniturePresets[0];
@@ -349,9 +406,9 @@
         if(state.pinchLock){if(!state.touchPointers.size){state.pinchLock=false;state.pinch=null;}return;}
         if(state.pan){state.pan=null;canvas.style.cursor=state.tool==='pan'?'grab':'crosshair';return;}
         lastMove=null;
-        if(state.pendingOpening){const pending=state.pendingOpening;state.pendingOpening=null;placeOpening(pending.p,pending.type);return;}
+        if(state.pendingOpening){const pending=state.pendingOpening;state.pendingOpening=null;placeOpening(pending.p,pending.type,pending.tolerance);return;}
         if(state.drawing){const obj=state.drawing;state.drawing=null;if(Math.abs(obj.x2-obj.x)+Math.abs(obj.y2-obj.y)>8){if(obj.type==='room'){const label=prompt('Room name:','ROOM');if(!label?.trim()){render();return;}obj.label=label.trim().toUpperCase();}addObject(obj);}else render();}
-        if(state.drag){if(state.selected&&['door','window'].includes(state.selected.type)){const o=state.selected,at=openingAt({x:(o.x+o.x2)/2,y:(o.y+o.y2)/2},o.type,Math.hypot(o.x2-o.x,o.y2-o.y));if(at)Object.assign(o,at);else{Object.assign(o,state.drag.original);toast('Opening must stay on a wall');}}state.drag=null;setStatus('Object moved');render();}
+        if(state.drag){if(state.selected&&['door','window'].includes(state.selected.type)){const o=state.selected,at=openingAt({x:(o.x+o.x2)/2,y:(o.y+o.y2)/2},o.type,Math.hypot(o.x2-o.x,o.y2-o.y),24);if(at)Object.assign(o,at);else{Object.assign(o,state.drag.original);toast('Opening must stay on a wall');}}state.drag=null;setStatus('Object moved');render();}
       });
       canvas.addEventListener('pointercancel',event=>{state.touchPointers.delete(event.pointerId);if(!state.touchPointers.size){state.pinch=null;state.pinchLock=false;}state.pendingOpening=null;state.drawing=null;state.drag=null;state.pan=null;lastMove=null;canvas.style.cursor=state.tool==='pan'?'grab':'crosshair';render();});
       canvas.addEventListener('wheel', event => {
