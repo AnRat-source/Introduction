@@ -26,14 +26,14 @@
         transform: none !important;
     }
     .video-wash { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,9,15,.38), rgba(8,9,15,.73)), radial-gradient(circle at 50% 45%, transparent 22%, rgba(8,9,15,.4) 90%); opacity: 0; }
-    /* Seven bars fill the available width and stay flush with the window bottom, including PiP. */
-    .visualizer { position: absolute; z-index: 0; inset: 0; display: flex; align-items: flex-end; justify-content: center; gap: clamp(5px, 1.35cqw, 19px); padding: 0 clamp(6px, 2cqw, 26px); overflow: hidden; pointer-events: none; }
-    .visualizer-bar { flex: 1 1 0; width: 0; min-width: 0; max-width: clamp(32px, 12cqw, 180px); height: var(--bar-height, 4%); max-height: 85%; border: 1px solid rgba(255,255,255,.28); border-bottom: 0; border-radius: clamp(10px, 2cqw, 28px) clamp(10px, 2cqw, 28px) 0 0; background: linear-gradient(180deg, rgba(240,206,255,.2), rgba(155,70,207,.1)); box-shadow: inset 1px 0 rgba(255,255,255,.2), 0 0 16px rgba(202,111,255,.1); backdrop-filter: blur(10px) saturate(165%) contrast(120%); -webkit-backdrop-filter: blur(10px) saturate(165%) contrast(120%); transform: translateX(var(--refraction, 0px)); transform-origin: bottom; transition: none; }
+    /* Twelve frequency bars fill the width and stay flush with the bottom, even in PiP. */
+    .visualizer { position: absolute; z-index: 0; inset: 0; display: flex; align-items: flex-end; justify-content: center; gap: clamp(3px, .7cqw, 12px); padding: 0 clamp(5px, 1.2cqw, 18px); overflow: hidden; pointer-events: none; }
+    .visualizer-bar { flex: 1 1 0; width: 0; min-width: 0; max-width: none; height: var(--bar-height, 2%); max-height: 85%; border: 1px solid rgba(255,255,255,.28); border-bottom: 0; border-radius: clamp(10px, 2cqw, 28px) clamp(10px, 2cqw, 28px) 0 0; background: linear-gradient(180deg, rgba(240,206,255,.2), rgba(155,70,207,.1)); box-shadow: inset 1px 0 rgba(255,255,255,.2), 0 0 16px rgba(202,111,255,.1); backdrop-filter: blur(10px) saturate(165%) contrast(120%); -webkit-backdrop-filter: blur(10px) saturate(165%) contrast(120%); transform: translateX(var(--refraction, 0px)); transform-origin: bottom; transition: none; }
     .visualizer-bar:nth-child(odd) { background: linear-gradient(180deg, rgba(176,234,255,.31), rgba(124,85,217,.08)); }
     .visualizer-bar:nth-child(3n) { --refraction: 3px; }
     .visualizer-bar:nth-child(4n) { --refraction: -3px; }
     @media (prefers-reduced-motion: reduce) { .visualizer-bar { transition: none; } }
-    .audio-sync { position: absolute; z-index: 3; right: clamp(12px, 3cqw, 28px); bottom: clamp(62px, 11cqh, 84px); min-width: 0; min-height: 32px; padding: 7px 11px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.6); backdrop-filter: blur(10px); color: var(--white); font-size: 10px; font-weight: 700; letter-spacing: .04em; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .2s ease, transform .2s ease, background .2s ease; }
+    .audio-sync { position: absolute; z-index: 3; right: clamp(12px, 3cqw, 28px); top: clamp(10px, 2.5cqh, 22px); min-width: 0; min-height: 32px; padding: 7px 11px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.6); backdrop-filter: blur(10px); color: var(--white); font-size: 10px; font-weight: 700; letter-spacing: .04em; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .2s ease, transform .2s ease, background .2s ease; }
     .player:hover .audio-sync, .audio-sync:focus-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
     .audio-sync:hover, .audio-sync:focus-visible, .audio-sync[aria-pressed="true"] { background: rgba(95,23,124,.8); }
     .volume-control { position: absolute; z-index: 3; bottom: clamp(12px, 3cqh, 24px); left: clamp(12px, 3cqw, 28px); width: 40px; height: 40px; display: flex; align-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.4); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transform: translateY(8px); transition: width .2s ease, background .2s ease, opacity .2s ease, transform .2s ease; }
@@ -152,21 +152,21 @@
       const embeddedInDocumentPiP = new URLSearchParams(window.location.search).has('embedded');
       if (!embeddedInDocumentPiP) document.body.classList.add('not-in-pip');
       let player, ready = false, updateTimer, lastVideoId = '', pipWindow;
-      // YouTube runs in a cross-origin iframe, so its raw audio is not accessible
-      // to this page. The LIVE AUDIO button optionally captures tab audio with
-      // the browser's explicit sharing permission; otherwise player volume drives
-      // a convincing, but synthetic, animation.
-      const BAR_COUNT = 7;
-      const visualizerBars = Array.from({ length: BAR_COUNT }, (_, index) => {
+      // YouTube's cross-origin iframe does not expose raw audio. When enabled,
+      // LIVE AUDIO analyzes user-approved tab audio with the Web Audio API.
+      // Each of the 12 bars corresponds to a distinct logarithmic frequency band.
+      const BAR_COUNT = 12;
+      const visualizerBars = Array.from({ length: BAR_COUNT }, () => {
         const bar = document.createElement('span');
         bar.className = 'visualizer-bar';
-        bar.style.setProperty('--bar-height', `${4 + index % 3}%`);
+        bar.style.setProperty('--bar-height', '2%');
         visualizer.append(bar);
         return bar;
       });
       const clamp01 = value => Math.max(0, Math.min(1, value));
-      const barHeights = new Float32Array(BAR_COUNT).fill(4);
+      const barHeights = new Float32Array(BAR_COUNT).fill(2);
       const frequencyLevels = new Float32Array(BAR_COUNT);
+      const previousLevels = new Float32Array(BAR_COUNT);
       let captureStream = null;
       let audioContext = null;
       let audioSource = null;
@@ -176,8 +176,16 @@
       let lastFrameTime = 0;
       let animationPhase = 0;
       let smoothEnergy = 0;
+      let fluxBaseline = 0;
+      let bassBaseline = 0;
+      let previousBass = 0;
+      let lastBeatTime = -Infinity;
+      let beatInterval = 500;
+      let beatPulse = 0;
+      let captureGeneration = 0;
 
       const stopAudioCapture = () => {
+        ++captureGeneration;
         if (captureStream) captureStream.getTracks().forEach(track => track.stop());
         audioSource?.disconnect();
         audioAnalyser?.disconnect();
@@ -188,6 +196,14 @@
         audioAnalyser = null;
         frequencyData = null;
         timeDomainData = null;
+        previousLevels.fill(0);
+        frequencyLevels.fill(0);
+        smoothEnergy = 0;
+        fluxBaseline = 0;
+        bassBaseline = 0;
+        previousBass = 0;
+        lastBeatTime = -Infinity;
+        beatPulse = 0;
         audioSync.textContent = 'LIVE AUDIO: OFF';
         audioSync.setAttribute('aria-pressed', 'false');
         audioSync.title = 'React to actual audio: choose This Tab and enable Share tab audio';
@@ -203,9 +219,12 @@
           audioSync.textContent = 'AUDIO UNSUPPORTED';
           return;
         }
+        const generation = ++captureGeneration;
         let stream;
+        let context;
         try {
-          // Browsers require a user click and an explicit selection of this tab.
+          audioSync.textContent = 'CHOOSE TAB AUDIO';
+          // Chrome requires the user to select this tab and opt into sharing audio.
           stream = await navigator.mediaDevices.getDisplayMedia({
             video: true,
             audio: { suppressLocalAudioPlayback: false },
@@ -213,21 +232,32 @@
             selfBrowserSurface: 'include',
             systemAudio: 'include'
           });
+          if (generation !== captureGeneration) {
+            stream.getTracks().forEach(track => track.stop());
+            return;
+          }
           if (!stream.getAudioTracks().length) {
             stream.getTracks().forEach(track => track.stop());
             audioSync.textContent = 'SHARE TAB AUDIO';
             audioSync.title = 'Try again: select This Tab and turn on Share tab audio';
             return;
           }
-          // No routing to speakers; that could double the music or cause echo.
-          const context = new AudioContext();
+          context = new AudioContext();
           const source = context.createMediaStreamSource(stream);
           const analyser = context.createAnalyser();
-          analyser.fftSize = 2048;
-          analyser.smoothingTimeConstant = 0.66;
+          analyser.fftSize = 4096; // ~11 Hz/bin at 44.1 kHz, so bass has detail.
+          analyser.smoothingTimeConstant = 0.38; // Fast transients / drum hits.
+          analyser.minDecibels = -90;
+          analyser.maxDecibels = -10;
+          // Deliberately never connect to context.destination: it would echo.
           source.connect(analyser);
           await context.resume();
-
+          if (generation !== captureGeneration) {
+            stream.getTracks().forEach(track => track.stop());
+            source.disconnect();
+            await context.close();
+            return;
+          }
           captureStream = stream;
           audioContext = context;
           audioSource = source;
@@ -236,7 +266,7 @@
           timeDomainData = new Uint8Array(analyser.fftSize);
           audioSync.textContent = 'LIVE AUDIO: ON';
           audioSync.setAttribute('aria-pressed', 'true');
-          audioSync.title = 'Using actual shared-tab audio. Click to stop.';
+          audioSync.title = '12-band, beat-reactive tab audio. Click to stop.';
           stream.getTracks().forEach(track => {
             track.addEventListener('ended', () => {
               if (captureStream === stream) stopAudioCapture();
@@ -244,33 +274,78 @@
           });
         } catch (error) {
           stream?.getTracks().forEach(track => track.stop());
+          if (context && context !== audioContext) context.close().catch(() => {});
           console.warn('Tab audio could not be captured.', error);
-          audioSync.textContent = 'LIVE AUDIO: OFF';
-          audioSync.title = 'Permission cancelled or tab audio unavailable; click to try again';
+          if (generation === captureGeneration) {
+            audioSync.textContent = 'LIVE AUDIO: OFF';
+            audioSync.title = 'Permission cancelled or tab audio unavailable; click to try again';
+          }
         }
       });
 
-      const getTabAudioEnergy = () => {
+      // Read actual instantaneous loudness plus twelve independent pitch bands.
+      // Bass is on the left, vocals/mids in the center, cymbals/treble on the right.
+      const sampleTabAudio = (timestamp, delta) => {
         audioAnalyser.getByteTimeDomainData(timeDomainData);
         audioAnalyser.getByteFrequencyData(frequencyData);
+
         let sumSquares = 0;
-        for (const sample of timeDomainData) {
-          const value = (sample - 128) / 128;
-          sumSquares += value * value;
+        for (let i = 0; i < timeDomainData.length; i++) {
+          const sample = (timeDomainData[i] - 128) / 128;
+          sumSquares += sample * sample;
         }
         const rms = Math.sqrt(sumSquares / timeDomainData.length);
-        const overall = clamp01(Math.pow(rms * 4.2, 0.72));
+        const audible = clamp01((rms - 0.002) / 0.019); // Noise gate.
+        const loudness = clamp01(Math.pow(rms * 5.8, 0.76));
         const nyquist = audioContext.sampleRate / 2;
+        let positiveFlux = 0;
+        let bass = 0;
+
         for (let i = 0; i < BAR_COUNT; i++) {
-          const lowHz = 65 * Math.pow(12000 / 65, i / BAR_COUNT);
-          const highHz = 65 * Math.pow(12000 / 65, (i + 1) / BAR_COUNT);
+          // Equal musical/logarithmic ranges, from sub-bass (~42 Hz) to ~13 kHz.
+          const lowHz = 42 * Math.pow(13000 / 42, i / BAR_COUNT);
+          const highHz = 42 * Math.pow(13000 / 42, (i + 1) / BAR_COUNT);
           const first = Math.max(1, Math.floor(lowHz / nyquist * frequencyData.length));
-          const end = Math.min(frequencyData.length, Math.max(first + 1, Math.ceil(highHz / nyquist * frequencyData.length)));
-          let sum = 0;
-          for (let bin = first; bin < end; bin++) sum += frequencyData[bin] / 255;
-          frequencyLevels[i] = clamp01(Math.pow((sum / (end - first)) * 2.3, 0.82));
+          const last = Math.min(frequencyData.length, Math.max(first + 1, Math.ceil(highHz / nyquist * frequencyData.length)));
+          let energy = 0;
+          let peak = 0;
+          for (let bin = first; bin < last; bin++) {
+            const sample = frequencyData[bin] / 255;
+            energy += sample * sample;
+            if (sample > peak) peak = sample;
+          }
+          const bandRms = Math.sqrt(energy / (last - first));
+          const bandStrength = bandRms * 0.80 + peak * 0.20;
+          const level = audible * clamp01(Math.pow(clamp01((bandStrength - 0.09) * 2.25), 1.05) * (0.50 + 0.65 * loudness));
+          frequencyLevels[i] = level;
+          // Changes in the spectrum indicate musical transients / note onsets.
+          positiveFlux += Math.max(0, level - previousLevels[i]) * (i < 4 ? 1.25 : 1);
+          previousLevels[i] = level;
+          if (i < 3) bass += level / 3;
         }
-        return overall;
+
+        const flux = positiveFlux / BAR_COUNT;
+        fluxBaseline += (flux - fluxBaseline) * Math.min(1, delta * 1.9);
+        bassBaseline += (bass - bassBaseline) * Math.min(1, delta * 2.1);
+        const bassRise = bass - previousBass;
+        previousBass = bass;
+
+        // Adaptive onset detection: distinct increases above recent background.
+        // A short refractory period stops the same drum hit firing repeatedly.
+        const hit = flux > Math.max(0.022, fluxBaseline * 1.65) &&
+          (bassRise > 0.020 || flux > Math.max(0.045, fluxBaseline * 2.35)) &&
+          bass > 0.12 && audible > 0.16;
+        if (hit && timestamp - lastBeatTime > 185) {
+          const interval = timestamp - lastBeatTime;
+          if (interval >= 185 && interval <= 1100) {
+            beatInterval += (interval - beatInterval) * 0.22;
+          }
+          lastBeatTime = timestamp;
+          beatPulse = Math.max(beatPulse, clamp01(0.45 + flux * 5.5));
+        }
+
+        beatPulse = Math.max(0, beatPulse - delta * (3.8 + 450 / beatInterval));
+        return loudness * audible;
       };
 
       const animateVisualizer = timestamp => {
@@ -279,26 +354,42 @@
         const isPlaying = ready && player?.getPlayerState?.() === YT.PlayerState.PLAYING;
         const volume = ready ? clamp01((player.isMuted() ? 0 : player.getVolume()) / 100) : 0;
         const hasCapturedAudio = !!audioAnalyser && audioContext?.state === 'running';
-        const audioEnergy = hasCapturedAudio ? getTabAudioEnergy() : (isPlaying ? volume : 0);
-        const smoothing = Math.min(1, delta * (audioEnergy > smoothEnergy ? 14 : 7));
+        const audioEnergy = hasCapturedAudio ? sampleTabAudio(timestamp, delta) : (isPlaying ? volume : 0);
+        const smoothing = Math.min(1, delta * (audioEnergy > smoothEnergy ? 17 : 9));
         smoothEnergy += (audioEnergy - smoothEnergy) * smoothing;
-        // Louder output increases *both* animation speed and the highest possible bar.
-        const speed = 0.8 + smoothEnergy * 8.5;
-        animationPhase += delta * speed;
+        const tempo = clamp01((650 - beatInterval) / 460);
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+        if (!hasCapturedAudio) {
+          // Only the fallback is simulated; LIVE AUDIO is 100% sound-driven.
+          animationPhase += delta * (0.8 + smoothEnergy * 8.5);
+        }
+
         visualizerBars.forEach((bar, index) => {
-          const wave = reducedMotion ? 0.75 :
-            0.5 + 0.5 * Math.sin(animationPhase * (1.7 + index * 0.14) + index * 1.65);
-          const pulse = reducedMotion ? 0.75 :
-            0.5 + 0.5 * Math.sin(animationPhase * 0.72 + index * 0.87);
-          const level = hasCapturedAudio
-            ? clamp01(frequencyLevels[index] * 0.75 + smoothEnergy * 0.25)
-            : smoothEnergy;
-          const maxHeight = 4 + 80 * level;
-          const target = 3 + (maxHeight - 3) * (0.34 + wave * 0.44 + pulse * 0.22);
-          const ease = Math.min(1, delta * (target > barHeights[index] ? 17 : 8));
-          barHeights[index] += (target - barHeights[index]) * ease;
+          let target;
+          let riseSpeed;
+          let fallSpeed;
+          if (hasCapturedAudio) {
+            const level = frequencyLevels[index];
+            // Beat kicks emphasize low bands without creating random motion.
+            const bassEmphasis = 1 - index / BAR_COUNT;
+            const beatBoost = beatPulse * 0.22 * bassEmphasis * smoothEnergy;
+            target = 1.5 + 83.5 * clamp01(level + beatBoost);
+            // Fast beats and transients give faster reactions; quiet passages
+            // naturally shrink. Every bar still follows its own frequency.
+            riseSpeed = 24 + 13 * tempo + 8 * smoothEnergy;
+            fallSpeed = 10 + 6 * tempo + 5 * smoothEnergy;
+          } else {
+            const wave = reducedMotion ? 0.55 :
+              0.5 + 0.5 * Math.sin(animationPhase * (1.7 + index * 0.11) + index * 1.62);
+            const pulse = reducedMotion ? 0.5 :
+              0.5 + 0.5 * Math.sin(animationPhase * 0.72 + index * 0.87);
+            target = 2 + 80 * smoothEnergy * (0.18 + wave * 0.62 + pulse * 0.20);
+            riseSpeed = 17;
+            fallSpeed = 8;
+          }
+          const factor = Math.min(1, delta * (target > barHeights[index] ? riseSpeed : fallSpeed));
+          barHeights[index] += (target - barHeights[index]) * factor;
           bar.style.setProperty('--bar-height', `${barHeights[index].toFixed(2)}%`);
         });
         requestAnimationFrame(animateVisualizer);
