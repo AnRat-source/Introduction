@@ -181,8 +181,13 @@
       let player, ready = false, updateTimer, lastVideoId = '', pipWindow;
       // YouTube's cross-origin iframe does not expose raw audio. When enabled,
       // LIVE AUDIO analyzes user-approved tab audio with the Web Audio API.
-      // Each of the 12 bars corresponds to a distinct logarithmic frequency band.
+      // Analyze 12 independent logarithmic frequency bands. Rank their actual
+      // energy on each frame so the strongest sounds animate near the center,
+      // and the quieter frequencies sit progressively farther to each side.
       const BAR_COUNT = 12;
+      const CENTER_OUT_POSITIONS = [5, 6, 4, 7, 3, 8, 2, 9, 1, 10, 0, 11];
+      const rankedBandLevels = new Float32Array(BAR_COUNT);
+      const bandIndices = Array.from({ length: BAR_COUNT }, (_, index) => index);
       const visualizerBars = Array.from({ length: BAR_COUNT }, () => {
         const bar = document.createElement('span');
         bar.className = 'visualizer-bar';
@@ -311,7 +316,7 @@
       });
 
       // Read actual instantaneous loudness plus twelve independent pitch bands.
-      // Bass is on the left, vocals/mids in the center, cymbals/treble on the right.
+      // The loudest bands are rendered in the center, not locked to one side.
       const sampleTabAudio = (timestamp, delta) => {
         audioAnalyser.getByteTimeDomainData(timeDomainData);
         audioAnalyser.getByteFrequencyData(frequencyData);
@@ -392,16 +397,28 @@
           animationPhase += delta * (0.8 + smoothEnergy * 8.5);
         }
 
+        if (hasCapturedAudio) {
+          // Preserve all 12 measured frequency levels, but display the most
+          // energetic band nearest the center. Ranking the values every frame
+          // creates a naturally rounded silhouette without faking bar heights.
+          // Beat boosts still follow the low-frequency band they came from.
+          bandIndices.sort((a, b) => {
+            const energyA = frequencyLevels[a] + beatPulse * 0.22 * (1 - a / BAR_COUNT) * smoothEnergy;
+            const energyB = frequencyLevels[b] + beatPulse * 0.22 * (1 - b / BAR_COUNT) * smoothEnergy;
+            return energyB - energyA;
+          });
+          bandIndices.forEach((bandIndex, rank) => {
+            const beatBoost = beatPulse * 0.22 * (1 - bandIndex / BAR_COUNT) * smoothEnergy;
+            rankedBandLevels[CENTER_OUT_POSITIONS[rank]] = clamp01(frequencyLevels[bandIndex] + beatBoost);
+          });
+        }
+
         visualizerBars.forEach((bar, index) => {
           let target;
           let riseSpeed;
           let fallSpeed;
           if (hasCapturedAudio) {
-            const level = frequencyLevels[index];
-            // Beat kicks emphasize low bands without creating random motion.
-            const bassEmphasis = 1 - index / BAR_COUNT;
-            const beatBoost = beatPulse * 0.22 * bassEmphasis * smoothEnergy;
-            target = 1.5 + 83.5 * clamp01(level + beatBoost);
+            target = 1.5 + 83.5 * rankedBandLevels[index];
             // Fast beats and transients give faster reactions; quiet passages
             // naturally shrink. Every bar still follows its own frequency.
             riseSpeed = 24 + 13 * tempo + 8 * smoothEnergy;
@@ -411,7 +428,10 @@
               0.5 + 0.5 * Math.sin(animationPhase * (1.7 + index * 0.11) + index * 1.62);
             const pulse = reducedMotion ? 0.5 :
               0.5 + 0.5 * Math.sin(animationPhase * 0.72 + index * 0.87);
-            target = 2 + 80 * smoothEnergy * (0.18 + wave * 0.62 + pulse * 0.20);
+            // Keep a gentle center-heavy curve even before LIVE AUDIO is on.
+            const centerWeight = 1 - Math.abs((index - (BAR_COUNT - 1) / 2) / ((BAR_COUNT - 1) / 2));
+            target = 2 + 80 * smoothEnergy * (0.18 + centerWeight * 0.82) *
+              (0.48 + wave * 0.38 + pulse * 0.14);
             riseSpeed = 17;
             fallSpeed = 8;
           }
