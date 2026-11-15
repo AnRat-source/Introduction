@@ -181,11 +181,10 @@
       let player, ready = false, updateTimer, lastVideoId = '', pipWindow;
       // YouTube's cross-origin iframe does not expose raw audio. When enabled,
       // LIVE AUDIO analyzes user-approved tab audio with the Web Audio API.
-      // Analyze 12 independent logarithmic frequency bands. Rank their actual
-      // energy on each frame so the strongest sounds animate near the center,
-      // and the quieter frequencies sit progressively farther to each side.
+      // Rank 12 independent logarithmic frequency bands by their real energy.
+      // Place strongest bands at the two edges and quieter bands in the middle.
       const BAR_COUNT = 12;
-      const CENTER_OUT_POSITIONS = [5, 6, 4, 7, 3, 8, 2, 9, 1, 10, 0, 11];
+      const EDGES_IN_POSITIONS = [0, 11, 1, 10, 2, 9, 3, 8, 4, 7, 5, 6];
       const rankedBandLevels = new Float32Array(BAR_COUNT);
       const bandIndices = Array.from({ length: BAR_COUNT }, (_, index) => index);
       const visualizerBars = Array.from({ length: BAR_COUNT }, () => {
@@ -316,7 +315,7 @@
       });
 
       // Read actual instantaneous loudness plus twelve independent pitch bands.
-      // The loudest bands are rendered in the center, not locked to one side.
+      // The loudest bands are displayed at the edges, the quietest at the center.
       const sampleTabAudio = (timestamp, delta) => {
         audioAnalyser.getByteTimeDomainData(timeDomainData);
         audioAnalyser.getByteFrequencyData(frequencyData);
@@ -398,9 +397,9 @@
         }
 
         if (hasCapturedAudio) {
-          // Preserve all 12 measured frequency levels, but display the most
-          // energetic band nearest the center. Ranking the values every frame
-          // creates a naturally rounded silhouette without faking bar heights.
+          // Preserve all 12 measured frequency levels, but place the most
+          // energetic bands at the outer edges. Ranking the values every frame
+          // creates a natural valley silhouette without faking bar heights.
           // Beat boosts still follow the low-frequency band they came from.
           bandIndices.sort((a, b) => {
             const energyA = frequencyLevels[a] + beatPulse * 0.22 * (1 - a / BAR_COUNT) * smoothEnergy;
@@ -409,7 +408,7 @@
           });
           bandIndices.forEach((bandIndex, rank) => {
             const beatBoost = beatPulse * 0.22 * (1 - bandIndex / BAR_COUNT) * smoothEnergy;
-            rankedBandLevels[CENTER_OUT_POSITIONS[rank]] = clamp01(frequencyLevels[bandIndex] + beatBoost);
+            rankedBandLevels[EDGES_IN_POSITIONS[rank]] = clamp01(frequencyLevels[bandIndex] + beatBoost);
           });
         }
 
@@ -428,9 +427,9 @@
               0.5 + 0.5 * Math.sin(animationPhase * (1.7 + index * 0.11) + index * 1.62);
             const pulse = reducedMotion ? 0.5 :
               0.5 + 0.5 * Math.sin(animationPhase * 0.72 + index * 0.87);
-            // Keep a gentle center-heavy curve even before LIVE AUDIO is on.
-            const centerWeight = 1 - Math.abs((index - (BAR_COUNT - 1) / 2) / ((BAR_COUNT - 1) / 2));
-            target = 2 + 80 * smoothEnergy * (0.18 + centerWeight * 0.82) *
+            // Match the edge-heavy shape even when LIVE AUDIO is off.
+            const edgeWeight = Math.abs((index - (BAR_COUNT - 1) / 2) / ((BAR_COUNT - 1) / 2));
+            target = 2 + 80 * smoothEnergy * (0.18 + edgeWeight * 0.82) *
               (0.48 + wave * 0.38 + pulse * 0.14);
             riseSpeed = 17;
             fallSpeed = 8;
