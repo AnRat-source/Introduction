@@ -34,10 +34,10 @@
     .visualizer-bar:nth-child(4n) { --refraction: -3px; }
     @media (prefers-reduced-motion: reduce) { .visualizer-bar { transition: none; } }
     .audio-sync { position: absolute; z-index: 3; right: clamp(12px, 3cqw, 28px); top: clamp(10px, 2.5cqh, 22px); min-width: 0; min-height: 32px; padding: 7px 11px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.6); backdrop-filter: blur(10px); color: var(--white); font-size: 10px; font-weight: 700; letter-spacing: .04em; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .2s ease, transform .2s ease, background .2s ease; }
-    .player:hover .audio-sync, .audio-sync:focus-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .player.controls-visible .audio-sync { opacity: 1; pointer-events: auto; transform: translateY(0); }
     .audio-sync:hover, .audio-sync:focus-visible, .audio-sync[aria-pressed="true"] { background: rgba(95,23,124,.8); }
     .volume-control { position: absolute; z-index: 3; bottom: clamp(12px, 3cqh, 24px); left: clamp(12px, 3cqw, 28px); width: 40px; height: 40px; display: flex; align-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(8,9,15,.4); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transform: translateY(8px); transition: width .2s ease, background .2s ease, opacity .2s ease, transform .2s ease; }
-    .player:hover .volume-control { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .player.controls-visible .volume-control { opacity: 1; pointer-events: auto; transform: translateY(0); }
     .volume-control.expanded, .volume-control:focus-within { width: min(160px, calc(100cqw - 24px)); background: rgba(8,9,15,.66); }
     #volume-toggle { width: 38px; min-width: 38px; height: 38px; min-height: 38px; padding: 0; display: grid; place-items: center; text-shadow: none; }
     .volume-icon { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.4; }
@@ -148,6 +148,33 @@
       const visualizer = document.getElementById('visualizer');
       const playerCard = document.querySelector('.player');
       const audioSync = document.getElementById('audio-sync');
+      // Show the floating controls only while the player is being used.
+      // Unlike :hover, an inactivity timer also works when Chrome keeps a
+      // stale hovered state after a Document Picture-in-Picture window loses focus.
+      const CONTROLS_IDLE_MS = 3000;
+      let controlsIdleTimer = null;
+      const hideFloatingControls = () => {
+        clearTimeout(controlsIdleTimer);
+        controlsIdleTimer = null;
+        playerCard.classList.remove('controls-visible');
+        volumeControl.classList.remove('expanded');
+        volumeToggle.setAttribute('aria-expanded', 'false');
+      };
+      const showFloatingControls = () => {
+        playerCard.classList.add('controls-visible');
+        clearTimeout(controlsIdleTimer);
+        controlsIdleTimer = setTimeout(hideFloatingControls, CONTROLS_IDLE_MS);
+      };
+      // These listeners stay on the player when it is moved into a PiP document.
+      for (const type of ['pointerenter', 'pointermove', 'pointerdown', 'click', 'wheel', 'keydown', 'input', 'focusin', 'touchstart']) {
+        playerCard.addEventListener(type, showFloatingControls, { passive: type !== 'keydown' });
+      }
+      playerCard.addEventListener('pointerleave', hideFloatingControls);
+      // Hide immediately on focus loss; a tab/window switch may not fire pointerleave.
+      window.addEventListener('blur', hideFloatingControls);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) hideFloatingControls();
+      });
       const supportsDocumentPiP = 'documentPictureInPicture' in window;
       const embeddedInDocumentPiP = new URLSearchParams(window.location.search).has('embedded');
       if (!embeddedInDocumentPiP) document.body.classList.add('not-in-pip');
@@ -469,7 +496,12 @@
           pipWindow.document.body.append(playerCard);
           syncPipSize();
           pipWindow.addEventListener('resize', syncPipSize);
+          pipWindow.addEventListener('blur', hideFloatingControls);
+          pipWindow.document.addEventListener('visibilitychange', () => {
+            if (pipWindow?.document.hidden) hideFloatingControls();
+          });
           pipWindow.addEventListener('pagehide', () => {
+            hideFloatingControls();
             document.body.append(playerCard);
             playerCard.classList.remove('in-pip');
             playerCard.style.width = '';
