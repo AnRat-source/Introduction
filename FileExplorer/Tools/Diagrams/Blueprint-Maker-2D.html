@@ -79,8 +79,8 @@
     .stage-toolbar { display: flex; align-items: center; gap: 8px; min-height: 43px; padding: 6px 9px; border-bottom: 1px solid var(--border-soft); background: rgba(10, 16, 25, .28); }
     .stage-toolbar .file-name { flex: 1; color: #dbe7f7; font: 700 11px/1 ui-monospace, monospace; }
     .status-dot { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: #65d6a1; box-shadow: 0 0 9px #65d6a1; }
-    .canvas-frame { position: relative; flex: 1; min-height: 490px; overflow: auto; background: #080d16; cursor: crosshair; }
-    canvas { display: block; width: 1200px; height: 760px; background-color: var(--canvas); background-image: linear-gradient(var(--grid-minor) 1px, transparent 1px), linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px), linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px); background-size: 10px 10px, 10px 10px, 50px 50px, 50px 50px; touch-action: none; }
+    .canvas-frame { position: relative; flex: 1; min-height: 490px; overflow: hidden; background: #080d16; cursor: crosshair; }
+    canvas { display: block; width: 100%; height: 100%; background-color: var(--canvas); background-image: linear-gradient(var(--grid-minor) 1px, transparent 1px), linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px), linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px); background-size: 10px 10px, 10px 10px, 50px 50px, 50px 50px; touch-action: none; user-select: none; }
     .canvas-hint { position: absolute; right: 14px; bottom: 13px; padding: 6px 8px; border: 1px solid rgba(214, 235, 255, .37); background: rgba(7, 23, 41, .76); color: #deefff; font: 10px/1 ui-monospace, monospace; pointer-events: none; }
     .stage-footer { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 8px 10px; border-top: 1px solid var(--border-soft); background: rgba(10, 16, 25, .28); color: var(--muted); font: 10px/1 ui-monospace, monospace; }
     .stage-footer strong { color: #cde9ff; font-weight: 700; }
@@ -122,7 +122,7 @@
     .opening-controls[hidden] { display: none; }
     .opening-controls label { display: grid; grid-template-columns: 1fr 90px; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
     .opening-controls input { min-width: 0; width: 100%; padding: 6px; border: 1px solid var(--border); background: #111b2b; color: var(--ink); }
-    @media (max-width: 740px) { .app { width: calc(100% - 12px); padding-top: 6px; } header.window { padding: 11px; } .header-actions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); width: 100%; gap: 6px; } .header-actions .action { min-height: 43px; white-space: normal; } .theme-picker { grid-column: 1/-1; min-height: 41px; } .workspace { display: flex; flex-direction: column; gap: 10px; } .tool-panel { order: 2; } .properties-panel { order: 1; } .stage-window { order: 0; min-height: 0; } .canvas-frame { flex: 0 0 auto; min-height: 0; max-height: 72dvh; overflow: auto; } .canvas-frame canvas { max-width: none; } .canvas-hint { bottom: 6px; right: 6px; font-size: 9px; } .properties-panel .panel-content { display: block; } .stage-toolbar { flex-wrap: wrap; } .stage-toolbar .file-name { flex-basis: 100%; } .stage-toolbar .action { min-height: 39px; flex: 1; } .mobile-tools { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 4px; padding: 7px; border-bottom: 1px solid var(--border-soft); background: #172238; } .mobile-tools .tool { justify-content: center; text-align: center; min-width: 0; min-height: 43px; padding: 5px 2px; font-size: 11px; } .mobile-tools .tool .key { display: none; } .mobile-tools .tool small { display: none; } .tool-panel .tools { grid-template-columns: 1fr 1fr; } .tool-panel .tool { min-height: 43px; } select { min-width: 0; width: 100%; } }
+    @media (max-width: 740px) { .app { width: calc(100% - 12px); padding-top: 6px; } header.window { padding: 11px; } .header-actions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); width: 100%; gap: 6px; } .header-actions .action { min-height: 43px; white-space: normal; } .theme-picker { grid-column: 1/-1; min-height: 41px; } .workspace { display: flex; flex-direction: column; gap: 10px; } .tool-panel { order: 2; } .properties-panel { order: 1; } .stage-window { order: 0; min-height: 0; } .canvas-frame { flex: 0 0 auto; height: min(65dvh, 580px); min-height: 320px; max-height: 72dvh; overflow: hidden; } .canvas-frame canvas { max-width: none; } .canvas-hint { bottom: 6px; right: 6px; font-size: 9px; } .properties-panel .panel-content { display: block; } .stage-toolbar { flex-wrap: wrap; } .stage-toolbar .file-name { flex-basis: 100%; } .stage-toolbar .action { min-height: 39px; flex: 1; } .mobile-tools { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 4px; padding: 7px; border-bottom: 1px solid var(--border-soft); background: #172238; } .mobile-tools .tool { justify-content: center; text-align: center; min-width: 0; min-height: 43px; padding: 5px 2px; font-size: 11px; } .mobile-tools .tool .key { display: none; } .mobile-tools .tool small { display: none; } .tool-panel .tools { grid-template-columns: 1fr 1fr; } .tool-panel .tool { min-height: 43px; } select { min-width: 0; width: 100%; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
   </style>
   <link rel="stylesheet" href="../../app-theme.css">
@@ -150,6 +150,7 @@
             <button class="tool" data-tool="door" type="button"><span class="key">D</span> Door <small>tap wall</small></button>
             <button class="tool" data-tool="window" type="button"><span class="key">W</span> Window <small>tap wall</small></button>
             <button class="tool" data-tool="text" type="button"><span class="key">T</span> Note <small>text</small></button>
+            <button class="tool" data-tool="pan" type="button"><span class="key">H</span> Pan <small>infinite</small></button>
           </div>
           <p class="section-label">Canvas</p>
           <div class="tools"><button class="tool" id="undoButton" type="button"><span class="key">↶</span> Undo <small>Ctrl Z</small></button><button class="tool" id="redoButton" type="button"><span class="key">↷</span> Redo <small>Ctrl Y</small></button><button class="tool" id="clearButton" type="button"><span class="key">×</span> Clear canvas <small>new</small></button></div>
@@ -168,9 +169,9 @@
       </aside>
       <section class="window stage-window" aria-label="Blueprint canvas">
         <div class="titlebar"><span class="app-mark">▦</span> untitled.floorplan <span class="window-controls">_ □ ×</span></div>
-        <div class="stage-toolbar"><span class="file-name"><span class="status-dot"></span>LOCAL DRAFT · AUTO-SNAP ON</span><button class="action" id="zoomOut" type="button" aria-label="Zoom out">−</button><button class="action" id="zoomReset" type="button">100%</button><button class="action" id="zoomIn" type="button" aria-label="Zoom in">+</button></div>
-        <div class="mobile-tools" id="mobileTools"><button class="tool active" data-tool="select" type="button">Select</button><button class="tool" data-tool="line" type="button">Wall</button><button class="tool" data-tool="room" type="button">Room</button><button class="tool" data-tool="rect" type="button">Block</button><button class="tool" data-tool="door" type="button">Door</button><button class="tool" data-tool="window" type="button">Window</button><button class="tool" data-tool="furniture" type="button">Furniture</button><button class="tool" data-tool="text" type="button">Note</button></div>
-        <div class="canvas-frame" id="canvasFrame"><canvas id="canvas" width="1200" height="760" aria-label="Blueprint drawing canvas"></canvas><span class="canvas-hint" id="canvasHint">SELECT · 0 OBJECTS</span></div>
+        <div class="stage-toolbar"><span class="file-name"><span class="status-dot"></span>LOCAL DRAFT · AUTO-SNAP ON</span><button class="action" id="zoomOut" type="button" aria-label="Zoom out">−</button><button class="action" id="zoomReset" type="button">100%</button><button class="action" id="zoomIn" type="button" aria-label="Zoom in">+</button><button class="action" id="fitView" type="button" title="Find all objects">Fit</button></div>
+        <div class="mobile-tools" id="mobileTools"><button class="tool active" data-tool="select" type="button">Select</button><button class="tool" data-tool="line" type="button">Wall</button><button class="tool" data-tool="room" type="button">Room</button><button class="tool" data-tool="rect" type="button">Block</button><button class="tool" data-tool="door" type="button">Door</button><button class="tool" data-tool="window" type="button">Window</button><button class="tool" data-tool="furniture" type="button">Furniture</button><button class="tool" data-tool="text" type="button">Note</button><button class="tool" data-tool="pan" type="button">Pan</button></div>
+        <div class="canvas-frame" id="canvasFrame"><canvas id="canvas" aria-label="Infinite blueprint drawing canvas"></canvas><span class="canvas-hint" id="canvasHint">SELECT · 0 OBJECTS</span></div>
         <footer class="stage-footer"><span><strong id="coordinates">X 0 · Y 0</strong></span><span id="status">Ready to draft</span></footer>
       </section>
       <aside class="panel window properties-panel" aria-label="Properties and shortcuts">
@@ -178,7 +179,7 @@
         <div class="panel-content properties">
           <div><p class="section-label">Selection</p><div class="empty-selection" id="selectionInfo">Nothing selected.<br>Use <b>V</b> to move an item.</div><div class="rotation-controls" id="rotationControls" hidden><button class="action" data-rotate="-90" type="button">↶ 90°</button><button class="action" data-rotate="90" type="button">90° ↷</button><button class="action" data-rotate="-15" type="button">↶ 15°</button><button class="action" data-rotate="15" type="button">15° ↷</button></div><div class="text-controls" id="textControls" hidden><label class="text-toggle"><input id="showLabel" type="checkbox" checked> Show item label</label><label class="text-toggle"><input id="showDimensions" type="checkbox" checked> Show dimensions</label><label class="label-side"><span>Horizontal label side</span><select id="horizontalLabelSide"><option value="top">Top</option><option value="bottom">Bottom</option></select></label><label class="label-side"><span>Vertical label side</span><select id="verticalLabelSide"><option value="left">Left</option><option value="right">Right</option></select></label><label class="text-scale"><span>Text size</span><output id="textScaleValue">100%</output><input id="textScale" type="range" min="0.5" max="2.5" step="0.1" value="1"></label></div><div class="opening-controls" id="openingControls" hidden><label>Opening width <input id="openingWidth" type="number" step="any" min="0.1"></label><label>Opening height <input id="openingHeight" type="number" step="any" min="0.1"></label><label>Sill height <input id="openingSill" type="number" step="any" min="0"></label><span class="muted">Measurements use the selected display unit. Doors start at floor level.</span></div></div>
           <div><p class="section-label">Plan stats</p><div class="stat"><span>Objects</span><b id="objectCount">0</b></div><div class="stat"><span>Rooms</span><b id="roomCount">0</b></div><div class="stat"><span>Scale</span><b id="scaleInfo">50 px = 1 m</b></div><div class="stat"><span>Canvas</span><b id="canvasSize">24 × 15.2 m</b></div></div>
-          <div><p class="section-label">Shortcuts</p><div class="shortcut-list"><div><kbd>V</kbd> select / move</div><div><kbd>L</kbd> wall line</div><div><kbd>R</kbd> room</div><div><kbd>B</kbd> rectangle</div><div><kbd>T</kbd> add note</div><div><kbd>[</kbd> / <kbd>]</kbd> rotate 15°</div><div><kbd>DEL</kbd> remove selection</div></div></div>
+          <div><p class="section-label">Shortcuts</p><div class="shortcut-list"><div><kbd>V</kbd> select / move</div><div><kbd>L</kbd> wall line</div><div><kbd>R</kbd> room</div><div><kbd>B</kbd> rectangle</div><div><kbd>T</kbd> add note</div><div><kbd>H</kbd> pan / navigate</div><div><kbd>Space</kbd> + drag / middle drag to pan</div><div><kbd>Wheel</kbd> scroll plan; Ctrl + wheel to zoom</div><div><kbd>Pinch</kbd> pan and zoom on touch</div><div><kbd>[</kbd> / <kbd>]</kbd> rotate 15°</div><div><kbd>DEL</kbd> remove selection</div></div></div>
         </div>
       </aside>
     </section>
@@ -189,7 +190,7 @@
     (() => {
       const canvas = document.querySelector('#canvas'); let ctx = canvas.getContext('2d');
       const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-      const state = { tool: 'select', objects: [], selected: null, drawing: null, drag: null, zoom: 1, displayZoom: 1, touchPointers: new Map(), pinch: null, pinchLock: false, history: [], future: [], furniture: null, customFurniture: [], furniturePage: 0, furnitureSearch: '', drafts: [], currentDraftId: null, currentDraftName: 'Untitled plan' };
+      const state = { camera: { x: 0, y: 0 }, viewWidth: 1200, viewHeight: 760, dpr: 1, spaceHeld: false, pan: null, tool: 'select', objects: [], selected: null, drawing: null, drag: null, zoom: 1, displayZoom: 1, touchPointers: new Map(), pinch: null, pinchLock: false, history: [], future: [], furniture: null, customFurniture: [], furniturePage: 0, furnitureSearch: '', drafts: [], currentDraftId: null, currentDraftName: 'Untitled plan' };
       const FURNITURE_PER_PAGE = 10, DRAFTS_KEY = 'anrat-blueprint-drafts', LEGACY_DRAFT_KEY = 'anrat-blueprint-draft';
       const theme = $('#theme'), lineWeight = $('#lineWeight'), inkColor = $('#inkColor'), unit = $('#unit');
       const showLabel = $('#showLabel'), showDimensions = $('#showDimensions');
@@ -206,16 +207,28 @@
       const snap = (n, fine = false) => { const increment = fine ? FINE_SNAP_PX : GRID_PX; return Math.round(n / increment) * increment; };
       const formatLength = px => { const selected = units[unit.value]; return `${(px / PX_PER_METER * selected.multiplier).toFixed(selected.digits)} ${selected.label}`; };
       const dimensionText = obj => { if (['line','door','window'].includes(obj.type)) return formatLength(Math.hypot(obj.x2 - obj.x, obj.y2 - obj.y)); const b = bounds(obj); return `${formatLength(b.w)} × ${formatLength(b.h)}`; };
-      const point = event => { const r = canvas.getBoundingClientRect(), fine = event.ctrlKey; return { x: snap((event.clientX - r.left) * canvas.width / r.width, fine), y: snap((event.clientY - r.top) * canvas.height / r.height, fine) }; };
+      const screenToWorld = (clientX, clientY) => { const r = canvas.getBoundingClientRect(); return { x: state.camera.x + (clientX - r.left) / state.displayZoom, y: state.camera.y + (clientY - r.top) / state.displayZoom }; };
+      const point = event => { const p = screenToWorld(event.clientX, event.clientY); return { x: snap(p.x, event.ctrlKey), y: snap(p.y, event.ctrlKey) }; };
+      const visibleWorld = () => ({ x: state.camera.x, y: state.camera.y, w: state.viewWidth / state.displayZoom, h: state.viewHeight / state.displayZoom });
+      const clampZoom = z => Math.max(.2, Math.min(5, z));
+      const panTo = (x, y) => { state.camera.x = x; state.camera.y = y; syncGrid(); paintCanvas(); };
+      const zoomAround = (newZoom, cx, cy) => { const anchor = screenToWorld(cx, cy), r = canvas.getBoundingClientRect(); state.zoom = clampZoom(newZoom); state.camera.x = anchor.x - (cx - r.left) / state.zoom; state.camera.y = anchor.y - (cy - r.top) / state.zoom; applyZoom(); };
+      const resizeCanvas = () => { const frame = $('#canvasFrame'), w = Math.max(1, frame.clientWidth), h = Math.max(1, frame.clientHeight), dpr = Math.min(devicePixelRatio || 1, 2); if (state.viewWidth === w && state.viewHeight === h && state.dpr === dpr) return; state.viewWidth = w; state.viewHeight = h; state.dpr = dpr; canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); applyZoom(); };
       const pushHistory = () => { state.history.push(clone(state.objects)); if (state.history.length > 40) state.history.shift(); state.future = []; };
       const setStatus = message => $('#status').textContent = message;
-      const draftSnapshot = () => ({ objects: clone(state.objects), theme: theme.value, unit: unit.value, savedAt: Date.now() });
+      const draftSnapshot = () => ({ objects: clone(state.objects), theme: theme.value, unit: unit.value, camera: { ...state.camera }, zoom: state.zoom, savedAt: Date.now() });
       const persistDrafts = () => { try { localStorage.setItem(DRAFTS_KEY, JSON.stringify(state.drafts)); } catch { toast('Could not save drafts in this browser.'); } };
       const newDraftId = () => crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
-      function loadDraft(draft) { state.objects = clone(draft.objects || []); state.selected = null; state.history = []; state.future = []; state.currentDraftId = draft.id; state.currentDraftName = draft.name; theme.value = draft.theme || 'blueprint'; unit.value = draft.unit || 'm'; theme.dispatchEvent(new Event('change')); $('#draftDialog').close(); setStatus(`Loaded draft: ${draft.name}`); render(); toast(`Loaded “${draft.name}”.`); }
+      function loadDraft(draft) { state.objects = clone(draft.objects || []); state.selected = null; state.history = []; state.future = []; state.currentDraftId = draft.id; state.currentDraftName = draft.name; theme.value = draft.theme || 'blueprint'; unit.value = draft.unit || 'm'; theme.dispatchEvent(new Event('change')); if (draft.camera && Number.isFinite(draft.camera.x) && Number.isFinite(draft.camera.y)) { state.camera = { ...draft.camera }; state.zoom = clampZoom(draft.zoom || 1); applyZoom(); } else { fitDrawing(); } $('#draftDialog').close(); setStatus(`Loaded draft: ${draft.name}`); render(); toast(`Loaded “${draft.name}”.`); }
       function renderDraftList() { const list = $('#draftList'); list.replaceChildren(); if (!state.drafts.length) { const empty = document.createElement('div'); empty.className = 'empty-drafts'; empty.textContent = 'No saved drafts yet. Save the current canvas to add one.'; list.append(empty); return; } [...state.drafts].sort((a, b) => b.savedAt - a.savedAt).forEach(draft => { const row = document.createElement('div'), info = document.createElement('div'), name = document.createElement('b'), meta = document.createElement('small'), load = document.createElement('button'); row.className = 'draft-row'; info.className = 'draft-row-info'; name.textContent = draft.name; meta.textContent = `${draft.objects?.length || 0} objects · ${new Date(draft.savedAt).toLocaleString()}`; info.append(name, meta); load.className = 'action'; load.type = 'button'; load.textContent = 'Load'; load.addEventListener('click', () => loadDraft(draft)); row.append(info, load); list.append(row); }); }
-      const syncGrid = () => { const minor = GRID_PX * state.displayZoom, major = PX_PER_METER * state.displayZoom; canvas.style.backgroundSize = `${minor}px ${minor}px, ${minor}px ${minor}px, ${major}px ${major}px, ${major}px ${major}px`; $('#gridValue').textContent = `${formatLength(GRID_PX)} minor · ${formatLength(PX_PER_METER)} major`; };
-      const applyZoom = () => { const isMobile = matchMedia('(max-width: 740px)').matches, fit = isMobile ? Math.max(.1, ($('#canvasFrame').clientWidth - 1) / canvas.width) : 1; state.displayZoom = fit * state.zoom; canvas.style.width = `${canvas.width * state.displayZoom}px`; canvas.style.height = `${canvas.height * state.displayZoom}px`; $('#zoomReset').textContent = `${Math.round(state.zoom * 100)}%`; syncGrid(); };
+      const syncGrid = () => {
+        const minor = GRID_PX * state.displayZoom, major = PX_PER_METER * state.displayZoom;
+        canvas.style.backgroundSize = `${minor}px ${minor}px, ${minor}px ${minor}px, ${major}px ${major}px, ${major}px ${major}px`;
+        const x = -state.camera.x * state.displayZoom, y = -state.camera.y * state.displayZoom;
+        canvas.style.backgroundPosition = `${x}px ${y}px, ${x}px ${y}px, ${x}px ${y}px, ${x}px ${y}px`;
+        $('#gridValue').textContent = `${formatLength(GRID_PX)} minor · ${formatLength(PX_PER_METER)} major`;
+      };
+      const applyZoom = () => { state.zoom = clampZoom(state.zoom); state.displayZoom = state.zoom; $('#zoomReset').textContent = `${Math.round(state.zoom * 100)}%`; syncGrid(); paintCanvas(); };
       const objectLabel = obj => ({ line: 'Wall line', door: 'Door opening', window: 'Window opening', rect: 'Rectangle', room: `Room: ${obj.label}`, text: `Note: ${obj.label}`, furniture: `Furniture: ${obj.label}` })[obj?.type] || 'Nothing selected.';
       const objectCenter = obj => { const b = bounds(obj); return { x: b.x + b.w / 2, y: b.y + b.h / 2 }; };
       const rotatePoint = (point, center, degrees) => { const radians = degrees * Math.PI / 180, dx = point.x - center.x, dy = point.y - center.y; return { x: center.x + dx * Math.cos(radians) - dy * Math.sin(radians), y: center.y + dx * Math.sin(radians) + dy * Math.cos(radians) }; };
@@ -241,18 +254,111 @@
       }
       function bounds(obj) { if (obj.type === 'text') { ctx.save(); ctx.font = `700 ${14 * (obj.textScale || 1)}px ui-monospace, monospace`; const width = ctx.measureText(obj.label).width || 80; ctx.restore(); return { x: obj.x, y: obj.y, w: width, h: 18 * (obj.textScale || 1) }; } if (obj.type === 'furniture') return { x: obj.x, y: obj.y, w: obj.width, h: obj.height }; const x = Math.min(obj.x, obj.x2 ?? obj.x), y = Math.min(obj.y, obj.y2 ?? obj.y); return { x, y, w: Math.abs((obj.x2 ?? obj.x) - obj.x) || 8, h: Math.abs((obj.y2 ?? obj.y) - obj.y) || 8 }; }
       function renderFurnitureLibrary() { const library = $('#furnitureLibrary'), query = state.furnitureSearch.trim().toLowerCase(), entries = [...furniturePresets.map(preset => ({ preset, custom: false })), ...state.customFurniture.map((preset, customIndex) => ({ preset, custom: true, customIndex }))].filter(({ preset }) => preset.label.toLowerCase().includes(query)), pageCount = Math.max(1, Math.ceil(entries.length / FURNITURE_PER_PAGE)); state.furniturePage = Math.min(state.furniturePage, pageCount - 1); const pageItems = entries.slice(state.furniturePage * FURNITURE_PER_PAGE, (state.furniturePage + 1) * FURNITURE_PER_PAGE); library.replaceChildren(); pageItems.forEach(entry => { const item = document.createElement('div'), button = document.createElement('button'), name = document.createElement('b'), size = document.createElement('small'); item.className = 'furniture-item'; button.className = 'furniture'; button.type = 'button'; name.textContent = entry.preset.label; size.textContent = `${formatLength(entry.preset.width * PX_PER_METER)} × ${formatLength(entry.preset.height * PX_PER_METER)}`; button.append(name, size); button.classList.toggle('active', state.furniture === entry.preset); button.addEventListener('click', () => { state.furniture = entry.preset; setTool('furniture'); setStatus(`Place ${entry.preset.label}: click the canvas`); }); item.append(button); if (entry.custom) { const remove = document.createElement('button'); remove.className = 'delete-furniture'; remove.type = 'button'; remove.title = `Delete ${entry.preset.label}`; remove.setAttribute('aria-label', `Delete ${entry.preset.label}`); remove.textContent = '×'; remove.addEventListener('click', () => { if (!confirm(`Delete custom furniture preset “${entry.preset.label}”?`)) return; state.customFurniture.splice(entry.customIndex, 1); if (state.furniture === entry.preset) state.furniture = null; try { localStorage.setItem('anrat-blueprint-furniture', JSON.stringify(state.customFurniture)); } catch { /* storage is optional */ } render(); }); item.append(remove); } library.append(item); }); $('#furniturePageInfo').textContent = `Page ${state.furniturePage + 1} / ${pageCount}`; $('#furniturePrevious').disabled = state.furniturePage === 0; $('#furnitureNext').disabled = state.furniturePage >= pageCount - 1; }
-      function render() { ctx.clearRect(0, 0, canvas.width, canvas.height); state.objects.filter(obj => !['door','window'].includes(obj.type)).forEach(obj => drawObject(obj)); state.objects.filter(obj => ['door','window'].includes(obj.type)).forEach(obj => drawObject(obj)); if (state.drawing) drawObject(state.drawing, true); $('#objectCount').textContent = state.objects.length; $('#roomCount').textContent = state.objects.filter(x => x.type === 'room').length; $('#scaleInfo').textContent = `${PX_PER_METER} px = ${formatLength(PX_PER_METER)}`; $('#canvasSize').textContent = `${formatLength(canvas.width)} × ${formatLength(canvas.height)}`; $('#canvasHint').textContent = `${state.tool.toUpperCase()} · ${state.objects.length} OBJECT${state.objects.length === 1 ? '' : 'S'} · CTRL: ${formatLength(FINE_SNAP_PX)} SNAP`; const info = $('#selectionInfo'), rotationControls = $('#rotationControls'), textControls = $('#textControls'), textScale = $('#textScale'), horizontalSide = $('#horizontalLabelSide'), verticalSide = $('#verticalLabelSide'), openingControls=$('#openingControls'); info.replaceChildren(); rotationControls.hidden = !state.selected; textControls.hidden = !state.selected; openingControls.hidden = !state.selected || !['door','window'].includes(state.selected.type); if (state.selected) { const selected = state.selected, isText = selected.type === 'text', isLine = ['line','door','window'].includes(selected.type), heading = document.createElement('b'); heading.textContent = objectLabel(selected); info.append(heading, document.createElement('br'), document.createTextNode(isText ? 'Text annotation' : dimensionText(selected)), document.createElement('br'), document.createTextNode(`Rotation: ${selected.rotation || 0}° · Press [ or ] to rotate.`)); showLabel.checked = selected.showLabel !== false; showDimensions.checked = selected.showDimensions !== false; horizontalSide.value = selected.horizontalLabelSide || 'top'; verticalSide.value = selected.verticalLabelSide || 'left'; showLabel.disabled = isLine; showDimensions.disabled = isText; horizontalSide.disabled = isText; verticalSide.disabled = isText || isLine; showLabel.parentElement.style.opacity = isLine ? '.45' : '1'; showDimensions.parentElement.style.opacity = isText ? '.45' : '1'; horizontalSide.parentElement.style.opacity = isText ? '.45' : '1'; verticalSide.parentElement.style.opacity = isText || isLine ? '.45' : '1'; textScale.value = selected.textScale || 1; $('#textScaleValue').textContent = `${Math.round((selected.textScale || 1) * 100)}%`; if (!openingControls.hidden) { const f=units[unit.value].multiplier; $('#openingWidth').value=+(Math.hypot(selected.x2-selected.x,selected.y2-selected.y)/PX_PER_METER*f).toFixed(2);$('#openingHeight').value=+((selected.height3d||2.1)*f).toFixed(2);$('#openingSill').value=+((selected.sillHeight||0)*f).toFixed(2); } } else { info.append('Nothing selected.', document.createElement('br'), 'Use ', Object.assign(document.createElement('b'), { textContent: 'V' }), ' to move an item.'); } renderFurnitureLibrary(); }
-      function setTool(tool) { state.tool = tool; state.selected = null; $$('.tool[data-tool]').forEach(button => button.classList.toggle('active', button.dataset.tool === tool)); setStatus(`${tool === 'select' ? 'Select or move an object' : tool === 'furniture' ? 'Click to place furniture' : `Drawing ${tool}`}`); render(); }
+      function paintCanvas() {
+        if (!canvas.width || !canvas.height) return;
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const scale = state.dpr * state.displayZoom;
+        ctx.setTransform(scale, 0, 0, scale, -state.camera.x * scale, -state.camera.y * scale);
+        state.objects.filter(obj => !['door','window'].includes(obj.type)).forEach(obj => drawObject(obj));
+        state.objects.filter(obj => ['door','window'].includes(obj.type)).forEach(obj => drawObject(obj));
+        if (state.drawing) drawObject(state.drawing, true);
+        ctx.restore();
+      }
+      function render() { paintCanvas(); $('#objectCount').textContent = state.objects.length; $('#roomCount').textContent = state.objects.filter(x => x.type === 'room').length; $('#scaleInfo').textContent = `${PX_PER_METER} px = ${formatLength(PX_PER_METER)}`; $('#canvasSize').textContent = `Infinite · ${formatLength(state.viewWidth / state.zoom)} × ${formatLength(state.viewHeight / state.zoom)} visible`; $('#canvasHint').textContent = `${state.tool.toUpperCase()} · ${state.objects.length} OBJECT${state.objects.length === 1 ? '' : 'S'} · PAN: H / SPACE · CTRL: ${formatLength(FINE_SNAP_PX)} SNAP`; const info = $('#selectionInfo'), rotationControls = $('#rotationControls'), textControls = $('#textControls'), textScale = $('#textScale'), horizontalSide = $('#horizontalLabelSide'), verticalSide = $('#verticalLabelSide'), openingControls=$('#openingControls'); info.replaceChildren(); rotationControls.hidden = !state.selected; textControls.hidden = !state.selected; openingControls.hidden = !state.selected || !['door','window'].includes(state.selected.type); if (state.selected) { const selected = state.selected, isText = selected.type === 'text', isLine = ['line','door','window'].includes(selected.type), heading = document.createElement('b'); heading.textContent = objectLabel(selected); info.append(heading, document.createElement('br'), document.createTextNode(isText ? 'Text annotation' : dimensionText(selected)), document.createElement('br'), document.createTextNode(`Rotation: ${selected.rotation || 0}° · Press [ or ] to rotate.`)); showLabel.checked = selected.showLabel !== false; showDimensions.checked = selected.showDimensions !== false; horizontalSide.value = selected.horizontalLabelSide || 'top'; verticalSide.value = selected.verticalLabelSide || 'left'; showLabel.disabled = isLine; showDimensions.disabled = isText; horizontalSide.disabled = isText; verticalSide.disabled = isText || isLine; showLabel.parentElement.style.opacity = isLine ? '.45' : '1'; showDimensions.parentElement.style.opacity = isText ? '.45' : '1'; horizontalSide.parentElement.style.opacity = isText ? '.45' : '1'; verticalSide.parentElement.style.opacity = isText || isLine ? '.45' : '1'; textScale.value = selected.textScale || 1; $('#textScaleValue').textContent = `${Math.round((selected.textScale || 1) * 100)}%`; if (!openingControls.hidden) { const f=units[unit.value].multiplier; $('#openingWidth').value=+(Math.hypot(selected.x2-selected.x,selected.y2-selected.y)/PX_PER_METER*f).toFixed(2);$('#openingHeight').value=+((selected.height3d||2.1)*f).toFixed(2);$('#openingSill').value=+((selected.sillHeight||0)*f).toFixed(2); } } else { info.append('Nothing selected.', document.createElement('br'), 'Use ', Object.assign(document.createElement('b'), { textContent: 'V' }), ' to move an item.'); } renderFurnitureLibrary(); }
+      function setTool(tool) { state.tool = tool; canvas.style.cursor = tool === 'pan' ? 'grab' : 'crosshair'; state.selected = null; $$('.tool[data-tool]').forEach(button => button.classList.toggle('active', button.dataset.tool === tool)); setStatus(`${tool === 'select' ? 'Select or move an object' : tool === 'furniture' ? 'Click to place furniture' : `Drawing ${tool}`}`); render(); }
       function addObject(obj) { pushHistory(); state.objects.push(obj); state.selected = obj; setStatus(`${objectLabel(obj)} added`); render(); }
       function hitObject(p) { return [...state.objects].reverse().find(obj => { const local = localPoint(p, obj), b = bounds(obj); if (['line','door','window'].includes(obj.type)) { const d = Math.abs((obj.y2 - obj.y) * local.x - (obj.x2 - obj.x) * local.y + obj.x2 * obj.y - obj.y2 * obj.x) / (Math.hypot(obj.y2 - obj.y, obj.x2 - obj.x)||1); return d < (obj.type==='line'?10:20) && local.x >= b.x - 20 && local.x <= b.x + b.w + 20 && local.y >= b.y - 20 && local.y <= b.y + b.h + 20; } return local.x >= b.x - 6 && local.x <= b.x + b.w + 6 && local.y >= b.y - 6 && local.y <= b.y + b.h + 6; }); }
       const wallSegments = () => { const result=[]; for(const obj of state.objects) { const rot = p => rotatePoint(p,objectCenter(obj),obj.rotation||0); if(obj.type==='line')result.push([rot({x:obj.x,y:obj.y}),rot({x:obj.x2,y:obj.y2})]); else if(obj.type==='room'){const b=bounds(obj),pts=[{x:b.x,y:b.y},{x:b.x+b.w,y:b.y},{x:b.x+b.w,y:b.y+b.h},{x:b.x,y:b.y+b.h}].map(rot);for(let i=0;i<4;i++)result.push([pts[i],pts[(i+1)%4]])} } return result };
       const openingAt = (p,type,widthPx) => { let best=null; for(const [a,b] of wallSegments()){const length=Math.hypot(b.x-a.x,b.y-a.y);if(length<15)continue;const ux=(b.x-a.x)/length,uy=(b.y-a.y)/length,t=Math.max(0,Math.min(length,(p.x-a.x)*ux+(p.y-a.y)*uy)),d=Math.hypot(p.x-a.x-ux*t,p.y-a.y-uy*t);if(!best||d<best.distance)best={a,length,ux,uy,t,distance:d}}if(!best||best.distance>35)return null;const span=Math.min(widthPx||(type==='door'?45:60),best.length-2);if(span<8)return null;const begin=Math.max(0,Math.min(best.length-span,best.t-span/2));return {x:best.a.x+best.ux*begin,y:best.a.y+best.uy*begin,x2:best.a.x+best.ux*(begin+span),y2:best.a.y+best.uy*(begin+span)}};
       const placeOpening = (p,type) => {const at=openingAt(p,type);if(!at)return toast('Tap an existing wall or room edge to place an opening.');addObject({type,...at,label:type.toUpperCase(),height3d:type==='door'?2.1:1.2,sillHeight:type==='door'?0:.9,color:inkColor.value,weight:+lineWeight.value})};
-      const touchDistance = () => {const [a,b]=[...state.touchPointers.values()];return Math.hypot(a.x-b.x,a.y-b.y)};
-      canvas.addEventListener('pointerdown', event => { canvas.setPointerCapture(event.pointerId); if(event.pointerType==='touch'){state.touchPointers.set(event.pointerId,{x:event.clientX,y:event.clientY});if(state.touchPointers.size>=2){state.drawing=null;state.drag=null;state.pendingOpening=null;const pts=[...state.touchPointers.values()];state.pinch={distance:touchDistance(),zoom:state.zoom,center:{x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2},scrollX:$('#canvasFrame').scrollLeft,scrollY:$('#canvasFrame').scrollTop};state.pinchLock=true;return}}const p = point(event); if(['door','window'].includes(state.tool)){if(event.pointerType==='touch'){state.pendingOpening={p,type:state.tool};return}placeOpening(p,state.tool);return}if (state.tool === 'furniture') { if (!state.furniture) state.furniture=furniturePresets[0]; addObject({ type: 'furniture', x: p.x, y: p.y, width: state.furniture.width * PX_PER_METER, height: state.furniture.height * PX_PER_METER, label: state.furniture.label, color: inkColor.value, weight: +lineWeight.value }); return; } if (state.tool === 'text') { const label = prompt('Note text:', 'ENTRY'); if (label?.trim()) addObject({ type: 'text', x: p.x, y: p.y, label: label.trim(), color: inkColor.value, weight: +lineWeight.value }); return; } if (state.tool === 'select') { state.selected = hitObject(p) || null; if (state.selected) { pushHistory(); state.drag = { point: p, original: clone(state.selected) }; setStatus(`Moving ${objectLabel(state.selected)}`); } else setStatus('Nothing selected'); render(); return; } state.drawing = { type: state.tool, x: p.x, y: p.y, x2: p.x, y2: p.y, color: inkColor.value, weight: +lineWeight.value }; });
-      canvas.addEventListener('pointermove', event => { if(event.pointerType==='touch'&&state.touchPointers.has(event.pointerId)){state.touchPointers.set(event.pointerId,{x:event.clientX,y:event.clientY});if(state.pinch&&state.touchPointers.size>=2){state.zoom=Math.max(.5,Math.min(3,state.pinch.zoom*touchDistance()/Math.max(state.pinch.distance,1)));applyZoom();const pts=[...state.touchPointers.values()],cx=(pts[0].x+pts[1].x)/2,cy=(pts[0].y+pts[1].y)/2;$('#canvasFrame').scrollLeft=state.pinch.scrollX+state.pinch.center.x-cx;$('#canvasFrame').scrollTop=state.pinch.scrollY+state.pinch.center.y-cy;return}}if(state.pinchLock)return;const p = point(event); $('#coordinates').textContent = `X ${p.x} · Y ${p.y}`; if (state.drawing) { state.drawing.x2 = p.x; state.drawing.y2 = p.y; render(); } else if (state.drag && state.selected) { const dx = p.x - state.drag.point.x, dy = p.y - state.drag.point.y, o = state.drag.original; state.selected.x = o.x + dx; state.selected.y = o.y + dy; if ('x2' in state.selected) { state.selected.x2 = o.x2 + dx; state.selected.y2 = o.y2 + dy; } render(); } });
-      canvas.addEventListener('pointerup', event => {state.touchPointers.delete(event.pointerId);if(state.pinchLock){if(!state.touchPointers.size){state.pinchLock=false;state.pinch=null}return}if(state.pendingOpening){const pending=state.pendingOpening;state.pendingOpening=null;placeOpening(pending.p,pending.type);return}if (state.drawing) { const obj = state.drawing; state.drawing = null; if (Math.abs(obj.x2 - obj.x) + Math.abs(obj.y2 - obj.y) > 8) { if (obj.type === 'room') { const label = prompt('Room name:', 'ROOM'); if (!label?.trim()) { render(); return; } obj.label = label.trim().toUpperCase(); } addObject(obj); } else render(); } if (state.drag) { if(state.selected&&['door','window'].includes(state.selected.type)){const o=state.selected,at=openingAt({x:(o.x+o.x2)/2,y:(o.y+o.y2)/2},o.type,Math.hypot(o.x2-o.x,o.y2-o.y));if(at)Object.assign(o,at);else {Object.assign(o,state.drag.original);toast('Opening must stay on a wall')}}state.drag = null; setStatus('Object moved'); render(); } });
-      canvas.addEventListener('pointercancel',event=>{state.touchPointers.delete(event.pointerId);if(!state.touchPointers.size){state.pinch=null;state.pinchLock=false}state.pendingOpening=null;state.drawing=null;state.drag=null;render()});
+      const touchDistance = () => { const [a, b] = [...state.touchPointers.values()]; return Math.hypot(a.x-b.x, a.y-b.y); };
+      const touchCenter = () => { const [a, b] = [...state.touchPointers.values()]; return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; };
+      let lastMove = null;
+      const updateEditPointer = event => {
+        const p = point(event);
+        $('#coordinates').textContent = `X ${p.x} · Y ${p.y}`;
+        if (state.drawing) { state.drawing.x2 = p.x; state.drawing.y2 = p.y; paintCanvas(); }
+        else if (state.drag && state.selected) { const dx = p.x-state.drag.point.x, dy = p.y-state.drag.point.y, o=state.drag.original; state.selected.x=o.x+dx; state.selected.y=o.y+dy; if('x2' in state.selected){state.selected.x2=o.x2+dx;state.selected.y2=o.y2+dy;} paintCanvas(); }
+      };
+      // When drawing toward any edge, move the world underneath the cursor.
+      const autoPan = () => {
+        if ((state.drawing || state.drag) && lastMove && !state.pinchLock) {
+          const r=canvas.getBoundingClientRect(), pad=32;
+          const dx=lastMove.clientX<r.left+pad ? -Math.min(16,(r.left+pad-lastMove.clientX)*.4) : lastMove.clientX>r.right-pad ? Math.min(16,(lastMove.clientX-r.right+pad)*.4) : 0;
+          const dy=lastMove.clientY<r.top+pad ? -Math.min(16,(r.top+pad-lastMove.clientY)*.4) : lastMove.clientY>r.bottom-pad ? Math.min(16,(lastMove.clientY-r.bottom+pad)*.4) : 0;
+          if(dx||dy){state.camera.x+=dx/state.zoom;state.camera.y+=dy/state.zoom;syncGrid();updateEditPointer(lastMove);}
+        }
+        requestAnimationFrame(autoPan);
+      };
+      requestAnimationFrame(autoPan);
+      canvas.addEventListener('contextmenu', e=>e.preventDefault());
+      canvas.addEventListener('pointerdown', event => {
+        if(event.button===2 && state.tool!=='pan') return;
+        canvas.setPointerCapture(event.pointerId);
+        if(event.pointerType==='touch') {
+          state.touchPointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+          if(state.touchPointers.size>=2) {
+            state.drawing=null;state.drag=null;state.pan=null;state.pendingOpening=null;lastMove=null;
+            const center=touchCenter();
+            state.pinch={distance:Math.max(1,touchDistance()),zoom:state.zoom,anchor:screenToWorld(center.x,center.y)};
+            state.pinchLock=true;return;
+          }
+        }
+        if(state.tool==='pan' || state.spaceHeld || event.button===1) {
+          event.preventDefault();state.pan={clientX:event.clientX,clientY:event.clientY,x:state.camera.x,y:state.camera.y};
+          canvas.style.cursor='grabbing';return;
+        }
+        const p=point(event);
+        if(['door','window'].includes(state.tool)) {
+          if(event.pointerType==='touch'){state.pendingOpening={p,type:state.tool};return;}
+          placeOpening(p,state.tool);return;
+        }
+        if(state.tool==='furniture') {
+          if(!state.furniture)state.furniture=furniturePresets[0];
+          addObject({type:'furniture',x:p.x,y:p.y,width:state.furniture.width*PX_PER_METER,height:state.furniture.height*PX_PER_METER,label:state.furniture.label,color:inkColor.value,weight:+lineWeight.value});return;
+        }
+        if(state.tool==='text') {
+          const label=prompt('Note text:','ENTRY');
+          if(label?.trim()) addObject({type:'text',x:p.x,y:p.y,label:label.trim(),color:inkColor.value,weight:+lineWeight.value});return;
+        }
+        if(state.tool==='select') {
+          state.selected=hitObject(p)||null;
+          if(state.selected){pushHistory();state.drag={point:p,original:clone(state.selected)};setStatus(`Moving ${objectLabel(state.selected)}`);}
+          else setStatus('Nothing selected');render();return;
+        }
+        state.drawing={type:state.tool,x:p.x,y:p.y,x2:p.x,y2:p.y,color:inkColor.value,weight:+lineWeight.value};
+      });
+      canvas.addEventListener('pointermove', event => {
+        if(event.pointerType==='touch'&&state.touchPointers.has(event.pointerId)){
+          state.touchPointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+          if(state.pinch&&state.touchPointers.size>=2){
+            const center=touchCenter(), r=canvas.getBoundingClientRect();
+            state.zoom=clampZoom(state.pinch.zoom*touchDistance()/state.pinch.distance);
+            state.camera.x=state.pinch.anchor.x-(center.x-r.left)/state.zoom;
+            state.camera.y=state.pinch.anchor.y-(center.y-r.top)/state.zoom;
+            applyZoom();return;
+          }
+        }
+        if(state.pinchLock)return;
+        if(state.pan){panTo(state.pan.x-(event.clientX-state.pan.clientX)/state.zoom,state.pan.y-(event.clientY-state.pan.clientY)/state.zoom);return;}
+        lastMove=event;
+        updateEditPointer(event);
+      });
+      canvas.addEventListener('pointerup', event => {
+        state.touchPointers.delete(event.pointerId);
+        if(state.pinchLock){if(!state.touchPointers.size){state.pinchLock=false;state.pinch=null;}return;}
+        if(state.pan){state.pan=null;canvas.style.cursor=state.tool==='pan'?'grab':'crosshair';return;}
+        lastMove=null;
+        if(state.pendingOpening){const pending=state.pendingOpening;state.pendingOpening=null;placeOpening(pending.p,pending.type);return;}
+        if(state.drawing){const obj=state.drawing;state.drawing=null;if(Math.abs(obj.x2-obj.x)+Math.abs(obj.y2-obj.y)>8){if(obj.type==='room'){const label=prompt('Room name:','ROOM');if(!label?.trim()){render();return;}obj.label=label.trim().toUpperCase();}addObject(obj);}else render();}
+        if(state.drag){if(state.selected&&['door','window'].includes(state.selected.type)){const o=state.selected,at=openingAt({x:(o.x+o.x2)/2,y:(o.y+o.y2)/2},o.type,Math.hypot(o.x2-o.x,o.y2-o.y));if(at)Object.assign(o,at);else{Object.assign(o,state.drag.original);toast('Opening must stay on a wall');}}state.drag=null;setStatus('Object moved');render();}
+      });
+      canvas.addEventListener('pointercancel',event=>{state.touchPointers.delete(event.pointerId);if(!state.touchPointers.size){state.pinch=null;state.pinchLock=false;}state.pendingOpening=null;state.drawing=null;state.drag=null;state.pan=null;lastMove=null;canvas.style.cursor=state.tool==='pan'?'grab':'crosshair';render();});
+      canvas.addEventListener('wheel', event => {
+        event.preventDefault();
+        if(event.ctrlKey || event.metaKey){zoomAround(state.zoom*Math.exp(-event.deltaY*.0015),event.clientX,event.clientY);}
+        else {state.camera.x+=(event.shiftKey?event.deltaY:event.deltaX)/state.zoom;state.camera.y+=(event.shiftKey?0:event.deltaY)/state.zoom;syncGrid();paintCanvas();}
+      },{passive:false});
       $('#tools').addEventListener('click', event => { const button = event.target.closest('[data-tool]'); if (button) setTool(button.dataset.tool); });
       $('#mobileTools').addEventListener('click', event => { const button = event.target.closest('[data-tool]'); if (button) setTool(button.dataset.tool); });
       $('#rotationControls').addEventListener('click', event => { const button = event.target.closest('[data-rotate]'); if (button) rotateSelected(Number(button.dataset.rotate)); });
@@ -275,18 +381,95 @@
       $('#furnitureSearch').oninput = event => { state.furnitureSearch = event.target.value; state.furniturePage = 0; renderFurnitureLibrary(); };
       $('#furniturePrevious').onclick = () => { state.furniturePage = Math.max(0, state.furniturePage - 1); renderFurnitureLibrary(); };
       $('#furnitureNext').onclick = () => { state.furniturePage += 1; renderFurnitureLibrary(); };
-      $('#zoomIn').onclick = () => { state.zoom = Math.min(3, state.zoom + .1); applyZoom(); };
-      $('#zoomOut').onclick = () => { state.zoom = Math.max(.5, state.zoom - .1); applyZoom(); };
-      $('#zoomReset').onclick = () => { state.zoom = 1; applyZoom(); };
+      const centerOfCanvas=()=>{const r=canvas.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};};
+      const zoomButton=delta=>{const center=centerOfCanvas();zoomAround(state.zoom+delta,center.x,center.y);};
+      $('#zoomIn').onclick=()=>zoomButton(.1);
+      $('#zoomOut').onclick=()=>zoomButton(-.1);
+      $('#zoomReset').onclick=()=>{const center=centerOfCanvas();zoomAround(1,center.x,center.y);};
+      $('#fitView').onclick=()=>fitDrawing();
       $('#loadButton').onclick = () => { renderDraftList(); $('#draftDialog').showModal(); };
       $('#closeDraftDialog').onclick = () => $('#draftDialog').close();
       $('#saveButton').onclick = () => { const requestedName = prompt('Save draft as:', state.currentDraftName); if (requestedName === null) return; const name = requestedName.trim() || 'Untitled plan', snapshot = { id: state.currentDraftId || newDraftId(), name, ...draftSnapshot() }, existingIndex = state.drafts.findIndex(draft => draft.id === snapshot.id); if (existingIndex >= 0) state.drafts[existingIndex] = snapshot; else state.drafts.push(snapshot); state.currentDraftId = snapshot.id; state.currentDraftName = name; persistDrafts(); toast(`Saved “${name}”.`); };
       $('#exportJSONButton').onclick = () => { const current = { id: state.currentDraftId || newDraftId(), name: state.currentDraftName || 'Current canvas', ...draftSnapshot() }; const drafts = [...state.drafts.filter(draft => draft.id !== current.id), current]; const payload = { format: 'anrat-blueprint-2d', version: 1, pixelsPerMeter: PX_PER_METER, exportedAt: Date.now(), drafts }; const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'blueprint-2d-saves.json'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 2500); toast(`Exported ${drafts.length} 2D draft${drafts.length === 1 ? '' : 's'} as JSON.`); };
-      $('#exportButton').onclick = () => { const exportScale = 4, exportCanvas = document.createElement('canvas'); exportCanvas.width = canvas.width * exportScale; exportCanvas.height = canvas.height * exportScale; const exportCtx = exportCanvas.getContext('2d'), root = getComputedStyle(document.documentElement), styles = getComputedStyle(canvas), grid = GRID_PX, screenContext = ctx, selected = state.selected; exportCtx.fillStyle = styles.backgroundColor; exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height); exportCtx.save(); exportCtx.scale(exportScale, exportScale); exportCtx.lineWidth = 1 / exportScale; for (let i = 0; i <= canvas.width; i += grid) { exportCtx.beginPath(); exportCtx.strokeStyle = i % PX_PER_METER === 0 ? root.getPropertyValue('--grid-major') : root.getPropertyValue('--grid-minor'); exportCtx.moveTo(i, 0); exportCtx.lineTo(i, canvas.height); exportCtx.stroke(); } for (let i = 0; i <= canvas.height; i += grid) { exportCtx.beginPath(); exportCtx.strokeStyle = i % PX_PER_METER === 0 ? root.getPropertyValue('--grid-major') : root.getPropertyValue('--grid-minor'); exportCtx.moveTo(0, i); exportCtx.lineTo(canvas.width, i); exportCtx.stroke(); } ctx = exportCtx; state.selected = null; state.objects.forEach(obj => drawObject(obj)); state.selected = selected; ctx = screenContext; exportCtx.restore(); const a = document.createElement('a'); a.download = 'blueprint-draft-hd.png'; a.href = exportCanvas.toDataURL('image/png'); a.click(); toast('4× HD PNG export ready.'); };
-      document.addEventListener('keydown', event => { if (event.target.matches('input, select')) return; const key = event.key.toLowerCase(); if ((event.ctrlKey || event.metaKey) && key === 'z') { event.preventDefault(); $('#undoButton').click(); return; } if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); $('#redoButton').click(); return; } if (event.key === '[') { event.preventDefault(); rotateSelected(-15); return; } if (event.key === ']') { event.preventDefault(); rotateSelected(15); return; } if (event.key === 'Delete' && state.selected) { pushHistory(); state.objects = state.objects.filter(x => x !== state.selected); state.selected = null; setStatus('Object removed'); render(); return; } const map = { v: 'select', l: 'line', r: 'room', b: 'rect', d:'door',w:'window',t: 'text' }; if (map[key]) setTool(map[key]); });
+      // Transform all four corners around the object's pivot to cover rotated artwork.
+      function visualBounds(obj) {
+        const b=bounds(obj), center=objectCenter(obj), angle=obj.rotation||0;
+        let points=[{x:b.x,y:b.y},{x:b.x+b.w,y:b.y},{x:b.x+b.w,y:b.y+b.h},{x:b.x,y:b.y+b.h}];
+        if(obj.type==='door') {
+          const length=Math.hypot(obj.x2-obj.x,obj.y2-obj.y)*.85;
+          const start=Math.atan2(obj.y2-obj.y,obj.x2-obj.x);
+          for(let n=0;n<=16;n++){const a=start+(Math.PI/2)*n/16;points.push({x:obj.x+Math.cos(a)*length,y:obj.y+Math.sin(a)*length});}
+        }
+        points=points.map(p=>rotatePoint(p,center,angle));
+        let left=Math.min(...points.map(p=>p.x)),right=Math.max(...points.map(p=>p.x)),top=Math.min(...points.map(p=>p.y)),bottom=Math.max(...points.map(p=>p.y));
+        const extra = (obj.type==='text'?6:obj.showDimensions===false?6:21)*(obj.textScale||1)+Math.max(3,obj.weight||3);
+        return {x:left-extra,y:top-extra,w:right-left+extra*2,h:bottom-top+extra*2};
+      }
+      const overlap=(a,b)=>a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+      function fitDrawing(){
+        if(!state.objects.length){state.camera={x:0,y:0};state.zoom=1;applyZoom();toast('Back to the origin.');return;}
+        let left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
+        for(const obj of state.objects){const b=visualBounds(obj);left=Math.min(left,b.x);top=Math.min(top,b.y);right=Math.max(right,b.x+b.w);bottom=Math.max(bottom,b.y+b.h);}
+        const pad=GRID_PX*5;
+        state.zoom=clampZoom(Math.min(3,(state.viewWidth-40)/(right-left+2*pad),(state.viewHeight-40)/(bottom-top+2*pad)));
+        state.camera={x:(left+right)/2-state.viewWidth/(2*state.zoom),y:(top+bottom)/2-state.viewHeight/(2*state.zoom)};
+        applyZoom();toast('Fitted the drawing to view.');
+      }
+      $('#exportButton').onclick = () => {
+        if(!state.objects.length)return toast('Add something to the blueprint before exporting.');
+        const view=visibleWorld(), shown=state.objects.filter(obj=>overlap(visualBounds(obj),view));
+        if(!shown.length)return toast('Nothing is in view. Use Fit to find your drawing.');
+        // Render the visible geometry onto a transparent probe: this measures the *actual*
+        // drawn pixels (including labels, dimensions and rotations), not generous object boxes.
+        // The requested 3-tile padding is therefore measured from the visible ink itself.
+        const probe=document.createElement('canvas');
+        probe.width=Math.ceil(state.viewWidth);probe.height=Math.ceil(state.viewHeight);
+        const probeCtx=probe.getContext('2d',{willReadFrequently:true});
+        if(!probeCtx)return toast('Could not measure the visible blueprint.');
+        const previousCtx=ctx,previousSelection=state.selected;
+        try {
+          ctx=probeCtx;state.selected=null;
+          probeCtx.setTransform(state.zoom,0,0,state.zoom,-state.camera.x*state.zoom,-state.camera.y*state.zoom);
+          shown.filter(o=>!['door','window'].includes(o.type)).forEach(o=>drawObject(o));
+          shown.filter(o=>['door','window'].includes(o.type)).forEach(o=>drawObject(o));
+        } finally {ctx=previousCtx;state.selected=previousSelection;}
+        const pixels=probeCtx.getImageData(0,0,probe.width,probe.height).data;
+        let minX=probe.width,minY=probe.height,maxX=-1,maxY=-1;
+        for(let y=0;y<probe.height;y++)for(let x=0;x<probe.width;x++){
+          if(pixels[(y*probe.width+x)*4+3]>8){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}
+        }
+        if(maxX<0)return toast('Nothing visible to export.');
+        const margin=GRID_PX*3;
+        let left=Math.floor((view.x+minX/state.zoom-margin)/GRID_PX)*GRID_PX;
+        let top=Math.floor((view.y+minY/state.zoom-margin)/GRID_PX)*GRID_PX;
+        let right=Math.ceil((view.x+(maxX+1)/state.zoom+margin)/GRID_PX)*GRID_PX;
+        let bottom=Math.ceil((view.y+(maxY+1)/state.zoom+margin)/GRID_PX)*GRID_PX;
+        const w=Math.max(GRID_PX,right-left),h=Math.max(GRID_PX,bottom-top);
+        // Browser canvas sizes are finite, but the drawing workspace itself has no bounds.
+        const exportScale=Math.min(4,16384/w,16384/h,Math.sqrt(60000000/(w*h)));
+        if(exportScale<=0 || !Number.isFinite(exportScale))return toast('The visible area is too large to export. Zoom in first.');
+        const exportCanvas=document.createElement('canvas');
+        exportCanvas.width=Math.max(1,Math.ceil(w*exportScale));exportCanvas.height=Math.max(1,Math.ceil(h*exportScale));
+        const exportCtx=exportCanvas.getContext('2d');
+        if(!exportCtx)return toast('Could not create the PNG canvas. Try zooming in.');
+        const styles=getComputedStyle(canvas), themeStyles=getComputedStyle(document.body);
+        exportCtx.fillStyle=styles.backgroundColor;exportCtx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
+        exportCtx.save();exportCtx.scale(exportScale,exportScale);exportCtx.translate(-left,-top);
+        // Align the exported grid to the same unbounded world origin as the editing grid.
+        for(let x=Math.ceil(left/GRID_PX)*GRID_PX;x<=right;x+=GRID_PX){const major=Math.abs(x/PX_PER_METER-Math.round(x/PX_PER_METER))<1e-7;exportCtx.beginPath();exportCtx.strokeStyle=themeStyles.getPropertyValue(major?'--grid-major':'--grid-minor');exportCtx.lineWidth=1/exportScale;exportCtx.moveTo(x,top);exportCtx.lineTo(x,bottom);exportCtx.stroke();}
+        for(let y=Math.ceil(top/GRID_PX)*GRID_PX;y<=bottom;y+=GRID_PX){const major=Math.abs(y/PX_PER_METER-Math.round(y/PX_PER_METER))<1e-7;exportCtx.beginPath();exportCtx.strokeStyle=themeStyles.getPropertyValue(major?'--grid-major':'--grid-minor');exportCtx.lineWidth=1/exportScale;exportCtx.moveTo(left,y);exportCtx.lineTo(right,y);exportCtx.stroke();}
+        const originalContext=ctx,selected=state.selected;
+        try{ctx=exportCtx;state.selected=null;shown.filter(o=>!['door','window'].includes(o.type)).forEach(o=>drawObject(o));shown.filter(o=>['door','window'].includes(o.type)).forEach(o=>drawObject(o));}
+        finally{ctx=originalContext;state.selected=selected;exportCtx.restore();}
+        const a=document.createElement('a');a.download='blueprint-visible-cropped.png';a.href=exportCanvas.toDataURL('image/png');a.click();
+        toast(`Cropped PNG exported (${exportCanvas.width} × ${exportCanvas.height}, 3-tile margin).`);
+      };
+      document.addEventListener('keydown', event => { if (event.target.matches('input, select, textarea') || event.ctrlKey && event.key === ' ') return; if(event.code==='Space'){if(!event.repeat){state.spaceHeld=true;canvas.style.cursor='grab';}event.preventDefault();return;} const key = event.key.toLowerCase(); if ((event.ctrlKey || event.metaKey) && key === 'z') { event.preventDefault(); $('#undoButton').click(); return; } if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); $('#redoButton').click(); return; } if (event.key === '[') { event.preventDefault(); rotateSelected(-15); return; } if (event.key === ']') { event.preventDefault(); rotateSelected(15); return; } if (event.key === 'Delete' && state.selected) { pushHistory(); state.objects = state.objects.filter(x => x !== state.selected); state.selected = null; setStatus('Object removed'); render(); return; } const map = { h: 'pan', v: 'select', l: 'line', r: 'room', b: 'rect', d:'door',w:'window',t: 'text' }; if (map[key]) setTool(map[key]); });
+      document.addEventListener('keyup', event=>{if(event.code==='Space'){state.spaceHeld=false;if(!state.pan)canvas.style.cursor=state.tool==='pan'?'grab':'crosshair';}});
+      window.addEventListener('blur',()=>{state.spaceHeld=false;state.pan=null;canvas.style.cursor=state.tool==='pan'?'grab':'crosshair';});
       try { const customFurniture = JSON.parse(localStorage.getItem('anrat-blueprint-furniture')); if (Array.isArray(customFurniture)) state.customFurniture = customFurniture.filter(item => item && typeof item.label === 'string' && Number.isFinite(item.width) && Number.isFinite(item.height)); const storedDrafts = JSON.parse(localStorage.getItem(DRAFTS_KEY) || '[]'); if (Array.isArray(storedDrafts)) state.drafts = storedDrafts.filter(draft => draft && typeof draft.id === 'string' && typeof draft.name === 'string' && Array.isArray(draft.objects)); const legacy = JSON.parse(localStorage.getItem(LEGACY_DRAFT_KEY) || 'null'); const migratedKey = 'anrat-blueprint-draft-migrated'; if (legacy?.objects && !localStorage.getItem(migratedKey)) { state.drafts.push({ id: newDraftId(), name: 'Recovered legacy draft', objects: legacy.objects, theme: legacy.theme || 'blueprint', unit: legacy.unit || 'm', savedAt: Date.now() }); persistDrafts(); localStorage.setItem(migratedKey, '1'); } } catch { /* local storage is optional */ }
-      unit.dispatchEvent(new Event('change')); applyZoom(); render();
-      new ResizeObserver(applyZoom).observe($('#canvasFrame'));
+      unit.dispatchEvent(new Event('change')); resizeCanvas(); render();
+      new ResizeObserver(resizeCanvas).observe($('#canvasFrame'));
     })();
   </script>
 </body>
