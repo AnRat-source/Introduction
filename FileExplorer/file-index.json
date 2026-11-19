@@ -152,6 +152,11 @@
           },
           {
             "type": "file",
+            "name": "outbreak_cityfall.html",
+            "path": "FileExplorer/Misc/Games/outbreak_cityfall.html"
+          },
+          {
+            "type": "file",
             "name": "Star-Catcher.html",
             "path": "FileExplorer/Misc/Games/Star-Catcher.html"
           },
