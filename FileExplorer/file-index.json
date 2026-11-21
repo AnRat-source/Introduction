@@ -241,6 +241,11 @@
           },
           {
             "type": "file",
+            "name": "image-texture-lab.html",
+            "path": "FileExplorer/Tools/Media/image-texture-lab.html"
+          },
+          {
+            "type": "file",
             "name": "Pixel-Art-Studio.html",
             "path": "FileExplorer/Tools/Media/Pixel-Art-Studio.html"
           }
@@ -270,11 +275,6 @@
             "type": "file",
             "name": "HTML-Maker.html",
             "path": "FileExplorer/Tools/Utilities/HTML-Maker.html"
-          },
-          {
-            "type": "file",
-            "name": "image-texture-lab.html",
-            "path": "FileExplorer/Tools/Utilities/image-texture-lab.html"
           },
           {
             "type": "file",
