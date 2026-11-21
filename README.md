@@ -89,6 +89,7 @@ The [`FileExplorer/Tools/index.html`](FileExplorer/Tools/index.html) page is a s
 - [`FileExplorer/Misc/Fun/sliders.html`](FileExplorer/Misc/Fun/sliders.html): slider interaction experiment.
 - [`FileExplorer/Misc/Fun/WordWheel.html`](FileExplorer/Misc/Fun/WordWheel.html): randomized letter-wheel crossword game.
 - [`FileExplorer/Misc/Fun/WordleUnlimited.html`](FileExplorer/Misc/Fun/WordleUnlimited.html): unlimited Wordle-style game using the shared word list.
+- [`FileExplorer/Misc/Fun/PaddedRoomStudio.html`](FileExplorer/Misc/Fun/PaddedRoomStudio.html): padded-room compositor with scene lighting, cutout placement, and wall drawing.
 - [`FileExplorer/Misc/Games/Star-Catcher.html`](FileExplorer/Misc/Games/Star-Catcher.html): browser game.
 - [`FileExplorer/Tools/Diagrams/Blueprint-Maker.html`](FileExplorer/Tools/Diagrams/Blueprint-Maker.html): diagram/layout utility.
 

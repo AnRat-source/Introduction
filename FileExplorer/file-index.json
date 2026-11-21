@@ -55,6 +55,11 @@
           },
           {
             "type": "file",
+            "name": "PaddedRoomStudio.html",
+            "path": "FileExplorer/Misc/Fun/PaddedRoomStudio.html"
+          },
+          {
+            "type": "file",
             "name": "sliders.html",
             "path": "FileExplorer/Misc/Fun/sliders.html"
           }
@@ -265,6 +270,11 @@
             "type": "file",
             "name": "HTML-Maker.html",
             "path": "FileExplorer/Tools/Utilities/HTML-Maker.html"
+          },
+          {
+            "type": "file",
+            "name": "image-texture-lab.html",
+            "path": "FileExplorer/Tools/Utilities/image-texture-lab.html"
           },
           {
             "type": "file",
