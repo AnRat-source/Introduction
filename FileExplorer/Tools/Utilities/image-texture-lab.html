@@ -109,6 +109,20 @@
     .advanced-body { padding: 1px 16px 16px; }
     .advanced-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 2px; }
     .adv-line { margin-bottom: 14px; }
+    .control-hint { margin: -2px 0 8px; color: var(--muted); font-size: 9px; line-height: 1.55; }
+    .reality-check { border-top: 1px solid var(--line-soft); }
+    .reality-check summary { padding: 15px 16px; cursor: pointer; font-weight: 700; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+    .reality-check summary::-webkit-details-marker { display:none; }
+    .reality-check summary .chevron { transition: transform .15s; color: var(--muted); }
+    .reality-check[open] summary .chevron { transform: rotate(180deg); }
+    .reality-body { padding: 1px 16px 16px; }
+    .reality-intro { margin: 0 0 11px; color: var(--muted); font-size: 10px; line-height: 1.7; }
+    .audit-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 7px; }
+    .audit-list li { position: relative; padding: 8px 8px 8px 25px; border: 1px solid #302f3b; background: #191923; border-radius: 6px; color: #c9c5d0; font-size: 10px; line-height: 1.5; }
+    .audit-list li::before { content: '✓'; position: absolute; left: 9px; color: #bda2ed; font-weight: 800; }
+    .audit-list strong { color: var(--text); }
+    .research-note { margin: 11px 0 0; color: var(--soft); font-size: 9px; line-height: 1.6; }
+    .research-note a { color: #cbb5f5; }
     .export-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 11px; }
     .field-label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 6px; }
     select { width: 100%; border: 1px solid #44414f; border-radius: 7px; padding: 9px 8px; color: var(--text); background: #23232e; font-size: 11px; min-width: 0; }
@@ -119,7 +133,7 @@
     .toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%) translateY(12px); opacity: 0; pointer-events:none; background: #282331; border:1px solid #675879; color: #ede4f8; padding: 9px 16px; border-radius: 7px; font-size: 11px; transition: opacity .18s,transform .18s; z-index: 100; text-align:center; box-shadow: 0 8px 35px #0008; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
-    @media (max-width: 1030px) { .workspace { grid-template-columns: minmax(0,1fr) 312px; } .shell { padding: 17px; } .control-section { padding: 14px 12px; } .advanced summary { padding: 14px 12px; } .advanced-body { padding: 0 12px 15px; } }
+    @media (max-width: 1030px) { .workspace { grid-template-columns: minmax(0,1fr) 312px; } .shell { padding: 17px; } .control-section { padding: 14px 12px; } .advanced summary, .reality-check summary { padding: 14px 12px; } .advanced-body, .reality-body { padding: 0 12px 15px; } }
     @media (max-width: 780px) { .workspace { grid-template-columns: 1fr; } .dropzone { min-height: 360px; height: 52vh; max-height: 600px; } .controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); } .control-section { border-right: 1px solid var(--line-soft); } .advanced { border-top: 0; } .advanced, .export-section { grid-column: span 2; } .shell { padding: 12px; } }
     @media (max-width: 480px) { .top-right { display: none; } .controls { display: block; } .control-section { border-right: 0; } .toolbar { padding: 10px; } .toolbar-meta { display: block; margin: 2px 0 0; max-width: 175px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .toolbar-actions .btn { padding: 8px; } .toolbar-actions .btn span.optional { display: none; } .dropzone { min-height: 320px; height: 46vh; } .compare { padding: 8px; } .info-line { font-size: 9px; } .info-line .right-info { display: none; } .footer { font-size: 9px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
@@ -192,23 +206,40 @@
         <details class="advanced" id="advanced">
           <summary><span>04 / Advanced settings <span style="font-weight:400;color:var(--soft);font-size:10px">(optional)</span></span><svg class="icon chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
           <div class="advanced-body">
-            <div class="range-group adv-line"><div class="range-top"><label for="grain">Fine grain</label><output id="grainValue">25</output></div><input type="range" id="grain" min="0" max="100" value="25"></div>
-            <div class="range-group adv-line"><div class="range-top"><label for="palette">Color / shade bands</label><output id="paletteValue">15</output></div><input type="range" id="palette" min="0" max="100" value="15"></div>
-            <div class="range-group adv-line"><div class="range-top"><label for="edges">Outline definition</label><output id="edgesValue">0</output></div><input type="range" id="edges" min="0" max="100" value="0"></div>
-            <div class="range-group adv-line"><div class="range-top"><label for="texture">Material texture</label><output id="textureValue">30</output></div><input type="range" id="texture" min="0" max="100" value="30"></div>
-            <div class="range-group adv-line"><div class="range-top"><label for="softness">Softness / pigment bleed</label><output id="softnessValue">5</output></div><input type="range" id="softness" min="0" max="100" value="5"></div>
+            <div class="range-group adv-line"><div class="range-top"><label for="grain">Sensor / film grain</label><output id="grainValue">25</output></div><input type="range" id="grain" min="0" max="100" value="25"><p class="control-hint">Luminance-led and stronger in shadows; keep it restrained.</p></div>
+            <div class="range-group adv-line"><div class="range-top"><label for="toneRoll">Highlight roll-off</label><output id="toneRollValue">30</output></div><input type="range" id="toneRoll" min="0" max="100" value="30"><p class="control-hint">Gently preserves separation near bright values. It cannot repair impossible lighting.</p></div>
+            <div class="range-group adv-line"><div class="range-top"><label for="halation">Warm light bloom</label><output id="halationValue">0</output></div><input type="range" id="halation" min="0" max="100" value="0"><p class="control-hint">Use sparingly for bright practical lights; daylight usually needs none.</p></div>
+            <div class="range-group adv-line"><div class="range-top"><label for="lensFalloff">Lens falloff</label><output id="lensFalloffValue">8</output></div><input type="range" id="lensFalloff" min="0" max="100" value="8"><p class="control-hint">A low, gradual edge exposure falloff—not a heavy vignette.</p></div>
+            <div class="range-group adv-line"><div class="range-top"><label for="palette">Color / shade bands</label><output id="paletteValue">15</output></div><input type="range" id="palette" min="0" max="100" value="15"><p class="control-hint">Keep at zero for photos; visible banding is a synthetic cue.</p></div>
+            <div class="range-group adv-line"><div class="range-top"><label for="edges">Outline definition</label><output id="edgesValue">0</output></div><input type="range" id="edges" min="0" max="100" value="0"><p class="control-hint">For illustration only. Camera photos should not gain ink-like edges.</p></div>
+            <div class="range-group adv-line"><div class="range-top"><label for="texture">Material texture</label><output id="textureValue">30</output></div><input type="range" id="texture" min="0" max="100" value="30"><p class="control-hint">Non-repeating microvariation. Avoid overlaying strong texture on skin or smooth sky.</p></div>
+            <div class="range-group adv-line"><div class="range-top"><label for="softness">Optical softness / pigment bleed</label><output id="softnessValue">5</output></div><input type="range" id="softness" min="0" max="100" value="5"><p class="control-hint">A tiny amount can break clinical sharpness; too much reads waxy.</p></div>
             <div class="range-group adv-line" id="pixelSetting" style="display:none"><div class="range-top"><label for="pixelBlock">Pixel block size</label><output id="pixelBlockValue">5 px</output></div><input type="range" id="pixelBlock" min="2" max="20" value="5"></div>
             <div class="advanced-footer"><span class="section-tip">Same seed = consistent grain</span><button class="btn btn-quiet" id="randomizeBtn" style="padding:5px 7px">New seed</button></div>
           </div>
         </details>
+        <details class="reality-check">
+          <summary><span>05 / Reality check <span style="font-weight:400;color:var(--soft);font-size:10px">(structural)</span></span><svg class="icon chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="reality-body">
+            <p class="reality-intro">Surface finishing helps with polished, overly even texture. Inspect at 100% before export: these failures need a local retouch or a new generation, not another global filter.</p>
+            <ul class="audit-list">
+              <li><strong>Light, shadow &amp; contact:</strong> trace every cast shadow to the same source; feet, objects and hair should meet surfaces convincingly.</li>
+              <li><strong>Reflection &amp; material:</strong> mirrors, glasses, eyes, metal and water must agree with the scene and its light direction.</li>
+              <li><strong>Anatomy &amp; attachments:</strong> check hands, teeth, ears, jewelry, straps, overlap points and object functions one by one.</li>
+              <li><strong>Text, pattern &amp; detail:</strong> zoom into signage, labels, fabrics and foliage for gibberish, repeated motifs or melting joins.</li>
+              <li><strong>Geometry &amp; focus:</strong> verify horizon, vanishing lines, scale and depth-of-field transition; subject and background should share a believable camera setup.</li>
+            </ul>
+            <p class="research-note">Guidance synthesized from an <a href="https://openaccess.thecvf.com/content/ICCV2025W/APAI/papers/Sharma_Explainable_AI-Generated_Image_Forensics_A_Low-Resolution_Perspective_with_Novel_Artifact_ICCVW_2025_paper.pdf" target="_blank" rel="noopener">ICCV artifact taxonomy</a>, a large-scale <a href="https://arxiv.org/abs/2502.11989" target="_blank" rel="noopener">photorealism study</a>, and <a href="https://www.iso.org/obp/ui?_escaped_fragment_=iso%3Astd%3Aiso%3A15739%3Aed-4%3Av1%3Aen" target="_blank" rel="noopener">ISO 15739</a> noise guidance.</p>
+          </div>
+        </details>
         <section class="control-section export-section">
-          <div class="section-head"><span class="section-title">05 / Export</span><span class="section-tip">save to device</span></div>
+          <div class="section-head"><span class="section-title">06 / Export</span><span class="section-tip">save to device</span></div>
           <div class="export-group">
             <label><span class="field-label">Format</span><select id="format"><option value="png">PNG (lossless)</option><option value="jpeg">JPG (smaller)</option><option value="webp">WEBP</option></select></label>
             <label><span class="field-label">Resolution</span><select id="exportSize"><option value="original">Original size</option><option value="preview">Preview size</option></select></label>
           </div>
           <button class="btn btn-primary download" id="download" disabled><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg>Download finished image</button>
-          <div class="footnote">Filters can change texture, color, and edge style. They cannot reliably fix malformed anatomy, perspective, or other structural AI artifacts. No image is sent to a server.</div>
+          <div class="footnote">This is an appearance finisher, not a detector or proof of human authorship. It can refine tone and texture; it cannot make a structurally implausible image reliable. No image is sent to a server.</div>
         </section>
       </aside>
     </main>
@@ -220,13 +251,13 @@
   'use strict';
   const $ = s => document.querySelector(s);
   const presets = {
-    photo:      { label:'Photo / IRL',          grain:32, palette:12, edges:0,  texture:32, softness:5,  contrast:-3, saturation:-7, highlights:35, shadows:4, vignette:9,  block:5 },
-    digital:    { label:'Digital drawing',     grain:10, palette:46, edges:34, texture:22, softness:5,  contrast:1,  saturation:-6, highlights:20, shadows:2, vignette:0,  block:5 },
-    anime:      { label:'Anime / cel',         grain:8,  palette:72, edges:57, texture:14, softness:3,  contrast:2,  saturation:-5, highlights:22, shadows:0, vignette:0,  block:5 },
-    watercolor: { label:'Paint / watercolor',  grain:15, palette:34, edges:6,  texture:76, softness:42, contrast:-8, saturation:-11,highlights:20, shadows:5, vignette:3,  block:5 },
-    pixel:      { label:'Pixel art',           grain:0,  palette:78, edges:27, texture:4,  softness:0,  contrast:5,  saturation:-4, highlights:8,  shadows:0, vignette:0,  block:5 },
-    render:     { label:'3D / CGI render',     grain:41, palette:7,  edges:0,  texture:42, softness:7,  contrast:-5, saturation:-9, highlights:52, shadows:7, vignette:13, block:5 },
-    other:      { label:'Other / mixed',       grain:21, palette:22, edges:9,  texture:28, softness:8,  contrast:-2, saturation:-5, highlights:27, shadows:3, vignette:4,  block:5 }
+    photo:      { label:'Photo / IRL',          grain:22, palette:0,  edges:0,  texture:10, softness:2,  toneRoll:42, halation:0, lensFalloff:7,  contrast:-2, saturation:-5, highlights:29, shadows:3, block:5 },
+    digital:    { label:'Digital drawing',     grain:8,  palette:46, edges:34, texture:16, softness:4,  toneRoll:12, halation:0, lensFalloff:0,  contrast:1,  saturation:-6, highlights:20, shadows:2, block:5 },
+    anime:      { label:'Anime / cel',         grain:5,  palette:72, edges:57, texture:9,  softness:2,  toneRoll:8,  halation:0, lensFalloff:0,  contrast:2,  saturation:-5, highlights:22, shadows:0, block:5 },
+    watercolor: { label:'Paint / watercolor',  grain:13, palette:34, edges:6,  texture:63, softness:42, toneRoll:18, halation:0, lensFalloff:2,  contrast:-8, saturation:-11,highlights:20, shadows:5, block:5 },
+    pixel:      { label:'Pixel art',           grain:0,  palette:78, edges:27, texture:4,  softness:0,  toneRoll:0,  halation:0, lensFalloff:0,  contrast:5,  saturation:-4, highlights:8,  shadows:0, block:5 },
+    render:     { label:'3D / CGI render',     grain:27, palette:0,  edges:0,  texture:13, softness:4,  toneRoll:48, halation:8, lensFalloff:8,  contrast:-4, saturation:-8, highlights:43, shadows:6, block:5 },
+    other:      { label:'Other / mixed',       grain:15, palette:13, edges:7,  texture:14, softness:5,  toneRoll:26, halation:0, lensFalloff:3,  contrast:-2, saturation:-5, highlights:27, shadows:3, block:5 }
   };
   const els = {
     fileInput: $('#fileInput'), drop: $('#dropzone'), empty: $('#empty'), compare: $('#compare'), stage: $('#stage'),
@@ -235,7 +266,7 @@
     info: $('#presetInfo'), queue: $('#fileQueue'), strength: $('#strength'),
     download: $('#download'), reroll: $('#reroll'), pixelSetting: $('#pixelSetting'), toast: $('#toast')
   };
-  const sliders = ['grain','palette','edges','texture','softness','pixelBlock'];
+  const sliders = ['grain','toneRoll','halation','lensFalloff','palette','edges','texture','softness','pixelBlock'];
   let preset = 'photo', tone='neutral', seed=971, bitmap=null, files=[], activeFile=-1;
   let sourceCanvas = document.createElement('canvas');
   let split = 50, previewTimer=null, busy=false, requested=false, currentToken=0, previewRevision=0, toastTimer;
@@ -245,8 +276,8 @@
   function getParams() {
     return { ...presets[preset], type:preset, tone, seed,
       strength: Number(els.strength.value)/100,
-      grain: +$('#grain').value, palette: +$('#palette').value, edges: +$('#edges').value,
-      texture: +$('#texture').value, softness: +$('#softness').value, block: +$('#pixelBlock').value };
+      grain: +$('#grain').value, toneRoll: +$('#toneRoll').value, halation: +$('#halation').value, lensFalloff: +$('#lensFalloff').value,
+      palette: +$('#palette').value, edges: +$('#edges').value, texture: +$('#texture').value, softness: +$('#softness').value, block: +$('#pixelBlock').value };
   }
   function syncRange(name) { const value = $('#'+name).value; $('#'+name+'Value').textContent = name==='pixelBlock' ? value+' px' : value; }
   function setPreset(next) {
@@ -357,6 +388,14 @@
     z=Math.imul(z^(z>>>13),1274126177);
     return ((z^(z>>>16))>>>0)/4294967295;
   }
+  // Interpolated value noise avoids the visibly repeating wave texture of simple overlays.
+  function smoothNoise(x,y,s,scale) {
+    const gx=Math.floor(x/scale), gy=Math.floor(y/scale);
+    const tx=x/scale-gx, ty=y/scale-gy;
+    const sx=tx*tx*(3-2*tx), sy=ty*ty*(3-2*ty);
+    const a=hash(gx,gy,s), b=hash(gx+1,gy,s), c=hash(gx,gy+1,s), d=hash(gx+1,gy+1,s);
+    return ((a+(b-a)*sx)+((c+(d-c)*sx)-(a+(b-a)*sx))*sy)*2-1;
+  }
   function processCanvas(src, dest, p) {
     const w=src.width,h=src.height;
     dest.width=w;dest.height=h;
@@ -366,7 +405,7 @@
     const source=src.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h);
     const original=source.data;
     const out=ctx.createImageData(w,h), dst=out.data;
-    let smoothed=null,pixeled=null;
+    let smoothed=null,pixeled=null,halationMap=null;
     if(p.softness>1 && p.type!=='pixel') {
       const c=document.createElement('canvas');c.width=w;c.height=h;
       const c2=c.getContext('2d',{willReadFrequently:true});
@@ -374,6 +413,16 @@
       c2.filter=`blur(${blurRadius.toFixed(2)}px)`;
       c2.drawImage(src,0,0);
       smoothed=c2.getImageData(0,0,w,h).data;
+    }
+    const photoLike=p.type==='photo'||p.type==='render'||p.type==='other';
+    const halation=p.halation/100*a*(photoLike?1:0);
+    if(halation>.001) {
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const c2=c.getContext('2d',{willReadFrequently:true});
+      const blurRadius=Math.max(1.2,Math.min(5.5,Math.min(w,h)/700*2.3));
+      c2.filter=`blur(${blurRadius.toFixed(2)}px)`;
+      c2.drawImage(src,0,0);
+      halationMap=c2.getImageData(0,0,w,h).data;
     }
     if(p.type==='pixel') {
       const block=Math.max(2,Math.round(p.block*Math.min(1.9,Math.max(.7,Math.min(w,h)/900))));
@@ -389,7 +438,7 @@
       const colors=(pixeled && p.type==='pixel')?pixeled:original;
       for(let j=0,k=0;j<colors.length;j+=4,k++) lum[k]=(colors[j]*77+colors[j+1]*150+colors[j+2]*29)>>8;
     }
-    const intensityGrain=p.grain/100*a*(p.type==='watercolor'?18:22);
+    const intensityGrain=p.grain/100*a*(p.type==='watercolor'?18:18);
     const texture=p.texture/100*a;
     const bandAmount=Math.pow(p.palette/100,1.08)*a*(p.type==='anime'||p.type==='pixel'?.9:.7);
     const qSteps=p.type==='pixel'?7:(p.type==='anime'?11:(p.type==='digital'?13:17));
@@ -401,7 +450,8 @@
     const contrastFactor=1+(p.contrast/100)*a;
     const highlight=p.highlights/100*a;
     const shadow=p.shadows/100*a;
-    const vignette=p.vignette/100*a;
+    const toneRoll=p.toneRoll/100*a;
+    const lensFalloff=p.lensFalloff/100*a;
     const usePaper=p.type==='watercolor';
     const seedValue=p.seed|0;
     const invW=1/w,invH=1/h;
@@ -428,6 +478,17 @@
         if(tone==='warm') {r+=6.7*a;g+=1.1*a;b-=6.2*a;}
         else if(tone==='cool') {r-=3.6*a;g+=1.5*a;b+=7.4*a;}
         else if(tone==='lavender') {r+=3.8*a;g-=3.4*a;b+=8.5*a;}
+        // A soft shoulder keeps highlight transition gradual instead of abruptly clipping bright detail.
+        if(toneRoll>0 && photoLike) {
+          const maxChannel=Math.max(r,g,b);
+          const knee=184;
+          if(maxChannel>knee) {
+            const t=clamp((maxChannel-knee)/(255-knee),0,1);
+            const rolled=knee+(255-knee)*Math.pow(t,1+toneRoll*.72);
+            const scale=rolled/Math.max(1,maxChannel);
+            r*=scale;g*=scale;b*=scale;
+          }
+        }
         // Palette quantization is mixed back into the source so some gradients survive.
         if(bandAmount>0) {
           let n=0;
@@ -449,23 +510,30 @@
           r-=ink;g-=ink;b-=ink;
         }
         if(texture>0 || intensityGrain>0) {
-          // 2 frequencies of non-grid organic structure, one fine grain layer.
-          const coarse=(Math.sin(x*.117+y*.071+seedValue*.031)*Math.sin(y*.133-x*.067+seedValue*.012)+Math.sin(x*.033-y*.029+seedValue*.077)*.46)/1.46;
+          // Low-frequency, non-periodic material variation plus sensor-like luminance grain.
+          const coarse=smoothNoise(x,y,seedValue,19)*.7+smoothNoise(x,y,seedValue+761,47)*.3;
           const fine=(hash(x,y,seedValue)-.5)*2;
           const tooth=(hash(x>>1,y>>1,seedValue+881)-.5)*2;
-          const material=coarse*(usePaper?11.4:5.8)*texture+tooth*(usePaper?5.1:1.7)*texture;
-          const grain=fine*intensityGrain*(usePaper?.37:1);
+          const material=coarse*(usePaper?10.2:3.4)*texture+tooth*(usePaper?4.8:1.05)*texture;
+          const shadowWeight=.47+.73*(1-Math.min(1,Math.max(0,light)));
+          const grain=fine*intensityGrain*shadowWeight*(usePaper?.37:1);
           const total=material+grain;
           r+=total;g+=total;b+=total;
-          // Slight separation between color layers, without a colored-noise explosion.
+          // Keep chroma noise quiet; real camera noise is perceived mostly as luminance variation.
           if(!usePaper && p.type!=='pixel') {
-            const separation=coarse*texture*2.3;
+            const separation=(hash(x+31,y-17,seedValue)-.5)*texture*.42;
             r+=separation;b-=separation*.75;
           }
         }
-        if(vignette>0) {
+        if(halationMap) {
+          const hr=halationMap[j], hg=halationMap[j+1], hb=halationMap[j+2];
+          const haloLight=(hr*.2126+hg*.7152+hb*.0722)/255;
+          const bloom=Math.pow(Math.max(0,(haloLight-.73)/.27),1.7)*halation*11;
+          r+=bloom*1.28;g+=bloom*.48;b+=bloom*.08;
+        }
+        if(lensFalloff>0) {
           const vx=(x*invW-.5)*2;
-          const v=Math.min(1,Math.pow(vx*vx+vy*vy,1.2)) * vignette*17;
+          const v=Math.min(1,Math.pow(vx*vx+vy*vy,1.42)) * lensFalloff*12;
           r-=v;g-=v;b-=v;
         }
         dst[j]=clamp(r);dst[j+1]=clamp(g);dst[j+2]=clamp(b);dst[j+3]=original[j+3];
