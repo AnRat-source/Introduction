@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#020604" />
-  <title>NULL ATLAS | Production Console 0.8</title>
+  <title>NULL ATLAS | Production Console 0.9</title>
   
   <style>
     :root { color-scheme:dark; --bg:#020604; --panel:rgba(5,13,10,.96); --panel2:#0b1912; --line:#234632; --muted:#76917c; --text:#def9df; --green:#83f4a0; --red:#fa5965; --amber:#f3c78e; --mono:'Cascadia Code','Cascadia Mono','JetBrains Mono',Consolas,monospace; }
@@ -135,7 +135,7 @@
     #overlayCanvas { z-index:2; pointer-events:none }
     #map::after { z-index:3 }
     .osmTile { position:absolute; top:0; left:0; width:256px; height:256px; display:block; overflow:hidden; will-change:transform; transform-origin:top left; }
-    .osmTile img { position:absolute; display:block; max-width:none; image-rendering:auto; filter:var(--tile-color-filter,url(#noLabelColor)); }
+    .osmTile img { position:absolute; display:block; max-width:none; image-rendering:auto; filter:var(--tile-color-filter,url(#tileFallbackColor)); }
     .presetPreview { display:flex;align-items:center;gap:11px;padding:10px 11px;margin-top:10px;border:1px solid #345643;background:#0a1d12;border-radius:8px;min-height:63px }
     .presetSwatch { width:28px;height:28px;border-radius:50%;border:2px solid #ff5865;background:#ff586522;box-shadow:inset 0 0 0 5px #ff586522;flex:none }
     .presetPreview strong {display:block;font-size:11px;color:#e6fee8;margin-bottom:5px}
@@ -203,12 +203,12 @@
 </div>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute">
   <filter id="tileFallbackColor" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="-0.06 -0.05 0.11 0 0.026  -0.49 -0.12 0.46 0 0.258  -0.27 -0.07 0.34 0 0.112  0 0 0 1 0"/></filter>
-  <filter id="noLabelColor" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.2 0.1 0 0 0  -0.50 -0.10 1.20 0 0  -0.25 -0.20 0.55 0 0  0 0 0 1 0"/></filter>
+
 </svg>
 <div class="shell">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="brandtop"><div class="brandname">NULL ATLAS<small>GLOBAL SIGNAL ARRAY / V.08</small></div><div class="stamp">FILM<br>PROP</div></div>
+      <div class="brandtop"><div class="brandname">NULL ATLAS<small>GLOBAL SIGNAL ARRAY / V.09</small></div><div class="stamp">FILM<br>PROP</div></div>
       <p class="description">GLOBAL TELEMETRY SYSTEM <span class="brandIndicator">● SYSTEM ONLINE</span></p>
     </div>
     <div class="mainScroll">
@@ -254,12 +254,12 @@
       </div>
       <div class="section">
         <div class="labelrow"><span class="eyebrow">04 / Map layers</span><span class="subtle">STYLE CONTROLS</span></div>
-        <label class="fieldLabel" for="basemapSelect">OpenStreetMap-based basemap</label>
+        <label class="fieldLabel" for="basemapSelect">OpenStreetMap basemap</label>
         <select class="dropdown" id="basemapSelect">
-          <option value="nolabels">NO LABELS / dark terrain & roads</option>
-          <option value="osm">OSM STANDARD / original place names</option>
+          <option value="matrix">MATRIX / dark green terrain</option>
+          <option value="osm">OSM ORIGINAL / unfiltered streets</option>
         </select>
-        <p class="footnote">NO LABELS removes embedded city names. STANDARD restores the original map typography.</p>
+        <p class="footnote">Both modes use the official OpenStreetMap tile server. In Matrix mode, map labels are tinted along with the terrain. Original mode keeps their normal colors. Raster labels cannot be removed independently.</p>
         <label class="check-row">Relay markers <input id="relayLayer" type="checkbox" checked /></label>
         <label class="check-row">Air / sea activity <input id="trafficLayer" type="checkbox" checked /></label>
         <div class="footnote" style="margin:1px 0 8px;color:#b8dcbc">Map tiles reload at each zoom level to keep available street detail.</div>
@@ -290,20 +290,21 @@
   </aside>
   <button class="mobile-toggle" id="mobileToggle" aria-label="Collapse or expand controls">HIDE PANEL</button>
   <header class="topbar"><div class="topbarL"><span class="blinker"></span><span class="topbar-title">GLOBAL SIGNAL MONITOR / OPEN MAP</span></div><div class="topbarR"><span>STATUS <strong>ONLINE</strong></span><span id="utcTime">00:00:00 UTC</span></div></header>
-  <div class="mini-footer"><span class="pill">OSM NIGHT / LABELS OFF</span><span class="pill" id="zoomLevel">OSM Z2.0 / 19</span><span class="pill">REFERENCE INDEX / 07</span></div>
+  <div class="mini-footer"><span class="pill" id="basemapBadge">OSM / MATRIX</span><span class="pill" id="zoomLevel">OSM Z2.0 / 19</span><span class="pill">REFERENCE INDEX / 07</span></div>
   <section class="status" aria-live="polite"><div class="metricHead">// NETWORK TELEMETRY</div><div class="statGrid"><div class="metric"><strong id="totalPulses">0</strong><span>SEQUENCES SENT</span></div><div class="metric red"><strong id="activePulses">0</strong><span>IN TRANSIT</span></div><div class="metric"><strong id="targetCount">0</strong><span>DESTINATIONS QUEUED</span></div><div class="metric"><strong id="visualRings">0</strong><span>ACTIVE RINGS</span></div><div class="metric"><strong id="relayCount">50</strong><span>NETWORK NODES</span></div><div class="metric"><strong id="batchCount">0</strong><span>BATCHES SENT</span></div></div><div class="eventHeader">// EVENT FEED</div><div class="events" id="events"><div class="event"><b>ATLAS READY</b> · Select a location</div></div></section>
   <div class="maptip" id="maptip"><strong>DESTINATION MODE</strong><div>Tap the map to add locations. Zoom in for fine placement.</div></div>
   <div class="mapScale" id="mapScale" aria-live="off"><div class="scaleTitle">GROUND DISTANCE / MAP SCALE</div><div class="scaleLine" id="scaleLine"></div><div class="scaleText" id="scaleText">Calculating scale...</div></div>
   <div class="maptools"><button class="tool" id="zoomIn" aria-label="Zoom in">+</button><button class="tool" id="zoomOut" aria-label="Zoom out">−</button><button class="tool" id="resetView" aria-label="Reset map view">⌖</button></div>
   <div id="cursor-hud">MAP POSITION // <span id="cursorPos">move pointer over map</span></div>
-  <div class="osm-attribution" id="mapCredits">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · © <a href="https://carto.com/attribution/" target="_blank" rel="noopener noreferrer">CARTO</a></div>
+  <div class="osm-attribution" id="mapCredits">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></div>
 </div>
 <script>
 (() => {
   'use strict';
   // Entire renderer is embedded, with no third-party JS libraries.
-  // The OSM-derived no-label basemap is rendered with native image tiles, and
-  // a toggle restores standard OSM raster tiles. No third-party JS libraries.
+  // Both basemap modes use official OpenStreetMap raster image tiles.
+  // Matrix mode uses an SVG color matrix; Original uses unfiltered tiles.
+  // No external JS libraries or API keys.
   const $ = id => document.getElementById(id);
   const out = (id,value) => { const e=$(id); if(e)e.textContent=String(value); };
   const clamp=(v,a,b)=>Math.max(a,Math.min(v,b));
@@ -408,18 +409,17 @@
     $('presetSwatch').style.background=`rgba(${p.color.join(',')},.2)`;
     $('presetSwatch').style.boxShadow=`inset 0 0 0 5px rgba(${p.color.join(',')},.1)`;
   }
-  let mapStyle='nolabels';
+  let mapStyle='matrix';
   const mapSources={
-    nolabels:(z,x,y)=>`https://basemaps.cartocdn.com/dark_nolabels/${z}/${x}/${y}.png`,
+    matrix:(z,x,y)=>`https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
     osm:(z,x,y)=>`https://tile.openstreetmap.org/${z}/${x}/${y}.png`
   };
   function updateBasemapStyle(){
     mapStyle=$('basemapSelect').value;
-    tileLayer.style.setProperty('--tile-color-filter',mapStyle==='nolabels'?'url(#noLabelColor)':'url(#tileFallbackColor)');
-    $('mapCredits').innerHTML=mapStyle==='nolabels'
-      ? '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · © <a href="https://carto.com/attribution/" target="_blank" rel="noopener noreferrer">CARTO</a>'
-      : '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>';
-    $('tileNotice').hidden=true;failures=0;successes=0;failedNotice=false;
+    tileLayer.style.setProperty('--tile-color-filter',mapStyle==='matrix'?'url(#tileFallbackColor)':'none');
+    out('basemapBadge',mapStyle==='matrix'?'OSM / MATRIX':'OSM / ORIGINAL');
+    $('tileNotice').hidden=true;
+    failures=0;successes=0;failedNotice=false;
     scheduleTiles();
   }
   let queued=false,moving=false,dragged=false,startTouch=null,pinchDist=0;
@@ -500,7 +500,7 @@
       img.onload=()=>{
         tile.state='ready';successes++;
         if(successes===1){
-          log((mapStyle==='nolabels'?'Label-free OSM-based map':'Standard OpenStreetMap map')+' loaded');
+          log('OpenStreetMap tiles loaded');
           $('maptip').querySelector('strong').textContent='ADD DESTINATIONS';
           $('tileNotice').hidden=true;
         }
@@ -511,7 +511,7 @@
         if(!failedNotice && failures>=3 && successes===0){
           failedNotice=true;
           const note=$('tileNotice');
-          note.textContent='Map tiles could not load in this browser. Check your internet connection or try the other basemap setting. If opened directly from Downloads, host the HTML from HTTPS. No inaccurate fallback geography is substituted.';
+          note.textContent='OpenStreetMap tiles could not load. Check your connection. Some browsers block map requests from local Downloads (content:// or file://); if that happens, open this HTML from an HTTPS host such as GitHub Pages.';
           note.hidden=false;
           log('Selected map tiles unavailable. Try another basemap or HTTPS hosting.',true);
         }
@@ -720,7 +720,7 @@
   $('relaySearch').addEventListener('input',paintList);
   $('focusRelay').addEventListener('click',()=>{const r=relays[state.selected];state.lon=r.coord[0];state.lat=r.coord[1];state.z=Math.max(12,state.z);scheduleTiles();});
   $('profileSelect').addEventListener('change',syncPresetPreview);
-  $('basemapSelect').addEventListener('change',()=>{updateBasemapStyle();log(mapStyle==='nolabels'?'City labels hidden: OSM-based dark map':'Original OpenStreetMap labels restored');});
+  $('basemapSelect').addEventListener('change',()=>{updateBasemapStyle();log(mapStyle==='matrix'?'Matrix map enabled':'Original OpenStreetMap colors restored');});
   $('pulseBtn').addEventListener('click',sendBatch);
   $('pauseBtn').addEventListener('click',()=>{state.paused=!state.paused;$('pauseBtn').textContent=state.paused?'RESUME SEQUENCES':'PAUSE SEQUENCES';log(state.paused?'Sequence playback paused':'Sequence playback resumed');});
   $('clearBtn').addEventListener('click',()=>{pulses.length=0;out('activePulses',0);out('visualRings',0);log('Active sequences cleared');});
