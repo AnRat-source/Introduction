@@ -157,8 +157,13 @@
           },
           {
             "type": "file",
-            "name": "outbreak_cityfall.html",
-            "path": "FileExplorer/Misc/Games/outbreak_cityfall.html"
+            "name": "Null-Atlas.html",
+            "path": "FileExplorer/Misc/Games/Null-Atlas.html"
+          },
+          {
+            "type": "file",
+            "name": "outbreak_cityfall.iframe",
+            "path": "FileExplorer/Misc/Games/outbreak_cityfall.iframe"
           },
           {
             "type": "file",
