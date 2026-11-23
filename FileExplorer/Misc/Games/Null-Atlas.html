@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#020604" />
+  <title>NULL ATLAS v0.6 | Geographic Scale Overlay</title>
+  
+  <style>
+    :root { color-scheme:dark; --bg:#020604; --panel:rgba(5,13,10,.96); --panel2:#0b1912; --line:#234632; --muted:#76917c; --text:#def9df; --green:#83f4a0; --red:#fa5965; --amber:#f3c78e; --mono:'Cascadia Code','Cascadia Mono','JetBrains Mono',Consolas,monospace; }
+    * { box-sizing:border-box }
+    html,body { padding:0; margin:0; width:100%; height:100%; background:var(--bg); overflow:hidden; font-family:var(--mono); color:var(--text) }
+    button,input { font:inherit }
+    button { cursor:pointer; -webkit-tap-highlight-color:transparent }
+    button:focus-visible,input:focus-visible { outline:2px solid #b0ffc3; outline-offset:2px }
+    #map { position:fixed; inset:0; background:#020604 }
+    #map::after { content:''; position:absolute; inset:0; pointer-events:none; z-index:2; background:linear-gradient(transparent 50%,rgba(0,0,0,.09) 50%); background-size:100% 4px; opacity:.22 }
+    .maplibregl-ctrl-attrib { background:rgba(2,9,5,.8)!important; color:#9eb49c!important; font:10px var(--mono)!important }
+    .maplibregl-ctrl-attrib a { color:#a5d7b1!important }
+    .maplibregl-ctrl-bottom-right { bottom:0; }
+    .shell { position:fixed; inset:0; pointer-events:none; z-index:5 }
+    .sidebar,.topbar,.status,.maptip,.maptools,.mini-footer,.mobile-toggle { pointer-events:auto }
+    .sidebar { position:absolute; top:13px; left:13px; bottom:13px; width:326px; display:flex; flex-direction:column; border:1px solid #315640; border-radius:12px; overflow:hidden; background:var(--panel); backdrop-filter:blur(16px); box-shadow:0 10px 50px #0008; }
+    .brand { padding:18px 18px 15px; border-bottom:1px solid var(--line); flex:none }
+    .brandtop { display:flex; align-items:center; justify-content:space-between; gap:12px }
+    .brandname { font-size:23px; font-weight:800; letter-spacing:-1.3px; line-height:1.1; color:#a8fabb }
+    .brandname small { display:block; font-size:10px; letter-spacing:2.1px; font-weight:500; color:#658972; margin-top:7px }
+    .stamp { border:1px solid #3c6850; padding:6px 8px; border-radius:5px; font-size:9px; color:#92d9a3; white-space:nowrap }
+    .description { margin:13px 0 0; color:#a7bda8; font-size:11px; line-height:1.6 }
+    .mainScroll { overflow:auto; padding:0 15px 15px; scrollbar-width:thin; scrollbar-color:#325440 transparent }
+    .section { padding:17px 0 15px; border-bottom:1px solid #263f30 }
+    .section:last-child { border-bottom:0 }
+    .labelrow { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:10px }
+    .eyebrow { color:#9cbb9f; text-transform:uppercase; font-size:10px; letter-spacing:1.3px; font-weight:700 }
+    .subtle { font-size:10px; color:#789a80 }
+    .relayCurrent { border:1px solid #40694c; border-radius:8px; background:#0b2015; padding:11px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px }
+    .relayCurrent strong { display:block; font-size:13px; color:#b2fac4; margin-bottom:5px }
+    .relayCurrent span { font-size:10px; color:#80a18c }
+    .relayBtn { padding:7px 10px; color:#a9eab4; border:1px solid #426d50; background:#10291a; border-radius:5px; font-size:10px }
+    .relay-list { max-height:160px; overflow-y:auto; margin-top:8px; border:1px solid #1f3829; border-radius:8px; scrollbar-width:thin; scrollbar-color:#335e43 transparent }
+    .relay-option { width:100%; display:flex; align-items:center; justify-content:space-between; padding:9px 12px; background:none; border:0; color:#aac5ad; text-align:left; border-bottom:1px solid #1a3223; font-size:11px }
+    .relay-option:last-child { border-bottom:0 }
+    .relay-option.active,.relay-option:hover { background:#153422; color:#e0ffdf }
+    .relay-option span:last-child { color:#6c9073; font-size:9px }
+    .search { border:1px solid #32543c; padding:9px 10px; width:100%; border-radius:6px; background:#07130b; color:#d7f9db; margin-top:9px; font-size:11px }
+    .coordRow { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:8px 0 13px; font-size:11px }
+    .coordRow b { color:#bdf8c8; font-weight:600; font-variant-numeric:tabular-nums; font-size:11px }
+    .select-hint { border:1px dashed #3d6549; padding:12px; font-size:11px; color:#a2c2a6; border-radius:8px; line-height:1.6; background:#07170c }
+    .select-hint b { color:#e3ffde }
+    .two-cols { display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    .boxInput { background:#09180f; border:1px solid #284632; border-radius:8px; padding:11px }
+    .boxInput label { display:block; font-size:9px; letter-spacing:.7px; color:#86a58c; margin-bottom:9px; text-transform:uppercase }
+    .boxInput strong { display:block; color:#e3ffe4; font-size:17px; font-weight:700; margin:4px 0 8px }
+    input[type=range] { width:100%; accent-color:#99eea4; cursor:pointer; height:15px; margin:0 }
+    .play-btn { width:100%; margin-top:13px; padding:13px; border:1px solid #a2ffb0; background:#a8ffba; color:#001c0d; border-radius:8px; font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:1.4px }
+    .play-btn:hover:not(:disabled) { filter:brightness(1.1) }
+    .play-btn:disabled { opacity:.38; cursor:not-allowed }
+    .actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:9px }
+    .minor-btn { border:1px solid #3a6047; background:#11251a; color:#c5e5c7; padding:10px; font-size:11px; border-radius:6px }
+    .minor-btn:hover { background:#1b3624 }
+    .check-row { display:flex; align-items:center; justify-content:space-between; font-size:11px; color:#b1cbb4; padding:7px 0; cursor:pointer }
+    .check-row input { accent-color:#90efa8; width:15px; height:15px }
+    .footnote { font-size:10px; line-height:1.55; color:#799b7f; margin:10px 0 0 }
+    .topbar { position:absolute; top:14px; left:358px; right:16px; height:50px; display:flex; align-items:center; justify-content:space-between; padding:0 13px; background:rgba(4,15,9,.89); border:1px solid #254331; border-radius:9px; backdrop-filter:blur(12px); gap:10px }
+    .topbarL { display:flex; align-items:center; gap:11px; min-width:0 }
+    .blinker { width:8px;height:8px;border-radius:50%;background:#85e79a;box-shadow:0 0 10px #84e999; flex:none;animation:blink 2.4s infinite }
+    @keyframes blink { 50% {opacity:.4} }
+    .topbar-title { font-size:11px; font-weight:700; letter-spacing:1px; color:#b0d9b6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+    .topbarR { display:flex; gap:14px; align-items:center; color:#9aa99e; font-size:10px; white-space:nowrap }
+    .topbarR strong { color:#98ebb1 }
+    .status { position:absolute; right:16px; top:76px; width:256px; padding:14px; border:1px solid #2c5038; border-radius:9px; background:rgba(4,14,8,.91); backdrop-filter:blur(10px) }
+    .metricHead { font-size:10px; letter-spacing:1px; color:#8bad92; margin-bottom:13px }
+    .statGrid { display:grid; grid-template-columns:1fr 1fr; gap:9px }
+    .metric { background:#0b1b10; border:1px solid #254032; padding:11px; border-radius:7px; min-height:66px }
+    .metric strong { display:block; font-size:22px; color:#b6ffc7; font-weight:700; line-height:1.3; font-variant-numeric:tabular-nums }
+    .metric span { display:block; font-size:9px; margin-top:5px; color:#7f9e85; line-height:1.4 }
+    .metric.red strong { color:#ff8587 }
+    .eventHeader { font-size:10px; color:#9bbb9d; margin-top:13px; padding:11px 0 7px; border-top:1px solid #294631 }
+    .events { display:flex; flex-direction:column; max-height:136px; overflow:auto; gap:5px }
+    .event { font-size:10px; color:#8bb297; border-left:2px solid #3c6c4a; padding:6px 0 6px 8px; background:#07150b }
+    .event b { font-weight:500; color:#bbf4c2 }
+    .event.red { border-color:#d05a65 }
+    .event.red b { color:#fa8f99 }
+    .maptip { position:absolute; left:358px; bottom:31px; border:1px solid #2b4935; padding:9px 12px; background:rgba(4,15,9,.92); border-radius:7px; color:#aed4b2; font-size:10px; max-width:310px; line-height:1.5 }
+    .maptip strong { color:#baffc5 }
+    .maptools { position:absolute; bottom:33px; right:15px; display:flex; flex-direction:column; gap:7px }
+    .tool { width:36px; height:36px; border-radius:7px; border:1px solid #34513c; background:rgba(3,17,8,.94); color:#c2f4c6; font-size:19px; }
+    .tool:hover { background:#143823 }
+    .mini-footer { position:absolute; top:72px; left:358px; display:flex; gap:8px; flex-wrap:wrap; max-width:600px }
+    .pill { background:rgba(5,21,12,.9); border:1px solid #27583a; color:#8ac49b; border-radius:5px; font-size:9px; letter-spacing:.3px; padding:6px 8px }
+    .pill.red { border-color:#723d48; color:#edabb0 }
+    .mobile-toggle { display:none }
+    #cursor-hud { position:absolute; left:358px; top:113px; pointer-events:none; font-size:9px; color:#80a88b; text-shadow:0 1px 4px #000 }
+    @media(max-width:850px) {
+      .sidebar { top:auto; bottom:10px; left:10px; right:10px; width:auto; height:min(410px, 53vh); border-radius:10px; transition:height .25s ease }
+      .sidebar.collapsed { height:58px }
+      .sidebar.collapsed .mainScroll { display:none }
+      .sidebar.collapsed .brand { border:0; padding:10px 13px }
+      .sidebar.collapsed .brandname { font-size:16px }
+      .sidebar.collapsed .brandname small { margin-top:4px; font-size:8px }
+      .sidebar.collapsed .description,.sidebar.collapsed .stamp { display:none }
+      .mobile-toggle { display:block; color:#c9fad0; background:#143b23; border:1px solid #427650; border-radius:6px; padding:9px 11px; position:absolute; z-index:7; bottom:20px; right:22px; font-size:10px }
+      .topbar { left:10px; right:10px; top:10px; height:46px }
+      .topbarR span:not(:last-child) { display:none }
+      .topbar-title { font-size:10px }
+      .status { top:64px; right:10px; width:207px; padding:9px }
+      .metric { min-height:56px; padding:8px }
+      .metric strong { font-size:18px }
+      .metric span { font-size:8px }
+      .metricHead,.eventHeader { font-size:9px }
+      .events { max-height:70px }
+      .mini-footer { left:10px; top:64px; right:228px }
+      .pill { font-size:8px; max-width:145px }
+      #zoomLevel { display:none }
+      .maptip { left:10px; top:145px; bottom:auto; padding:7px; width:180px; font-size:9px }
+      #cursor-hud { display:none }
+      .maptools { right:10px; bottom:calc(min(410px, 53vh) + 23px) }
+      .sidebar.collapsed~.maptools { bottom:80px }
+      .maplibregl-ctrl-bottom-right { bottom:74px }
+    }
+    @media(max-width:450px) {
+      .status { width:184px }
+      .mini-footer { right:200px }
+      .maptip { max-width:155px }
+      .topbar-title { letter-spacing:.1px }
+      .topbarR { font-size:9px }
+      .brand { padding:14px }
+    }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important } }
+
+    #map { touch-action:none; user-select:none; overflow:hidden; cursor:crosshair; background:#081c12 }
+    #map canvas,#tileLayer { position:absolute; inset:0; display:block }
+    #backgroundCanvas { z-index:0; }
+    #tileLayer { z-index:1; overflow:hidden; pointer-events:none }
+    #overlayCanvas { z-index:2; pointer-events:none }
+    #map::after { z-index:3 }
+    .osmTile { position:absolute; top:0; left:0; width:256px; height:256px; display:block; overflow:hidden; will-change:transform; transform-origin:top left; }
+    .osmTile img { position:absolute; display:block; max-width:none; image-rendering:auto; filter:url(#tileFallbackColor); }
+    .tileNotice { position:absolute; z-index:4; top:50%; left:50%; transform:translate(-50%,-50%); width:min(90vw,375px); padding:16px 18px; border:1px solid #55745b; border-radius:8px; color:#cee4ca; font-size:12px; line-height:1.6; text-align:center; background:rgba(1,12,6,.95); pointer-events:none; }
+    .tileNotice[hidden] { display:none; }
+    .mapScale { position:absolute; left:358px; bottom:98px; pointer-events:none; background:rgba(4,16,9,.89); border:1px solid #31543b; border-radius:7px; padding:8px 10px; min-width:120px; color:#addbb6; font-size:9px; z-index:6; }
+    .scaleTitle {color:#78a88c; letter-spacing:.45px; margin-bottom:8px;}
+    .scaleLine {height:6px; border-left:2px solid #a0e7b1; border-bottom:2px solid #a0e7b1; border-right:2px solid #a0e7b1; width:100px;}
+    .scaleText {margin-top:6px; font-variant-numeric:tabular-nums;}
+    @media(max-width:850px) {
+      .mapScale {left:10px;bottom:78px; padding:6px 8px;}
+      #sidebar:not(.collapsed)~.mapScale { bottom:calc(min(520px, 66vh) + 23px); }
+    }
+    .osm-attribution { pointer-events:auto; position:absolute; z-index:7; right:15px; bottom:3px; font-size:9px; color:#8bb59a; background:rgba(1,10,5,.9); border:1px solid #24462e; border-radius:4px; padding:4px 6px }
+    .osm-attribution a { color:#a0ddb1; text-decoration:none }
+    @media(max-width:850px) {.osm-attribution { right:8px; bottom:7px; font-size:8px; }.tileNotice { top:58%; font-size:11px; }}
+    @media(max-width:600px) { .topbarR span:first-child { display:none } }
+
+    .target-list { display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;overscroll-behavior:contain;padding:2px 2px 2px 0;scrollbar-color:#3b6249 transparent;scrollbar-width:thin }
+    .emptyQueue { font-size:10px;line-height:1.5;color:#789c80;border:1px dashed #345440;border-radius:6px;padding:14px;text-align:center }
+    .targetRow { background:#081a0e;border:1px solid #244a31;border-radius:7px;padding:9px 8px;display:flex;flex-direction:column;gap:6px }
+    .targetRow.selected { border-color:#a5535c;background:#1a1613 }
+    .targetRow.muted { opacity:.53 }
+    .targetHeadline { display:flex;align-items:center;gap:7px;width:100%;min-width:0 }
+    .targetHeadline input { accent-color:#f9747e;width:15px;height:15px;flex:none }
+    .targetFocus { color:#e9c8c7;border:0;background:none;padding:2px;text-align:left;font-size:9px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
+    .removeTarget { background:none;color:#c99e9e;border:1px solid #4d3136;border-radius:5px;line-height:17px;font-size:16px;width:25px;height:24px;flex:none }
+    .dropdown,.tinyDropdown { display:block;width:100%;color:#bee7ca;background:#07170d;border:1px solid #365941;border-radius:6px;font-family:var(--mono) }
+    .dropdown {padding:11px 8px;font-size:10px;min-height:40px }
+    .tinyDropdown {padding:6px 5px;font-size:9px;min-height:30px }
+    .fieldLabel { display:block;margin:11px 0 6px;color:#8fb99b;text-transform:uppercase;font-size:9px;letter-spacing:.5px }
+    @media(max-width:850px) { .target-list {max-height:180px} .sidebar {height:min(520px,66vh)} .maptools {bottom:calc(min(520px,66vh) + 23px)} }
+
+    /* Dataset explorer is informational: no source site coordinates are loaded into the simulator. */
+    .dataIntro { border:1px solid #3b6250; background:#0a1c13; border-radius:8px; padding:11px; font-size:10px; line-height:1.65; color:#b4cfbb }
+    .dataIntro strong { color:#bbf5c4; display:block; font-size:11px; letter-spacing:.35px; margin-bottom:3px }
+    .dataStats { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0 }
+    .dataStat { border:1px solid #2a5038; border-radius:7px; padding:10px; background:#08180e; min-width:0 }
+    .dataStat b { display:block;font-size:21px;color:#bbfacb;font-variant-numeric:tabular-nums }
+    .dataStat span { display:block;font-size:9px;color:#86a68e;line-height:1.5;margin-top:4px }
+    .tagFlow { display:flex;flex-wrap:wrap;gap:5px;margin-top:9px }
+    .tag { color:#a7cdb2;font-size:9px;padding:5px 7px;border:1px solid #335741;background:#10251a;border-radius:4px }
+    .indexList { display:flex; flex-direction:column;gap:5px;margin-top:9px;max-height:200px;overflow:auto;scrollbar-width:thin;scrollbar-color:#315740 transparent }
+    .indexRow { display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0b1d11;border:1px solid #254a32;border-radius:6px;color:#afcbb2;width:100%;text-align:left;padding:8px 10px;font-size:10px }
+    .indexRow strong { font-size:11px;color:#a1efb1 }
+    .indexRow:hover,.indexRow.selected { border-color:#5ea373;background:#12311c }
+    .dataCaution { margin-top:11px;color:#ddc5a5;font-size:10px;line-height:1.6;border-left:2px solid #b48855;padding:3px 0 3px 9px }
+    .dataMode { margin:9px 0 4px;display:flex;gap:6px;flex-wrap:wrap }
+    .readOnly { font-size:9px;color:#72a982;border:1px solid #345b44;border-radius:4px;padding:4px 6px;white-space:nowrap }
+    .dataTitle { text-transform:uppercase;letter-spacing:.7px;color:#a9c8ac;font-size:10px;font-weight:bold;margin-top:13px }
+  </style>
+</head>
+<body>
+<div id="map" aria-label="Interactive OpenStreetMap map and fictional pulse visualizer">
+  <canvas id="backgroundCanvas" aria-hidden="true"></canvas>
+  <div id="tileLayer" aria-hidden="true"></div><div id="tileNotice" class="tileNotice" hidden></div>
+  <canvas id="overlayCanvas" aria-hidden="true"></canvas>
+</div>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <filter id="tileFallbackColor" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="-0.06 -0.05 0.11 0 0.026  -0.49 -0.12 0.46 0 0.258  -0.27 -0.07 0.34 0 0.112  0 0 0 1 0"/></filter>
+</svg>
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brandtop"><div class="brandname">NULL ATLAS<small>VISUAL PULSE NETWORK / V.06</small></div><div class="stamp">FICTIONAL<br>SIMULATION</div></div>
+      <p class="description">Single-file OpenStreetMap visualizer with geographically scaled fictional signal overlays and a read-only reference summary.</p>
+    </div>
+    <div class="mainScroll">
+      <div class="section">
+        <div class="labelrow"><span class="eyebrow">01 / Destination queue</span><span class="subtle" id="targetStatus">0 / 24</span></div>
+        <div class="select-hint">Tap anywhere on the map to <b>add a destination</b>. Tap a numbered marker to select it. Build a queue of up to <b>24</b> simulated visual pulses.</div>
+        <div class="labelrow" style="margin-top:12px"><span class="eyebrow">Queued destinations</span><span class="subtle">UNCHECK TO SKIP</span></div>
+        <div class="target-list" id="targetList"><div class="emptyQueue">No destinations yet. Tap the map to add one.</div></div>
+        <div class="actions" style="margin-top:8px"><button class="minor-btn" id="selectAllBtn">SELECT ALL</button><button class="minor-btn" id="clearTargetsBtn">CLEAR QUEUE</button></div>
+        <button class="play-btn" id="pulseBtn" disabled>ADD DESTINATIONS TO SEND</button>
+      </div>
+      <div class="section">
+        <div class="labelrow"><span class="eyebrow">02 / Signal configuration</span><span class="subtle">VISUAL ONLY</span></div>
+        <label class="fieldLabel" for="originMode">Origin assignment</label>
+        <select class="dropdown" id="originMode">
+          <option value="auto">AUTO / cycle through 50 fictional relays</option>
+          <option value="manual">MANUAL / use selected relay</option>
+        </select>
+        <p class="footnote">Each queued destination may override this setting. Auto mode rotates through fictional nodes without calculating realistic range or suitability.</p>
+        <label class="fieldLabel" for="profileSelect">Fictional pulse profile</label>
+        <select class="dropdown" id="profileSelect">
+          <option value="echo">ECHO / classic red trace</option>
+          <option value="spark">SPARK / quick narrow halo</option>
+          <option value="drift">DRIFT / slow wide arc</option>
+          <option value="veil">VEIL / large red ring</option>
+          <option value="ghost">GHOST / quiet dim ring</option>
+        </select>
+        <div class="two-cols" style="margin-top:10px">
+          <div class="boxInput"><label for="sizeSlider">Signal radius (geographic)</label><strong id="sizeOut">75 km</strong><input id="sizeSlider" type="range" min="10" max="500" value="75" step="5" /></div>
+          <div class="boxInput"><label for="durationSlider">Animation time</label><strong id="durationOut">7 s</strong><input id="durationSlider" type="range" min="2" max="24" value="7" step="1" /></div>
+        </div>
+        <div class="actions"><button class="minor-btn" id="pauseBtn">PAUSE VISUALS</button><button class="minor-btn" id="clearBtn">CLEAR PULSES</button></div>
+        <p class="footnote">All map dots, corridors and rings use geographic distances; they grow/shrink as you zoom. Pulse radii are imaginary signal distances, not real weapon or damage measurements. Labels and tap areas stay readable at screen size.</p>
+      </div>
+      <div class="section">
+        <div class="labelrow"><span class="eyebrow">03 / Relay station</span><span class="subtle">50 virtual nodes</span></div>
+        <div class="relayCurrent"><div><strong id="selectedName">NODE-001</strong><span id="selectedCoords">Virtual origin</span></div><button class="relayBtn" id="focusRelay">LOCATE</button></div>
+        <input class="search" id="relaySearch" type="search" placeholder="Search relays by number or sector..." aria-label="Search fictional relays" />
+        <div class="relay-list" id="relayList"></div>
+      </div>
+      <div class="section">
+        <div class="labelrow"><span class="eyebrow">04 / Map layers</span><span class="subtle">STYLE CONTROLS</span></div>
+        <label class="check-row">Virtual relay markers <input id="relayLayer" type="checkbox" checked /></label>
+        <label class="check-row">Decorative synthetic traffic <input id="trafficLayer" type="checkbox" checked /></label>
+        <div class="footnote" style="margin:1px 0 8px;color:#b8dcbc">OpenStreetMap detail is always on, including at maximum zoom.</div>
+        <label class="check-row">Coordinate grid <input id="labelLayer" type="checkbox" checked /></label>
+        <p class="footnote">The aircraft and vessel dots are synthetic scenery. No live tracking, blast modeling, casualties, or damage calculations.</p>
+      </div>
+      <div class="section" id="dataSection">
+        <div class="labelrow"><span class="eyebrow">05 / Source dataset</span><span class="readOnly">READ ONLY</span></div>
+        <div class="dataIntro"><strong>DATASET.JS / REFERENCE INDEX</strong>
+          This is a non-operational summary of the file you provided. Source military sites, government sites, and suggested targets are <b>not</b> loaded as selectable points, launch origins, or impact destinations.
+        </div>
+        <div class="dataStats">
+          <div class="dataStat"><b>7</b><span>PROFILE LABELS</span></div>
+          <div class="dataStat"><b>128</b><span>WORLDWIDE CIVIC ENTRIES</span></div>
+          <div class="dataStat"><b>42</b><span>DECLARED SITE RECORDS</span></div>
+          <div class="dataStat"><b>24</b><span>CHINA CIVIC ENTRIES</span></div>
+          <div class="dataStat" style="grid-column:span 2"><b>48</b><span>RUSSIA-RELATED ENTRIES / MIXED SITE TYPES</span></div>
+        </div>
+        <div class="dataTitle">Profile labels in source</div>
+        <div class="tagFlow" id="profileTags"></div>
+        <div class="dataTitle">Country-level distribution</div>
+        <p class="footnote">These numbers count source records, not operational facilities, missiles, or confirmed launches. Overview badges are geographically scaled 90 km schematic circles at approximate <em>country centers</em>, never the supplied site coordinates; they hide at city zoom.</p>
+        <label class="check-row" style="margin-top:7px">Regional overview on map <input id="datasetLayer" type="checkbox" checked /></label>
+        <div class="indexList" id="regionList"></div>
+        <div class="dataCaution"><b>Data quality:</b> the file has no event dates, citations, or verified operational status. Several entries are broad regions, historic sites, or uncertain placeholders. It is not a record of all missile launches.</div>
+      </div>
+    </div>
+  </aside>
+  <button class="mobile-toggle" id="mobileToggle" aria-label="Collapse or expand controls">HIDE PANEL</button>
+  <header class="topbar"><div class="topbarL"><span class="blinker"></span><span class="topbar-title">GLOBAL SIGNAL MONITOR / OPEN MAP</span></div><div class="topbarR"><span>NETWORK <strong>SIMULATED</strong></span><span id="utcTime">00:00:00 UTC</span></div></header>
+  <div class="mini-footer"><span class="pill">OPENSTREETMAP / DIRECT TILES</span><span class="pill" id="zoomLevel">OSM Z2.0 / 19</span><span class="pill">DATASET INDEX / READ ONLY</span><span class="pill red">NO REAL-WORLD EFFECT MODEL</span></div>
+  <section class="status" aria-live="polite"><div class="metricHead">// NETWORK TELEMETRY</div><div class="statGrid"><div class="metric"><strong id="totalPulses">0</strong><span>PULSES CREATED</span></div><div class="metric red"><strong id="activePulses">0</strong><span>IN TRANSIT</span></div><div class="metric"><strong id="targetCount">0</strong><span>DESTINATIONS QUEUED</span></div><div class="metric"><strong id="visualRings">0</strong><span>VISIBLE RINGS</span></div><div class="metric"><strong id="relayCount">50</strong><span>FICTIONAL RELAYS</span></div><div class="metric"><strong id="batchCount">0</strong><span>BATCHES SENT</span></div></div><div class="eventHeader">// EVENT FEED</div><div class="events" id="events"><div class="event"><b>ATLAS READY</b> · Select a location</div></div></section>
+  <div class="maptip" id="maptip"><strong>MULTI-DESTINATION MODE</strong><div>Tap the map repeatedly to queue destinations. Real-distance overlays may be too small to see when zoomed far out.</div></div>
+  <div class="mapScale" id="mapScale" aria-live="off"><div class="scaleTitle">GROUND DISTANCE / MAP SCALE</div><div class="scaleLine" id="scaleLine"></div><div class="scaleText" id="scaleText">Calculating scale...</div></div>
+  <div class="maptools"><button class="tool" id="zoomIn" aria-label="Zoom in">+</button><button class="tool" id="zoomOut" aria-label="Zoom out">−</button><button class="tool" id="resetView" aria-label="Reset map view">⌖</button></div>
+  <div id="cursor-hud">MAP POSITION // <span id="cursorPos">move pointer over map</span></div>
+  <div class="osm-attribution">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></div>
+</div>
+<script>
+(() => {
+  'use strict';
+  // Entire renderer is embedded, with no third-party JS libraries.
+  // OpenStreetMap standard raster tiles supply every map feature at each real zoom level.
+  // No hand-drawn coastline, pixel-upscaled permanent map, or third-party JS dependencies.
+  const $ = id => document.getElementById(id);
+  const out = (id,value) => { const e=$(id); if(e)e.textContent=String(value); };
+  const clamp=(v,a,b)=>Math.max(a,Math.min(v,b));
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const rand=(seed)=>()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};
+  const random=rand(20261123);
+  const sectors=['UMBRA','VEIL','MOSS','ECHO','FALLOW','NIGHT','HALO','RIFT','NOX','ASH'];
+  const relays=Array.from({length:50},(_,i)=>({id:'NODE-'+String(i+1).padStart(3,'0'),sector:sectors[Math.floor(i/5)],coord:[-173+random()*346,-62+random()*124]}));
+  const traffic=Array.from({length:75},(_,i)=>({type:i<46?'AIR':'SEA',lon:-178+random()*356,lat:-62+random()*124,velocity:.35+random()*1.5,phase:random()*Math.PI*2}));
+  const mapEl=$('map'),tileLayer=$('tileLayer'),bg=$('backgroundCanvas'),overlay=$('overlayCanvas');
+  const bctx=bg.getContext('2d',{alpha:false}),ctx=overlay.getContext('2d');
+  const state={lon:4,lat:14,z:2,width:0,height:0,selected:0,selectedTarget:null,paused:false,elapsed:0,total:0,rings:0,batches:0,last:0,lastTileKey:'',frame:0};
+  const keys=new Map(),visibleFrames=new Map(),pulses=[],targets=[],activePointers=new Map();
+  let nextTargetId=1;
+
+  // Source: user-supplied dataset.js. Only counts, public category names and
+  // broad country-level aggregation are included here. No operational
+  // site coordinates, candidate target coordinates, or weapon performance data.
+  const datasetSummary = Object.freeze({
+    profileLabels:['Tomahawk','ICBM','SS','SCUD','Nuke','Precision','Custom'],
+    worldwideCivicEntries:128,declaredSiteEntries:42,chinaCivicEntries:24,russiaRelatedEntries:48,
+    launchEvents:0
+  });
+  const regionalIndex = [
+    {name:'United States',count:25,center:[-99,39]},
+    {name:'United Kingdom',count:2,center:[-3,54]},
+    {name:'Russia',count:4,center:[94,61]},
+    {name:'China',count:3,center:[103,35]},
+    {name:'France',count:1,center:[2,47]},
+    {name:'North Korea',count:2,center:[127,40]},
+    {name:'Pakistan',count:1,center:[69,30]},
+    {name:'India',count:1,center:[79,22]},
+    {name:'Canada',count:1,center:[-110,58]},
+    {name:'Ukraine',count:1,center:[31,49]},
+    {name:'Other / unclear',count:1,center:null}
+  ];
+  let highlightedRegion = null;
+  function renderSourceSummary(){
+    const tagHost=$('profileTags');tagHost.replaceChildren();
+    for(const name of datasetSummary.profileLabels){
+      const tag=document.createElement('span');tag.className='tag';tag.textContent=name;tagHost.append(tag);
+    }
+    const host=$('regionList');host.replaceChildren();
+    for(const [i,r] of regionalIndex.entries()){
+      const row=document.createElement('button');row.type='button';row.className='indexRow'+(highlightedRegion===i?' selected':'');
+      const name=document.createElement('span');name.textContent=r.name;
+      const count=document.createElement('strong');count.textContent=r.count+' records';
+      row.append(name,count);
+      row.addEventListener('click',()=>selectRegion(i));
+      host.append(row);
+    }
+  }
+  function selectRegion(i){
+    highlightedRegion=i;
+    renderSourceSummary();
+    const r=regionalIndex[i];
+    log('Reference index: '+r.name+' / '+r.count+' unverified records');
+    if(r.center){state.lon=r.center[0];state.lat=r.center[1];state.z=Math.max(state.z,5.3);scheduleTiles();}
+  }
+  function pickRegionBadge(x,y){
+    if(!$('datasetLayer').checked || state.z>8)return -1;
+    for(const [i,r] of regionalIndex.entries()){
+      if(!r.center)continue;
+      const p=screen(r.center),visualRadius=metersToPixels(90000,r.center[1]);
+      if(visualRadius>=.7 && Math.hypot(x-p[0],y-p[1])<Math.max(14,visualRadius))return i;
+    }
+    return -1;
+  }
+  function renderRegionalLayer(){
+    if(!$('datasetLayer').checked || state.z>8)return;
+    for(const [i,r] of regionalIndex.entries()){
+      if(!r.center)continue;
+      const [x,y]=screen(r.center),radius=metersToPixels(90000,r.center[1]);
+      if(radius<.5 || x<-radius || x>state.width+radius || y<-radius || y>state.height+radius)continue;
+      const selected=i===highlightedRegion;
+      ctx.save();ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);
+      ctx.fillStyle='rgba(8,34,20,.33)';ctx.strokeStyle=selected?'#baffce':'#5cc783';ctx.lineWidth=1.3;
+      ctx.fill();ctx.stroke();
+      if(radius>=9){ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 11px monospace';ctx.fillStyle='#bcffd0';ctx.fillText(String(r.count),x,y);}
+      if(radius>=8 && state.z>4.5){ctx.font='9px monospace';ctx.textAlign='left';ctx.fillStyle='#b8e1c1';ctx.fillText(r.name,x+radius+3,y+3);}
+      ctx.restore();
+    }
+  }
+  const profiles={echo:{size:1,duration:1,color:[255,73,92]},spark:{size:.62,duration:.65,color:[255,125,91]},drift:{size:1.12,duration:1.8,color:[255,83,116]},veil:{size:1.55,duration:1.1,color:[245,50,75]},ghost:{size:.85,duration:1.2,color:[184,76,92]}};
+  let queued=false,moving=false,dragged=false,startTouch=null,pinchDist=0;
+  let failures=0,successes=0,failedNotice=false,lastTrafficUpdate=0;
+  const lonLabel=v=>`${Math.abs(v).toFixed(2)}°${v>=0?'E':'W'}`;
+  const latLabel=v=>`${Math.abs(v).toFixed(2)}°${v>=0?'N':'S'}`;
+  function log(s,red=false){const feed=$('events'),e=document.createElement('div');e.className='event'+(red?' red':'');let b=document.createElement('b');b.textContent=new Date().toLocaleTimeString([],{hour12:false});e.append(b,document.createTextNode(' · '+s));feed.prepend(e);while(feed.children.length>12)feed.lastChild.remove();}
+  const boundLon=l=>((l+180)%360+360)%360-180;
+  const mercY=lat=>{let v=clamp(lat,-85.0511,85.0511)*Math.PI/180;return(1-Math.log(Math.tan(v)+1/Math.cos(v))/Math.PI)/2;};
+  const unMercY=y=>Math.atan(Math.sinh(Math.PI*(1-2*y)))*180/Math.PI;
+  function project(coord,z=state.z){const s=256*2**z;return{x:(coord[0]+180)/360*s,y:mercY(coord[1])*s};}
+  function unproject(x,y,z=state.z){const s=256*2**z;return[boundLon(x/s*360-180),unMercY(y/s)];}
+  function centerPt(){return project([state.lon,state.lat]);}
+  function screen(coord){const p=project(coord),c=centerPt(),world=256*2**state.z;let dx=p.x-c.x;dx-=Math.round(dx/world)*world;return[xClamp(dx+state.width/2),p.y-c.y+state.height/2];}
+  function xClamp(v){return v;}
+  // Projection-aware sizing. Every geographic symbol is specified in meters,
+  // so it occupies the same *distance on the ground* at every zoom level.
+  const EARTH_RADIUS=6378137;
+  const EARTH_CIRCUMFERENCE=2*Math.PI*EARTH_RADIUS;
+  function metersPerPixel(lat=state.lat){
+    return EARTH_CIRCUMFERENCE*Math.cos(clamp(lat,-85,85)*Math.PI/180)/(256*2**state.z);
+  }
+  function metersToPixels(distanceMeters,lat=state.lat){return distanceMeters/metersPerPixel(lat);}
+  function formatLength(m){return m>=1000?(m/1000).toLocaleString(undefined,{maximumFractionDigits:m>=10000?0:1})+' km':Math.round(m)+' m';}
+  function updateScale(){
+    const key=state.z.toFixed(3)+'/'+state.lat.toFixed(3);
+    if(key===state.scaleKey)return;
+    state.scaleKey=key;
+    const mpp=metersPerPixel(state.lat),distanceFor100px=mpp*100;
+    const power=10**Math.floor(Math.log10(distanceFor100px));
+    const ideal=[1,2,5,10].map(v=>v*power).filter(v=>v<=distanceFor100px).at(-1)||power;
+    const barWidth=ideal/mpp;
+    $('scaleLine').style.width=barWidth.toFixed(2)+'px';
+    out('scaleText',`${formatLength(ideal)} / ${Math.round(barWidth)} px · ${formatLength(mpp)}/px`);
+  }
+  // Great-circle radius for larger rings: a projected screen circle would
+  // become distorted across wide latitude ranges and at high latitudes.
+  function geographicCirclePath(coord,radiusMeters,segments=48){
+    const pxRadius=metersToPixels(radiusMeters,coord[1]);
+    ctx.beginPath();
+    if(pxRadius<18){const p=screen(coord);ctx.arc(p[0],p[1],pxRadius,0,Math.PI*2);return;}
+    const center=project(coord),originScreen=screen(coord),world=256*2**state.z;
+    const lat1=coord[1]*Math.PI/180,lon1=coord[0]*Math.PI/180;
+    const angle=radiusMeters/EARTH_RADIUS;
+    for(let i=0;i<=segments;i++){
+      const bearing=i/segments*Math.PI*2;
+      const lat2=Math.asin(Math.sin(lat1)*Math.cos(angle)+Math.cos(lat1)*Math.sin(angle)*Math.cos(bearing));
+      const lon2=lon1+Math.atan2(Math.sin(bearing)*Math.sin(angle)*Math.cos(lat1),Math.cos(angle)-Math.sin(lat1)*Math.sin(lat2));
+      const pt=project([boundLon(lon2*180/Math.PI),lat2*180/Math.PI]);
+      let delta=pt.x-center.x;delta-=Math.round(delta/world)*world;
+      const x=originScreen[0]+delta;
+      const y=originScreen[1]+pt.y-center.y;
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+  }
+  function pointAt(x,y){const c=centerPt();return unproject(c.x+x-state.width/2,c.y+y-state.height/2);}
+  function setCenterPixels(x,y){let v=unproject(x,y);state.lon=v[0];state.lat=clamp(v[1],-85,85);scheduleTiles();}
+  function zoomAt(dir,x=state.width/2,y=state.height/2){const z=clamp(state.z+dir,0,19);if(z===state.z)return;const geo=pointAt(x,y);state.z=z;const anchor=project(geo);setCenterPixels(anchor.x-x+state.width/2,anchor.y-y+state.height/2);}
+  // Empty ocean-colored backing while OpenStreetMap tiles load.
+  // Never substitute fake geography, which would become inaccurate when zoomed.
+  function drawBase(){bctx.fillStyle='#081c12';bctx.fillRect(0,0,state.width,state.height);}
+  function resize(){const r=mapEl.getBoundingClientRect();state.width=Math.round(r.width);state.height=Math.round(r.height);if(!state.width||!state.height)return;const d=Math.min(2,devicePixelRatio||1);for(const c of [bg,overlay]){c.width=Math.round(state.width*d);c.height=Math.round(state.height*d);c.style.width=state.width+'px';c.style.height=state.height+'px';c.getContext('2d').setTransform(d,0,0,d,0,0);}scheduleTiles();}
+  // Tiles are displayed as native <img> elements. This avoids Android content://
+  // canvas/CORS failures and keeps source pixels sharp at their proper zoom level.
+  function addTile(z,tx,ty){
+    const n=2**z;
+    if(ty<0 || ty>=n)return null;
+    const canonical=((tx%n)+n)%n;
+    const key=`${z}/${canonical}/${ty}`;
+    let tile=keys.get(key);
+    if(!tile){
+      const img=new Image();
+      img.decoding='async';
+      img.referrerPolicy='strict-origin-when-cross-origin';
+      tile={key,state:'loading',img,at:Date.now()};
+      keys.set(key,tile);
+      img.onload=()=>{
+        tile.state='ready';successes++;
+        if(successes===1){
+          log('OpenStreetMap map loaded');
+          $('maptip').querySelector('strong').textContent='ADD DESTINATIONS';
+          $('tileNotice').hidden=true;
+        }
+        scheduleTiles();
+      };
+      img.onerror=()=>{
+        tile.state='error';failures++;
+        if(!failedNotice && failures>=3 && successes===0){
+          failedNotice=true;
+          const note=$('tileNotice');
+          note.textContent='OpenStreetMap blocked the image requests. If you opened this HTML from Downloads, host the same HTML file on an HTTPS website (for example GitHub Pages). OSM requires a valid web referrer; no fake map is substituted.';
+          note.hidden=false;
+          log('Map tiles blocked. Open the HTML from an HTTPS host.',true);
+        }
+        scheduleTiles();
+      };
+      img.src=`https://tile.openstreetmap.org/${z}/${canonical}/${ty}.png`;
+    }
+    tile.at=Date.now();
+    return tile;
+  }
+  function scheduleTiles(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;renderTiles();});}
+  function displayTile(frame,z,tx,ty,tile){
+    // Display only the *current* OpenStreetMap zoom level; never upscale older tiles.
+    const source=tile?.state==='ready'?tile.key:'';
+    if(frame.dataset.source===source)return;
+    frame.dataset.source=source;
+    frame.replaceChildren();
+    if(!source)return;
+    const img=tile.img.cloneNode(false);
+    img.style.left='0';img.style.top='0';img.style.width='256px';img.style.height='256px';
+    frame.append(img);
+  }
+  function renderTiles(){
+    if(!state.width)return;
+    drawBase();
+    const z=Math.round(state.z),n=2**z,zoomScale=2**(state.z-z);
+    const c=project([state.lon,state.lat],z), halfW=state.width/(2*zoomScale),halfH=state.height/(2*zoomScale);
+    const minX=Math.floor((c.x-halfW)/256),maxX=Math.floor((c.x+halfW)/256);
+    const minY=Math.max(0,Math.floor((c.y-halfH)/256)),maxY=Math.min(n-1,Math.floor((c.y+halfH)/256));
+    const active=new Set();
+    let total=0,ready=0;
+    for(let ty=minY;ty<=maxY;ty++)for(let tx=minX;tx<=maxX;tx++){
+      if(++total>75)break;
+      const uid=`${z}/${tx}/${ty}`;active.add(uid);
+      let frame=visibleFrames.get(uid);
+      if(!frame){
+        frame=document.createElement('div');frame.className='osmTile';
+        visibleFrames.set(uid,frame);tileLayer.append(frame);
+      }
+      const left=(tx*256-c.x)*zoomScale+state.width/2;
+      const top=(ty*256-c.y)*zoomScale+state.height/2;
+      frame.style.transform=`translate3d(${left}px,${top}px,0) scale(${zoomScale})`;
+      const tile=addTile(z,tx,ty);
+      if(tile?.state==='ready')ready++;
+      displayTile(frame,z,tx,ty,tile);
+    }
+    for(const [uid,frame] of visibleFrames){
+      if(!active.has(uid)){frame.remove();visibleFrames.delete(uid);}
+    }
+    out('zoomLevel',`OSM Z${state.z.toFixed(1)} / 19 · ${ready}/${total} TILES`);
+    // Evict only older image elements, never force browser HTTP cache bypass.
+    if(keys.size>220){const old=[...keys.values()].filter(t=>t.state!=='loading').sort((a,b)=>a.at-b.at);for(const t of old.slice(0,Math.max(0,keys.size-190)))keys.delete(t.key);}
+  }
+  function pickRelay(x,y){let best=-1,dist=15;for(let i=0;i<relays.length;i++){const p=screen(relays[i].coord),d=Math.hypot(x-p[0],y-p[1]);if(d<dist){best=i;dist=d;}}return best;}
+  function pickTarget(x,y){let best=null,dist=16;for(const t of targets){const p=screen(t.coord),d=Math.hypot(x-p[0],y-p[1]);if(d<dist){best=t;dist=d;}}return best;}
+  function paintList(){const q=$('relaySearch').value.trim().toLowerCase(),el=$('relayList');el.replaceChildren();for(const [i,r] of relays.entries()){if(!(`${r.id} ${r.sector}`.toLowerCase().includes(q)))continue;const b=document.createElement('button');b.className='relay-option'+(i===state.selected?' active':'');b.innerHTML=`<span>${r.id}</span><span>${r.sector}</span>`;b.onclick=()=>selectRelay(i);el.append(b);}}
+  function selectRelay(i){state.selected=i;const r=relays[i];out('selectedName',r.id);out('selectedCoords',`${r.sector} / ${latLabel(r.coord[1])} ${lonLabel(r.coord[0])}`);paintList();log('Relay '+r.id+' selected');}
+  function buttonText(){const count=targets.filter(t=>t.enabled).length;out('targetStatus',`${targets.length} / 24`);out('targetCount',targets.length);$('pulseBtn').disabled=!count;$('pulseBtn').textContent=count?`SEND QUEUE / ${count} PULSE${count===1?'':'S'}`:'ADD DESTINATIONS TO SEND';}
+  function setSelectedTarget(id){state.selectedTarget=id;paintTargetList();}
+  function addTarget(coord){
+    if(targets.length>=24){log('Maximum of 24 queued destinations',true);return;}
+    const t={id:nextTargetId++,coord:coord.slice(),enabled:true,relay:'default'};
+    targets.push(t);state.selectedTarget=t.id;paintTargetList();log(`Destination ${t.id} added to queue`);
+  }
+  function removeTarget(id){const i=targets.findIndex(t=>t.id===id);if(i<0)return;targets.splice(i,1);if(state.selectedTarget===id)state.selectedTarget=targets.at(-1)?.id??null;paintTargetList();log(`Destination ${id} removed`);}
+  function paintTargetList(){
+    const el=$('targetList');el.replaceChildren();
+    if(!targets.length){const d=document.createElement('div');d.className='emptyQueue';d.textContent='No destinations yet. Tap the map to add one.';el.append(d);}
+    for(const t of targets){
+      const row=document.createElement('div');row.className='targetRow'+(state.selectedTarget===t.id?' selected':'')+(t.enabled?'':' muted');
+      const headline=document.createElement('div');headline.className='targetHeadline';
+      const check=document.createElement('input');check.type='checkbox';check.checked=t.enabled;check.setAttribute('aria-label',`Enable destination ${t.id}`);check.addEventListener('change',()=>{t.enabled=check.checked;paintTargetList();});
+      const label=document.createElement('button');label.className='targetFocus';label.textContent=`POINT ${String(t.id).padStart(2,'0')}  ·  ${latLabel(t.coord[1])}, ${lonLabel(t.coord[0])}`;label.title='Focus and select on map';label.addEventListener('click',()=>{state.lon=t.coord[0];state.lat=t.coord[1];state.selectedTarget=t.id;state.z=Math.max(14,state.z);scheduleTiles();paintTargetList();});
+      const remove=document.createElement('button');remove.className='removeTarget';remove.textContent='×';remove.title='Remove destination';remove.setAttribute('aria-label',`Remove destination ${t.id}`);remove.addEventListener('click',()=>removeTarget(t.id));
+      headline.append(check,label,remove);row.append(headline);
+      const chooser=document.createElement('select');chooser.className='tinyDropdown';chooser.setAttribute('aria-label',`Relay for destination ${t.id}`);
+      for(const [value,name] of [['default','USE GLOBAL ASSIGNMENT'],['auto','AUTO / rotating relays'],...relays.map((r,i)=>[String(i),`${r.id} / ${r.sector}`])]){const opt=document.createElement('option');opt.value=value;opt.textContent=name;chooser.append(opt);}
+      chooser.value=t.relay;chooser.addEventListener('change',()=>{t.relay=chooser.value;log(`Point ${t.id} origin assignment updated`);});
+      row.append(chooser);el.append(row);
+    }
+    buttonText();
+  }
+  function routeBetween(a,b){const dx=((b[0]-a[0]+540)%360)-180;const bend=clamp(5+Math.abs(dx)*.055,5,20)*(a[1]+b[1]>=0?1:-1);let p=[];for(let i=0;i<=64;i++){let t=i/64;p.push([boundLon(a[0]+dx*t),clamp(lerp(a[1],b[1],t)+Math.sin(Math.PI*t)*bend,-80,80)]);}return p;}
+  function sendBatch(){
+    const enabled=targets.filter(t=>t.enabled);
+    if(!enabled.length)return;
+    if(pulses.filter(p=>p.phase==='moving').length+enabled.length>80){log('Animation limit: wait or clear pulses',true);return;}
+    const profile=profiles[$('profileSelect').value]||profiles.echo;
+    const mode=$('originMode').value;
+    const baseSize=+$('sizeSlider').value,baseDuration=+$('durationSlider').value*1000;
+    state.batches++;out('batchCount',state.batches);
+    for(const [i,t] of enabled.entries()){
+      const choice=t.relay==='default'?mode:t.relay;
+      // AUTO intentionally rotates through virtual nodes, without real targeting/range optimization.
+      const index=choice==='auto'?(state.batches*3+i*7)%relays.length:(choice==='manual'?state.selected:+choice);
+      const relay=relays[clamp(index,0,relays.length-1)];
+      pulses.push({id:++state.rings,targetId:t.id,origin:relay.coord,dest:t.coord.slice(),coords:routeBetween(relay.coord,t.coord),size:baseSize*1000*profile.size,duration:baseDuration*profile.duration,color:profile.color,t:0,phase:'moving',ringT:0});
+      state.total++;
+    }
+    if(pulses.length>160)pulses.splice(0,pulses.length-160);
+    out('totalPulses',state.total);
+    log(`Batch ${state.batches}: ${enabled.length} fictional pulse${enabled.length===1?'':'s'} launched`);
+  }
+  // Size in CSS pixels is computed from a stable geographic footprint. At
+  // low zoom, real-distance markers naturally become subpixel and disappear.
+  function marker(x,y,radiusPx,fill,stroke){
+    if(radiusPx<.5)return;
+    ctx.beginPath();ctx.arc(x,y,radiusPx,0,Math.PI*2);
+    ctx.fillStyle=fill;ctx.fill();ctx.lineWidth=Math.min(3,radiusPx*.13);
+    ctx.strokeStyle=stroke;ctx.stroke();
+  }
+  function drawOverlay(dt){
+    const w=state.width,h=state.height;
+    ctx.clearRect(0,0,w,h);updateScale();
+    if($('labelLayer').checked){
+      ctx.save();ctx.strokeStyle='rgba(68,129,82,.18)';ctx.lineWidth=.6;
+      const gap=state.z>=5?5:30;
+      for(let lat=-60;lat<=60;lat+=gap){const y=screen([state.lon,lat])[1];if(y>0&&y<h){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}}
+      for(let lon=-180;lon<180;lon+=gap){const x=screen([lon,state.lat])[0];if(x>0&&x<w){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}}
+      ctx.restore();
+    }
+    if($('trafficLayer').checked)for(const t of traffic){
+      const lon=boundLon(t.lon+state.elapsed*.000008*t.velocity*(t.type==='AIR'?1:-.48));
+      const lat=clamp(t.lat+Math.sin(state.elapsed*.00035+t.phase)*.4,-80,80);
+      const p=screen([lon,lat]),r=metersToPixels(t.type==='AIR'?35:110,lat);
+      if(r<.5 || p[0]<-r || p[0]>w+r || p[1]<-r || p[1]>h+r)continue;
+      marker(p[0],p[1],r,t.type==='AIR'?'#8eae8b':'#6aa8a0','#052216');
+    }
+    if($('relayLayer').checked)for(let i=0;i<relays.length;i++){
+      const relay=relays[i],p=screen(relay.coord),selected=i===state.selected;
+      const r=metersToPixels(450,relay.coord[1]); // 450-m virtual node footprint
+      if(r<.5 || p[0]<-r || p[0]>w+r || p[1]<-r || p[1]>h+r)continue;
+      marker(...p,r,selected?'#e5ffac':'#77ef98','#173927');
+      if(r>=5 && (selected||state.z>=12)){
+        ctx.fillStyle=selected?'#cbffc9':'#9cccab';ctx.font='9px monospace';ctx.fillText(relay.id,p[0]+r+5,p[1]-r-2);
+      }
+    }
+    renderRegionalLayer();
+    for(const t of targets){
+      const p=screen(t.coord),selected=t.id===state.selectedTarget;
+      const r=metersToPixels(100,t.coord[1]); // 100-m destination footprint
+      if(r<.5 || p[0]<-r || p[0]>w+r || p[1]<-r || p[1]>h+r)continue;
+      ctx.save();
+      marker(...p,r,t.enabled?'rgba(92,20,33,.76)':'rgba(40,48,41,.76)',t.enabled?'#ff8992':'#87958b');
+      if(r>=8){ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 10px monospace';ctx.fillStyle='#fff1ed';ctx.fillText(String(t.id),p[0],p[1]);}
+      if(selected){ctx.beginPath();ctx.arc(p[0],p[1],r*1.5,0,Math.PI*2);ctx.setLineDash([r*.25,r*.25]);ctx.strokeStyle='#ffbec2';ctx.lineWidth=Math.min(3,Math.max(.5,r*.08));ctx.stroke();}
+      ctx.restore();
+    }
+    let moving=0,rings=0;
+    for(const p of pulses){
+      if(!state.paused){
+        if(p.phase==='moving'){
+          p.t=Math.min(p.duration,p.t+dt);
+          if(p.t>=p.duration){p.phase='arrived';log('Visual pulse arrived',true);}
+        }else p.ringT=Math.min(1,p.ringT+dt/1200);
+      }
+      if(p.phase==='moving'){
+        moving++;
+        const part=p.t/p.duration,index=Math.min(64,Math.max(1,Math.floor(part*64)));
+        const geoLat=p.coords[index][1];
+        const trailWidth=metersToPixels(650,geoLat); // fictional 650-m wide signal trace
+        if(trailWidth>=.5){
+          ctx.save();ctx.strokeStyle=`rgb(${p.color.join(',')})`;ctx.lineWidth=trailWidth;
+          ctx.setLineDash([metersToPixels(9000,geoLat),metersToPixels(4500,geoLat)]);
+          ctx.beginPath();
+          let prev=null;
+          for(let j=0;j<=index;j++){
+            const s=screen(p.coords[j]);
+            if(j===0 || (prev && Math.abs(s[0]-prev[0])>256*2**(state.z-1)))ctx.moveTo(...s);
+            else ctx.lineTo(...s);
+            prev=s;
+          }
+          ctx.stroke();ctx.restore();
+        }
+        const head=screen(p.coords[index]);
+        marker(...head,metersToPixels(180,geoLat),'#fff0dd',`rgb(${p.color.join(',')})`);
+      }else{
+        const ringMeters=p.size*p.ringT;
+        const radiusPx=metersToPixels(ringMeters,p.dest[1]);
+        if(radiusPx<.45)continue;
+        const [x,y]=screen(p.dest);
+        if(x<-radiusPx*2||x>w+radiusPx*2||y<-radiusPx*2||y>h+radiusPx*2)continue;
+        rings++;
+        ctx.save();geographicCirclePath(p.dest,ringMeters);
+        ctx.fillStyle=`rgba(${p.color.join(',')},.055)`;ctx.fill();
+        ctx.strokeStyle=`rgba(${p.color.join(',')},.85)`;ctx.lineWidth=1.7;ctx.stroke();
+        geographicCirclePath(p.dest,ringMeters*.66);
+        ctx.strokeStyle=`rgba(${p.color.join(',')},.38)`;ctx.lineWidth=1;ctx.stroke();ctx.restore();
+      }
+    }
+    out('activePulses',moving);out('visualRings',rings);
+  }
+  function animate(t){requestAnimationFrame(animate);const dt=state.last?Math.min(70,t-state.last):16;state.last=t;if(!state.paused)state.elapsed+=dt;if(!state.width)return;drawOverlay(dt);}
+  function xy(evt){const r=mapEl.getBoundingClientRect();return [evt.clientX-r.left,evt.clientY-r.top];}
+  mapEl.addEventListener('pointerdown',e=>{e.preventDefault();mapEl.setPointerCapture(e.pointerId);const p=xy(e);activePointers.set(e.pointerId,p);if(activePointers.size===1){startTouch=p;dragged=false;}else if(activePointers.size===2){const a=[...activePointers.values()];pinchDist=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);dragged=true;}});
+  mapEl.addEventListener('pointermove',e=>{const p=xy(e);out('cursorPos',`${latLabel(pointAt(...p)[1])} · ${lonLabel(pointAt(...p)[0])}`);if(!activePointers.has(e.pointerId))return;const old=activePointers.get(e.pointerId);activePointers.set(e.pointerId,p);
+    if(activePointers.size===1){const dx=p[0]-old[0],dy=p[1]-old[1];if(startTouch&&Math.hypot(p[0]-startTouch[0],p[1]-startTouch[1])>6)dragged=true;if(dragged){const center=centerPt();setCenterPixels(center.x-dx,center.y-dy);}}
+    if(activePointers.size===2){const a=[...activePointers.values()],dist=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);const mx=(a[0][0]+a[1][0])/2,my=(a[0][1]+a[1][1])/2;if(pinchDist>0&&dist>1){zoomAt(Math.log2(dist/pinchDist),mx,my);pinchDist=dist;}}
+  });
+  function stopPointer(e){if(!activePointers.has(e.pointerId))return;const p=xy(e);activePointers.delete(e.pointerId);if(activePointers.size===0&&!dragged){const index=pickRegionBadge(...p);if(index>=0){selectRegion(index);if(window.matchMedia('(max-width:850px)').matches){$('sidebar').classList.remove('collapsed');$('mobileToggle').textContent='HIDE PANEL';}$('dataSection').scrollIntoView({block:'nearest',behavior:'smooth'});}else{const hit=pickTarget(...p);if(hit){setSelectedTarget(hit.id);}else{const i=pickRelay(...p);if(i>=0)selectRelay(i);else addTarget(pointAt(...p));}}}if(activePointers.size===0){startTouch=null;pinchDist=0;}else dragged=true;}
+  mapEl.addEventListener('pointerup',stopPointer);mapEl.addEventListener('pointercancel',e=>{activePointers.delete(e.pointerId);dragged=true;});
+  mapEl.addEventListener('wheel',e=>{e.preventDefault();const p=xy(e);zoomAt(e.deltaY<0?.5:-.5,...p);},{passive:false});
+  mapEl.addEventListener('dblclick',e=>{e.preventDefault();zoomAt(1,...xy(e));});
+  $('relaySearch').addEventListener('input',paintList);
+  $('focusRelay').addEventListener('click',()=>{const r=relays[state.selected];state.lon=r.coord[0];state.lat=r.coord[1];state.z=Math.max(12,state.z);scheduleTiles();});
+  $('sizeSlider').addEventListener('input',()=>out('sizeOut',$('sizeSlider').value+' km'));
+  $('durationSlider').addEventListener('input',()=>out('durationOut',$('durationSlider').value+' s'));
+  $('pulseBtn').addEventListener('click',sendBatch);
+  $('pauseBtn').addEventListener('click',()=>{state.paused=!state.paused;$('pauseBtn').textContent=state.paused?'RESUME VISUALS':'PAUSE VISUALS';log(state.paused?'Visuals paused':'Visuals resumed');});
+  $('clearBtn').addEventListener('click',()=>{pulses.length=0;out('activePulses',0);out('visualRings',0);log('Visual pulses cleared');});
+  $('clearTargetsBtn').addEventListener('click',()=>{targets.length=0;state.selectedTarget=null;paintTargetList();log('Destination queue cleared');});
+  $('selectAllBtn').addEventListener('click',()=>{for(const t of targets)t.enabled=true;paintTargetList();});
+
+  $('zoomIn').addEventListener('click',()=>zoomAt(1));$('zoomOut').addEventListener('click',()=>zoomAt(-1));
+  $('resetView').addEventListener('click',()=>{state.lon=4;state.lat=14;state.z=2;scheduleTiles();});
+  $('mobileToggle').addEventListener('click',()=>{const closed=$('sidebar').classList.toggle('collapsed');$('mobileToggle').textContent=closed?'SHOW PANEL':'HIDE PANEL';});
+  function clock(){out('utcTime',new Date().toISOString().slice(11,19)+' UTC');}setInterval(clock,1000);clock();
+  if(window.matchMedia('(max-width:850px)').matches){$('sidebar').classList.add('collapsed');$('mobileToggle').textContent='SHOW PANEL';}
+  new ResizeObserver(resize).observe(mapEl);resize();selectRelay(0);paintList();paintTargetList();renderSourceSummary();log('Reference index loaded: 42 unverified site records in aggregate only');log('Multi-destination renderer ready; direct OpenStreetMap tiles');requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
